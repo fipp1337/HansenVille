@@ -20,13 +20,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "families_roles")
-public class FamilyRole {
+public class FamilyRole { //
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "family_id", nullable = false)
+    @JoinColumn(nullable = false)
     private Family familyId;
 
     @Enumerated(EnumType.STRING)
