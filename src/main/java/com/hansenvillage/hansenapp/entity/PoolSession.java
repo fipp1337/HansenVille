@@ -8,11 +8,16 @@ import java.time.LocalTime;
 
 @Data
 @Entity
+@Table(name = "pool_sessions")
 public class PoolSession {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "pool_sessions_id", nullable = false)
+    private PoolSession poolSession;
 
     @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
@@ -34,4 +39,7 @@ public class PoolSession {
 
     @Column(name = "day_of_week", nullable = false)
     private int dayOfWeek;
+
+    @Column(name = "is_exclusive", nullable = false)
+    private boolean isExclusive = false;
 }

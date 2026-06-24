@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset fipp1337:5
+--changeset fipp1337:4
 
 CREATE TABLE pool_templates
 (

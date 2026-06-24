@@ -1,3 +1,12 @@
 databaseChangeLog:
   - includeAll:
       path: db/changelog/changeset
+
+## Шпора для SQL
+## BIGSERIAL / BIGINT → Long
+## INT → Integer
+## VARCHAR → String
+## TIME → java.time.LocalTime
+## DATE → java.time.LocalDate
+## TIMESTAMP → java.time.LocalDateTime
+## BOOLEAN → Boolean

@@ -6,6 +6,7 @@ import java.time.LocalTime;
 
 @Data
 @Entity
+@Table(name = "pool_templates")
 public class PoolTemplate {
 
     @Id

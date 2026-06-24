@@ -11,6 +11,7 @@ CREATE TABLE pool_sessions
     status       VARCHAR(50) NOT NULL,
     session_date DATE        NOT NULL,
     booked_count INT DEFAULT 0,
-    day_of_week  INT         NOT NULL
+    day_of_week  INT         NOT NULL,
+    is_exclusive BOOLEAN DEFAULT FALSE
 );
 
