@@ -21,7 +21,7 @@ public class User {
 
     @JsonIgnore // пока что так, потом сделаем DTO, это для избежания бесконечного цикла (Family содержит список Users, каждый User содержит Family, и так до бесконечности)
     private long familyId;
-
+    //
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
