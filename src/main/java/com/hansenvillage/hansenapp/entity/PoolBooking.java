@@ -12,11 +12,7 @@ public class PoolBooking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-
-    @JoinColumn(nullable = false)
     private long userId;
 
-
-    @JoinColumn(nullable = false)
     private long poolSessionId;
 }
