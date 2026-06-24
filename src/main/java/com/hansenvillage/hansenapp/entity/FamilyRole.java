@@ -20,7 +20,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "families_roles")
-public class FamilyRole {
+public class FamilyRole { //
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
