@@ -3,6 +3,7 @@ package com.hansenvillage.hansenapp.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,17 +17,14 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "full_names", nullable = false)
-    private String fullName; /// (для обсуждения с Ильдаром) ФИО конкретного члена семьи
+    private String name; /// (для обсуждения с Ильдаром) ФИО конкретного члена семьи
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "family_id")
     @JsonIgnore // пока что так, потом сделаем DTO, это для избежания бесконечного цикла (Family содержит список Users, каждый User содержит Family, и так до бесконечности)
-    private Family family;
+    private long familyId;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UsersRole> roles = new ArrayList<>();
+
 }

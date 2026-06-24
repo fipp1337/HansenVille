@@ -12,7 +12,5 @@ import java.util.Optional;
 
 @Repository
 public interface PoolSessionRepository extends JpaRepository<PoolSession, Long> {
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<PoolSession> findById(Long id);
-    List<PoolSession> findBySessionDateBetweenAndIsExclusiveFalseAndStatus(LocalDate startDate, LocalDate endDate, String status);
+
 }

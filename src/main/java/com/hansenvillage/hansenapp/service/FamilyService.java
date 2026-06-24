@@ -12,6 +12,6 @@ public class FamilyService {
    private final UserRepository userRepository;
 
     public int getFamilySize(Long familyId) {
-        return (int) userRepository.countByFamilyId(familyId);
+        return userRepository.countByFamilyId(familyId);
     }
 }

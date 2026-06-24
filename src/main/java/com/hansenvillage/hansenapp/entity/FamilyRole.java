@@ -1,7 +1,5 @@
 package com.hansenvillage.hansenapp.entity;
 
-import com.hansenvillage.hansenapp.entity.Role;
-import com.hansenvillage.hansenapp.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -21,18 +19,15 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(
-        name = "users_roles",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "role"}))
-public class UsersRole {
+@Table(name = "families_roles")
+public class FamilyRole {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "family_id", nullable = false)
+    private Family familyId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

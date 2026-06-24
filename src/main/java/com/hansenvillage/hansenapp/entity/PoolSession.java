@@ -15,9 +15,8 @@ public class PoolSession {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "pool_sessions_id", nullable = false)
-    private PoolSession poolSession;
+    private PoolSession poolSessionId;
 
     @Column(name = "start_time", nullable = false)
     private LocalTime startTime;

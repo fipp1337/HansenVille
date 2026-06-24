@@ -7,22 +7,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PoolSessionService {
-   private final PoolSessionRepository poolSessionRepository;
+    private final PoolSessionRepository poolSessionRepository;
 
     @Transactional
     public List<PoolSession> getAvailableSessionsForNextWeek(LocalDate fromDate) {
         LocalDate toDate = fromDate.plusDays(7);
-
-        List<PoolSession> sessions = poolSessionRepository
-                .findBySessionDateBetweenAndIsExclusiveFalseAndStatus(fromDate, toDate, "available");
-        return sessions.stream()
-                .filter(session -> session.getBookedCount() < session.getMaxCapacity())
-                .collect(Collectors.toList());
+        return new ArrayList<>();
     }
 }

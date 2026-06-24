@@ -7,5 +7,5 @@ import lombok.Data;
 public class AddMemberRequest {
 
     @NotBlank
-    private String fullName;
+    private String name;
 }

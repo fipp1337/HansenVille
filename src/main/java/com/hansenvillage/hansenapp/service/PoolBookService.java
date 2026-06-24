@@ -1,7 +1,7 @@
 package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.PoolBookingRequest;
-import com.hansenvillage.hansenapp.entity.PoolBook;
+import com.hansenvillage.hansenapp.entity.PoolBooking;
 import com.hansenvillage.hansenapp.entity.PoolSession;
 import com.hansenvillage.hansenapp.entity.User;
 import com.hansenvillage.hansenapp.repository.PoolBookRepository;
@@ -19,7 +19,7 @@ public class PoolBookService {
     private final UserRepository userRepository;
 
     @Transactional
-    public PoolBook poolBooking(PoolBookingRequest request) { // <-- Передаем DTO
+    public PoolBooking poolBooking(PoolBookingRequest request) {
         PoolSession session = poolSessionRepository.findById(request.getPoolSessionId())
                 .orElseThrow(() -> new IllegalArgumentException("SessionNotFound"));
 
@@ -37,10 +37,10 @@ public class PoolBookService {
         session.setBookedCount(session.getBookedCount() + 1);
         poolSessionRepository.save(session);
 
-        PoolBook poolBook = new PoolBook();
-        poolBook.setUser(user);
-        poolBook.setPoolSession(session);
+        PoolBooking poolBooking = new PoolBooking();
+        poolBooking.setUserId(user.getId());
+        poolBooking.setPoolSessionId(session.getId());
 
-        return poolBookRepository.save(poolBook);
+        return poolBookRepository.save(poolBooking);
     }
 }

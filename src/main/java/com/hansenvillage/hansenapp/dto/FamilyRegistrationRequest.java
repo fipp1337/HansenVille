@@ -11,9 +11,6 @@ import java.util.List;
 @Data
 public class FamilyRegistrationRequest {
 
-    @NotBlank(message = "Login is blank")
-    private String username;
-
     @NotBlank(message = "Password is blank")
     private String password;
 
@@ -30,7 +27,8 @@ public class FamilyRegistrationRequest {
 
     @Data
     public static class MemberRequest {
-        @NotBlank(message = "Fullname is blank")
-        private String fullName;
+
+        @NotBlank(message = "Name is blank")
+        private String name;
     }
 }
