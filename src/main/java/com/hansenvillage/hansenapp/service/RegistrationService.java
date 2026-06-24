@@ -32,8 +32,8 @@ public class RegistrationService {
         family = familyRepository.save(family);
 
         FamilyRole familyRole = new FamilyRole();
-        familyRole.setFamilyId(family);
-        familyRole.setRole(Role.USER);
+        familyRole.setFamilyId(family.getId());
+        familyRole.setRole(Role.USER.name());
 
 
 

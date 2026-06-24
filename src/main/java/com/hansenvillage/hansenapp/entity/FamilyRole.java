@@ -24,12 +24,9 @@ public class FamilyRole { //
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
-    @JoinColumn(nullable = false)
-    private Family familyId;
+    private long familyId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private Role role;
+    private String role;
 }

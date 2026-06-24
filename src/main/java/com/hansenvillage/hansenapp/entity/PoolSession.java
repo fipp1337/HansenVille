@@ -13,32 +13,23 @@ public class PoolSession {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
-    @JoinColumn(name = "pool_sessions_id", nullable = false)
-    private PoolSession poolSessionId;
+    private long poolSessionId;
 
-    @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
 
-    @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 
-    @Column(name = "max_capacity")
     private int maxCapacity = 40;
 
-    @Column(name = "status", nullable = false, length = 50)
     private String status;
 
-    @Column(name = "session_date", nullable = false)
     private LocalDate sessionDate;
 
-    @Column(name = "booked_count")
     private int bookedCount = 0;
 
-    @Column(name = "day_of_week", nullable = false)
     private int dayOfWeek;
 
-    @Column(name = "is_exclusive", nullable = false)
-    private boolean isExclusive = false;
+    private boolean isExclusive;
 }
