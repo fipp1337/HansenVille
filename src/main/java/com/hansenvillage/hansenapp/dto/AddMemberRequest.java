@@ -8,4 +8,5 @@ public class AddMemberRequest {
 
     @NotBlank
     private String name;
+    //dsfsdfsjdjfsdljfsjdfjjl
 }
