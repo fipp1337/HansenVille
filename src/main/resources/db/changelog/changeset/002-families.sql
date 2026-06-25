@@ -8,7 +8,7 @@ CREATE TABLE families (
     email    VARCHAR(255) NOT NULL unique,
     address  VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    family_quantity INT
+    member_count INT
 );
 
 CREATE TABLE users (
