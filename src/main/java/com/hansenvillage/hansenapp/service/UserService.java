@@ -3,6 +3,7 @@ package com.hansenvillage.hansenapp.service;
 import com.hansenvillage.hansenapp.dto.AddMemberRequest;
 import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.entity.User;
+import com.hansenvillage.hansenapp.mapper.UserMapper;
 import com.hansenvillage.hansenapp.repository.FamilyRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final UserRepository userRepository;
     private final FamilyRepository familyRepository;
+    private final UserMapper userMapper;
 
     @Transactional
     public User addNewMember(Long familyId, AddMemberRequest request) {
@@ -21,9 +23,7 @@ public class UserService {
         Family family = familyRepository.findById(familyId)
                 .orElseThrow(() -> new IllegalArgumentException("Family not found with id: " + familyId));
 
-        User member = new User();
-        member.setName(request.getName());
-        member.setFamilyId(family.getId());
+        User member = userMapper.toEntity(request);
 
         return userRepository.save(member);
     }
