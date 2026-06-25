@@ -1,11 +1,15 @@
 package com.hansenvillage.hansenapp.repository;
 
+import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.entity.FamilyRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.Optional;
+
 @Repository
 public interface FamilyRoleRepository extends JpaRepository<FamilyRole, Long> {
 
-
+    Collection<FamilyRole> findByFamilyId(Long id);
 }
