@@ -20,7 +20,7 @@ public class UserService {
     @Transactional
     public User addNewMember(Long familyId, AddMemberRequest request) {
 
-        Family family = familyRepository.findById(familyId)
+        familyRepository.findById(familyId)
                 .orElseThrow(() -> new IllegalArgumentException("Family not found with id: " + familyId));
 
         User member = userMapper.toEntity(request);

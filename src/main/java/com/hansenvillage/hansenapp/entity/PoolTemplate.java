@@ -19,4 +19,5 @@ public class PoolTemplate {
 
     private int dayOfWeek;
 
+    private int maxCapacity = 40;
 }

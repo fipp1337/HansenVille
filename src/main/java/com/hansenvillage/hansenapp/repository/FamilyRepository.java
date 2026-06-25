@@ -13,6 +13,4 @@ public interface FamilyRepository extends JpaRepository<Family, Long> {
     Optional<Family> findById(Long id);
 
     boolean existsByEmail(String email);
-
-    boolean existsByUsername(String username);
 }

@@ -1,22 +1,18 @@
-package com.hansenvillage.hansenapp.entity;
+package com.hansenvillage.hansenapp.dto;
 
-import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
-@Entity
-@Table(name = "pool_sessions")
-public class PoolSession {
+public class PoolSessionRequest {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-
+    @NotNull
     private LocalTime startTime;
 
+    @NotNull
     private LocalTime endTime;
 
     private Integer maxCapacity;
@@ -24,8 +20,6 @@ public class PoolSession {
     private String status;
 
     private LocalDate sessionDate;
-
-    private int bookedCount = 0;
 
     private int dayOfWeek;
 

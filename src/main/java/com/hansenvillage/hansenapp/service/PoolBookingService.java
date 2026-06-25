@@ -4,7 +4,8 @@ import com.hansenvillage.hansenapp.dto.PoolBookingRequest;
 import com.hansenvillage.hansenapp.entity.PoolBooking;
 import com.hansenvillage.hansenapp.entity.PoolSession;
 import com.hansenvillage.hansenapp.entity.User;
-import com.hansenvillage.hansenapp.repository.PoolBookRepository;
+import com.hansenvillage.hansenapp.mapper.PoolBookingMapper;
+import com.hansenvillage.hansenapp.repository.PoolBookingRepository;
 import com.hansenvillage.hansenapp.repository.PoolSessionRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -13,10 +14,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class PoolBookService {
+public class PoolBookingService {
     private final PoolSessionRepository poolSessionRepository;
-    private final PoolBookRepository poolBookRepository;
+    private final PoolBookingRepository poolBookingRepository;
     private final UserRepository userRepository;
+
+    private final PoolBookingMapper poolBookingMapper;
 
     @Transactional
     public PoolBooking poolBooking(PoolBookingRequest request) {
@@ -30,17 +33,15 @@ public class PoolBookService {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
 
-        if (poolBookRepository.existsByUserAndPoolSession(user, session)) {
+        if (poolBookingRepository.existsByUserIdAndPoolSessionId(user.getId(), session.getId())) {
             throw new IllegalStateException("Pool Session has already been Booked");
         }
 
         session.setBookedCount(session.getBookedCount() + 1);
         poolSessionRepository.save(session);
 
-        PoolBooking poolBooking = new PoolBooking();
-        poolBooking.setUserId(user.getId());
-        poolBooking.setPoolSessionId(session.getId());
+        PoolBooking poolBooking = poolBookingMapper.toEntity(request);
 
-        return poolBookRepository.save(poolBooking);
+        return poolBookingRepository.save(poolBooking);
     }
 }
