@@ -1,7 +1,7 @@
 package com.hansenvillage.hansenapp.mapper;
 
 import com.hansenvillage.hansenapp.dto.FamilyRegistrationRequest;
-import com.hansenvillage.hansenapp.dto.FamilyResponse;
+import com.hansenvillage.hansenapp.dto.FamilyRegistrationResponse;
 import com.hansenvillage.hansenapp.entity.Family;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,5 +13,5 @@ public interface FamilyMapper {
             expression = "java(request.getMembers().size())")
     Family toEntity(FamilyRegistrationRequest request);
 
-    FamilyResponse toResponse(Family family);
+    FamilyRegistrationResponse toResponse(Family family);
 }

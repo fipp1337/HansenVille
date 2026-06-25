@@ -3,7 +3,7 @@ package com.hansenvillage.hansenapp.dto;
 import lombok.Data;
 
 @Data
-public class FamilyResponse {
+public class FamilyRegistrationResponse {
     private Long id;
     private String email;
     private String address;
