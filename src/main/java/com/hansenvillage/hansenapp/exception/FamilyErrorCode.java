@@ -22,7 +22,7 @@ public enum FamilyErrorCode {
 
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "Invalid email or password"),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "Access denied"),
-
+    INVALID_TOKEN(HttpStatus.BAD_REQUEST, "Invalid token"),
     INVALID_QUANTITY(HttpStatus.BAD_REQUEST, "Quantity must be greater than zero"),
 //    INVALID_TOP_UP(HttpStatus.BAD_REQUEST, "Top-up amount must be positive"),
     FAMILY_EMPTY(HttpStatus.BAD_REQUEST, "Cart is empty");

@@ -15,8 +15,6 @@ public class PoolSession {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private long poolSessionId;
-
     private LocalTime startTime;
 
     private LocalTime endTime;
@@ -31,5 +29,4 @@ public class PoolSession {
 
     private int dayOfWeek;
 
-    private boolean isExclusive;
 }

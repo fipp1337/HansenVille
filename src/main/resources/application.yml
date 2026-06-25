@@ -22,8 +22,9 @@ spring:
 
 store:
   jwt:
-    secret: "teaching-store-jwt-secret-key-min-32-characters-long"
+    secret: "hansen-village-academy-teaching-jwt-secret-key-min-32-characters-long"
     expiration-ms: 86400000
+    refresh-expiration-ms: 2592000000
 
 server:
   port: 8080

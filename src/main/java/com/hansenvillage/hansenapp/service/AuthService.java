@@ -7,14 +7,18 @@ import com.hansenvillage.hansenapp.entity.Role;
 import com.hansenvillage.hansenapp.entity.User;
 import com.hansenvillage.hansenapp.repository.FamilyRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
+import com.hansenvillage.hansenapp.security.JwtService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
-public class RegistrationService {
+public class AuthService {
     private final UserRepository userRepository;
     private final FamilyRepository familyRepository;
+    private final JwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public Family registerFamily(FamilyRegistrationRequest request) {
@@ -24,7 +28,7 @@ public class RegistrationService {
 
         Family family = new Family();
         family.setEmail(request.getEmail());
-        family.setPassword(request.getPassword());
+        family.setPassword(passwordEncoder.encode(request.getPassword()));
         family.setAddress(request.getAddress());
 
         family.setMemberCount(request.getMembers().size());

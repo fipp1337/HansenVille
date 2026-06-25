@@ -25,11 +25,4 @@ public class Family {
 
     private int memberCount;
 
-    public int getMemberCount() {
-        return memberCount;
-    }
-
-    public void setMemberCount(int memberCount) {
-        this.memberCount = memberCount;
-    }
 }
