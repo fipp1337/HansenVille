@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 public interface FamilyRepository extends JpaRepository<Family, Long> {
     Optional<Family> findById(Long id);
-
+    Optional<Family> findByEmail(String email);
     boolean existsByEmail(String email);
 }

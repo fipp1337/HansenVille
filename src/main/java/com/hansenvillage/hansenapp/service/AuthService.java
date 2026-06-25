@@ -1,10 +1,14 @@
 package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.FamilyRegistrationRequest;
+import com.hansenvillage.hansenapp.dto.LoginRequest;
+import com.hansenvillage.hansenapp.dto.LoginResponse;
 import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.entity.FamilyRole;
 import com.hansenvillage.hansenapp.entity.Role;
 import com.hansenvillage.hansenapp.entity.User;
+import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
+import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.mapper.FamilyMapper;
 import com.hansenvillage.hansenapp.mapper.FamilyRoleMapper;
 import com.hansenvillage.hansenapp.mapper.UserMapper;
@@ -12,6 +16,7 @@ import com.hansenvillage.hansenapp.repository.FamilyRepository;
 import com.hansenvillage.hansenapp.repository.FamilyRoleRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
 import com.hansenvillage.hansenapp.security.JwtService;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -55,5 +60,29 @@ public class AuthService {
         userRepository.saveAll(userList);
 
         return savedFamily;
+    }
+
+    @Transactional
+    public LoginResponse login(LoginRequest request) {
+
+        Family family = familyRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.INVALID_TOKEN));
+
+        if (!passwordEncoder.matches(request.getPassword(), family.getPassword())) {
+            throw FamilyException.of(FamilyErrorCode.INVALID_TOKEN);
+        }
+
+        List<Role> roles = familyRoleRepository.findByFamilyId(family.getId()).stream()
+                .map(familyRole -> Role.valueOf(familyRole.getRole()))
+                .toList();
+
+        String accessToken = jwtService.generateToken(family, roles);
+        String refreshToken = jwtService.generateRefreshToken(family, roles);
+
+        LoginResponse response = new LoginResponse();
+        response.setAccessToken(accessToken);
+        response.setRefreshToken(refreshToken);
+
+        return response;
     }
 }
