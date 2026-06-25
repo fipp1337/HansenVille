@@ -18,4 +18,5 @@ public class PoolTemplate {
     private LocalTime endTime;
 
     private int dayOfWeek;
+
 }

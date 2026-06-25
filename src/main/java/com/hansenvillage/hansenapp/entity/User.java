@@ -17,9 +17,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name; /// (для обсуждения с Ильдаром) ФИО конкретного члена семьи
+    private String name;
 
-    @JsonIgnore // пока что так, потом сделаем DTO, это для избежания бесконечного цикла (Family содержит список Users, каждый User содержит Family, и так до бесконечности)
     private long familyId;
 
     @CreationTimestamp
