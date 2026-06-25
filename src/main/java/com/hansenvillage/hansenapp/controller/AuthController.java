@@ -1,7 +1,7 @@
 package com.hansenvillage.hansenapp.controller;
 
 import com.hansenvillage.hansenapp.dto.FamilyRegistrationRequest;
-import com.hansenvillage.hansenapp.dto.FamilyResponse;
+import com.hansenvillage.hansenapp.dto.FamilyRegistrationResponse;
 import com.hansenvillage.hansenapp.dto.LoginRequest;
 import com.hansenvillage.hansenapp.dto.LoginResponse;
 import com.hansenvillage.hansenapp.entity.Family;
@@ -27,7 +27,7 @@ public class AuthController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public FamilyResponse register(@Valid @RequestBody FamilyRegistrationRequest request) {
+    public FamilyRegistrationResponse register(@Valid @RequestBody FamilyRegistrationRequest request) {
         Family savedFamily = authService.registerFamily(request);
 
         return familyMapper.toResponse(savedFamily);

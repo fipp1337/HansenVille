@@ -12,17 +12,17 @@ import java.util.List;
 @Data
 public class FamilyRegistrationRequest {
 
-    @NotBlank(message = "Password is blank")
+    @NotBlank
     private String password;
 
     @NotBlank
-    @Email(message = "Invalid email")
+    @Email
     private String email;
 
     @NotBlank
     private String address;
 
-    @NotEmpty(message = "You need add family member")
+    @NotEmpty
     @Valid
     private List<MemberRequest> members;
 
