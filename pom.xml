@@ -8,12 +8,14 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.4.5</version>
-        <relativePath/> </parent>
+        <relativePath/>
+    </parent>
 
-    <groupId>com.store</groupId>
-    <artifactId>internet-store</artifactId>
+
+    <groupId>com.hansenvillage</groupId>
+    <artifactId>HansenApp_2</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <name>internet-store</name>
+    <name>HansenApp_2</name>
     <description>Teaching internet store: Spring Boot + Spring Data JPA</description>
 
     <properties>
