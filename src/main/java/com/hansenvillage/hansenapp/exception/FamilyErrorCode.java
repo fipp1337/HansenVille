@@ -10,6 +10,7 @@ public enum FamilyErrorCode {
     FAMILY_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "Member not found: %s"),
 //    PRODUCT_QUANTITY_EMPTY(HttpStatus.NOT_FOUND, "StockQuantity is empty or not enough: %s"),
     SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Session not found: %s"),
+    TEMPLATE_NOT_FOUND(HttpStatus.NOT_FOUND, "Template not found: %s"),
 //    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "Comment not found: %s"),
 //    CART_NOT_FOUND(HttpStatus.NOT_FOUND, "Cart not found for user: %s"),
 //    WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "Wallet not found for user: %s"),

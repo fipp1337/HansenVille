@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                        .anyRequest().authenticated())
+                        .anyRequest().permitAll())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(jsonSecurityHandlers)
                         .accessDeniedHandler(jsonSecurityHandlers))

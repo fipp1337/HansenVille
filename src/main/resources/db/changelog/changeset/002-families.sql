@@ -12,9 +12,15 @@ CREATE TABLE families (
 );
 
 CREATE TABLE users (
-                       id BIGSERIAL PRIMARY KEY,
-                       family_id BIGINT NOT NULL REFERENCES families (id) ON DELETE CASCADE,
-                       name VARCHAR(255) NOT NULL,
-                       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                       age INT
+    id BIGSERIAL PRIMARY KEY,
+    family_id BIGINT NOT NULL REFERENCES families (id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    age INT
+);
+
+CREATE TABLE families_roles (
+    id BIGSERIAL PRIMARY KEY,
+    family_id BIGINT NOT NULL,
+    role VARCHAR(20) NOT NULL
 );
