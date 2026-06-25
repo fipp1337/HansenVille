@@ -13,8 +13,8 @@ CREATE TABLE families (
 
 CREATE TABLE users (
                        id BIGSERIAL PRIMARY KEY,
-                       family_id BIGINT NOT NULL REFERENCES families (id),
+                       family_id BIGINT NOT NULL REFERENCES families (id) ON DELETE CASCADE,
                        name VARCHAR(255) NOT NULL,
                        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                        age INT
+                       age INT
 );

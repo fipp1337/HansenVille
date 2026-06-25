@@ -6,6 +6,7 @@ import com.hansenvillage.hansenapp.entity.FamilyRole;
 import com.hansenvillage.hansenapp.entity.Role;
 import com.hansenvillage.hansenapp.entity.User;
 import com.hansenvillage.hansenapp.repository.FamilyRepository;
+import com.hansenvillage.hansenapp.repository.FamilyRoleRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,26 +16,24 @@ import org.springframework.transaction.annotation.Transactional;
 public class RegistrationService {
     private final UserRepository userRepository;
     private final FamilyRepository familyRepository;
-
+    private final FamilyRoleRepository familyRoleRepository;
     @Transactional
     public Family registerFamily(FamilyRegistrationRequest request) {
         if (familyRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalStateException("Email used");
+            throw new IllegalStateException("Email not unique");
         }
 
         Family family = new Family();
         family.setEmail(request.getEmail());
         family.setPassword(request.getPassword());
         family.setAddress(request.getAddress());
-
         family.setMemberCount(request.getMembers().size());
-
         family = familyRepository.save(family);
 
         FamilyRole familyRole = new FamilyRole();
         familyRole.setFamilyId(family.getId());
         familyRole.setRole(Role.USER.name());
-
+        familyRoleRepository.save(familyRole);
 
 
         for (FamilyRegistrationRequest.MemberRequest memberReq : request.getMembers()) {
