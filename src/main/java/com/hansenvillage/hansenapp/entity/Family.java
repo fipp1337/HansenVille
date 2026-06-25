@@ -12,6 +12,7 @@ import java.util.List;
 @Entity
 @Table(name = "families")
 public class Family {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,4 +25,11 @@ public class Family {
 
     private int memberCount;
 
+    public int getMemberCount() {
+        return memberCount;
+    }
+
+    public void setMemberCount(int memberCount) {
+        this.memberCount = memberCount;
+    }
 }
