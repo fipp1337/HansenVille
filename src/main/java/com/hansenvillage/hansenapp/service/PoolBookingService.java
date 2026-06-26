@@ -10,6 +10,7 @@ import com.hansenvillage.hansenapp.mapper.PoolBookingMapper;
 import com.hansenvillage.hansenapp.repository.PoolBookingRepository;
 import com.hansenvillage.hansenapp.repository.PoolSessionRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
+import com.hansenvillage.hansenapp.security.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,11 +37,15 @@ public class PoolBookingService {
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND));
 
         if (session.getBookedCount() >= session.getMaxCapacity()) {
-            throw FamilyException.of(FamilyErrorCode.POOL_SESSION_IS_FOOL);
+            throw FamilyException.of(FamilyErrorCode.POOL_SESSION_IS_FULL);
         }
 
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND));
+
+        if (!Objects.equals(user.getFamilyId(), SecurityUtils.currentFamilyId())) {
+            throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
+        }
 
         if (poolBookingRepository.existsByUserIdAndPoolSessionId(user.getId(), session.getId())) {
             throw FamilyException.of(FamilyErrorCode.POOL_HAS_BEEN_BOOKED);
@@ -49,7 +55,6 @@ public class PoolBookingService {
         poolSessionRepository.save(session);
 
         PoolBooking poolBooking = poolBookingMapper.toEntity(request);
-
         return poolBookingRepository.save(poolBooking);
     }
 
@@ -61,8 +66,18 @@ public class PoolBookingService {
         return poolBookingRepository.findAll();
     }
 
-    public List<PoolBooking> getBookingsByUserId(UUID id) {
-        return poolBookingRepository.findByUserId(id);
+    public List<PoolBooking> getBookingsByUserId(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND));
+        if (!SecurityUtils.isAdmin() && !Objects.equals(user.getFamilyId(), SecurityUtils.currentFamilyId())) {
+            throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
+        }
+
+        return poolBookingRepository.findByUserId(userId);
+    }
+
+    public List<PoolBooking> getBookingsByFamilyId(UUID familyId) {
+        return poolBookingRepository.findByFamilyId(familyId);
     }
 
     @Transactional
@@ -92,4 +107,6 @@ public class PoolBookingService {
 
         poolBookingRepository.deleteById(id);
     }
+
+
 }

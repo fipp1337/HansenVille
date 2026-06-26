@@ -19,7 +19,7 @@ public enum FamilyErrorCode {
 //    CART_NOT_FOUND(HttpStatus.NOT_FOUND, "Cart not found for user: %s"),
 //    WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "Wallet not found for user: %s"),
     NOT_ENOUGH_MEMBERS(HttpStatus.NOT_FOUND, "Product not in cart: %s"),
-    POOL_SESSION_IS_FOOL(HttpStatus.CONFLICT, "Pool session is full %s"),
+    POOL_SESSION_IS_FULL(HttpStatus.CONFLICT, "Pool session is full %s"),
 //    WALLET_BALANCE_NOT_ENOUGH(HttpStatus.CONFLICT, "Balance not enough: %s"),
     USER_DOES_NOT_EXISTS(HttpStatus.CONFLICT, "User not found or does not exists: %s"),
     USER_EMAIL_EXISTS(HttpStatus.CONFLICT, "User with this email already exists: %s"),

@@ -1,6 +1,6 @@
 spring:
   application:
-    name: internet-store-clone
+    name: hansen-village-application
   datasource:
     url: jdbc:postgresql://localhost:5432/hansen-village
     username: myUser

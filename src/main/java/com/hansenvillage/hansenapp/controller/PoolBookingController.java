@@ -6,10 +6,10 @@ import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.security.SecurityUtils;
 import com.hansenvillage.hansenapp.service.PoolBookingService;
+import com.hansenvillage.hansenapp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,12 +20,12 @@ import java.util.UUID;
 @RequestMapping("/api/booking")
 @RequiredArgsConstructor
 public class PoolBookingController {
-
+    private final UserService userService;
     private final PoolBookingService poolBookingService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-//    @PreAuthorize("hasRole('USER', 'ADMIN')")
+//    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public PoolBooking createBooking(@Valid @RequestBody PoolBookingRequest request) {
         return poolBookingService.poolBooking(request);
     }
@@ -38,11 +38,15 @@ public class PoolBookingController {
     }
 
     @GetMapping("/family/{familyId}")
-//    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public List<PoolBooking> getBookingsByFamily(@PathVariable UUID userId) {
-        if (!Objects.equals(SecurityUtils.currentFamilyId(), userId)){
+    public List<PoolBooking> getBookingsByFamily(@PathVariable UUID familyId) {
+        if (!SecurityUtils.isAdmin() && !SecurityUtils.currentFamilyId().equals(familyId)) {
             throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
         }
+        return poolBookingService.getBookingsByFamilyId(familyId);
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<PoolBooking> getBookingsByUser(@PathVariable UUID userId) {
         return poolBookingService.getBookingsByUserId(userId);
     }
 
@@ -52,7 +56,7 @@ public class PoolBookingController {
         return poolBookingService.getAllBookings();
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
 //    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public void deleteBooking (@PathVariable UUID id) {

@@ -4,6 +4,8 @@ import com.hansenvillage.hansenapp.entity.PoolBooking;
 import com.hansenvillage.hansenapp.entity.PoolSession;
 import com.hansenvillage.hansenapp.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,8 +14,9 @@ import java.util.UUID;
 
 @Repository
 public interface PoolBookingRepository extends JpaRepository<PoolBooking, UUID> {
-
     boolean existsByUserIdAndPoolSessionId(UUID userId, UUID poolSessionId); // Важная штука против повторной записи
-
     List<PoolBooking> findByUserId(UUID id);
+
+    @Query("SELECT pb FROM PoolBooking pb JOIN User u ON pb.userId = u.id WHERE u.familyId = :familyId")
+    List<PoolBooking> findByFamilyId(@Param("familyId") UUID familyId);
 }

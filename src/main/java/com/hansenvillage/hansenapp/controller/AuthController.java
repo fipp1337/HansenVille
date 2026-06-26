@@ -1,9 +1,6 @@
 package com.hansenvillage.hansenapp.controller;
 
-import com.hansenvillage.hansenapp.dto.FamilyRegistrationRequest;
-import com.hansenvillage.hansenapp.dto.FamilyRegistrationResponse;
-import com.hansenvillage.hansenapp.dto.LoginRequest;
-import com.hansenvillage.hansenapp.dto.LoginResponse;
+import com.hansenvillage.hansenapp.dto.*;
 import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.mapper.FamilyMapper;
 import com.hansenvillage.hansenapp.service.AuthService;
@@ -37,5 +34,10 @@ public class AuthController {
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/refresh")
+    public LoginResponse refresh(@Valid @RequestBody RefreshRequest request) {
+        return authService.refreshToken(request);
     }
 }
