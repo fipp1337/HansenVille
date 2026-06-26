@@ -19,9 +19,12 @@ public interface PoolSessionMapper {
         }
 
         if (entity.getStatus() == null) {
-            entity.setStatus("ACTIVE");
+            entity.setStatus(SessionStatus.ACTIVE);
         }
 
-        entity.setBookedCount(0);
+//        entity.setBookedCount(0);
     }
+
+    void updateEntity(PoolSessionRequest request,
+                      @MappingTarget PoolSession session);
 }
