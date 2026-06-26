@@ -24,3 +24,5 @@ CREATE TABLE families_roles (
     family_id BIGINT NOT NULL,
     role VARCHAR(20) NOT NULL
 );
+
+

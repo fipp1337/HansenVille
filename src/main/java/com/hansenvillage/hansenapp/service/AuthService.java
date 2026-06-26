@@ -40,7 +40,7 @@ public class AuthService {
     @Transactional
     public Family registerFamily(FamilyRegistrationRequest request) {
         if (familyRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalStateException("Email used");
+            throw FamilyException.of(FamilyErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         Family family = familyMapper.toEntity(request);

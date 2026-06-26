@@ -4,6 +4,8 @@ import com.hansenvillage.hansenapp.dto.PoolBookingRequest;
 import com.hansenvillage.hansenapp.entity.PoolBooking;
 import com.hansenvillage.hansenapp.entity.PoolSession;
 import com.hansenvillage.hansenapp.entity.User;
+import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
+import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.mapper.PoolBookingMapper;
 import com.hansenvillage.hansenapp.repository.PoolBookingRepository;
 import com.hansenvillage.hansenapp.repository.PoolSessionRepository;
@@ -24,17 +26,17 @@ public class PoolBookingService {
     @Transactional
     public PoolBooking poolBooking(PoolBookingRequest request) {
         PoolSession session = poolSessionRepository.findById(request.getPoolSessionId())
-                .orElseThrow(() -> new IllegalArgumentException("SessionNotFound"));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND));
 
         if (session.getBookedCount() >= session.getMaxCapacity()) {
-            throw new IllegalStateException("Pool Session is full");
+            throw FamilyException.of(FamilyErrorCode.POOL_SESSION_IS_FOOL);
         }
 
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("UserNotFound"));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND));
 
         if (poolBookingRepository.existsByUserIdAndPoolSessionId(user.getId(), session.getId())) {
-            throw new IllegalStateException("Pool Session has already been Booked");
+            throw FamilyException.of(FamilyErrorCode.POOL_HAS_BEEN_BOOKED);
         }
 
         session.setBookedCount(session.getBookedCount() + 1);
