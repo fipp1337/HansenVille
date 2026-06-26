@@ -61,8 +61,8 @@ public class PoolBookingService {
         return poolBookingRepository.findAll();
     }
 
-    public List<PoolBooking> getBookingsByFamilyId(UUID familyId) {
-        return poolBookingRepository.findByUserFamilyId(familyId);
+    public List<PoolBooking> getBookingsByUserId(UUID id) {
+        return poolBookingRepository.findByUserId(id);
     }
 
     @Transactional
