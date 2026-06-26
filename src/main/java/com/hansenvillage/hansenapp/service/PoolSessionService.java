@@ -63,4 +63,9 @@ public class PoolSessionService {
         poolSessionRepository.deleteById(id);
     }
 
+
+    public List<PoolSession> getWeekSchedule(LocalDate weekStart) {
+        LocalDate weekEnd = weekStart.plusDays(6);
+        return poolSessionRepository.findBySessionDateBetween(weekStart, weekEnd);
+    }
 }
