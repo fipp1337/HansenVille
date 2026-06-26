@@ -1,24 +1,18 @@
 package com.hansenvillage.hansenapp.dto;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
-
-@Data
-public class PoolSessionRequest {
-
+@Getter
+@Setter
+public class SessionSlotsRequest {
     @NotNull
     private LocalTime startTime;
-
     @NotNull
     private LocalTime endTime;
-
-    private Integer maxCapacity;
-
-    private String status;
-
-    private LocalDate sessionDate;
-
+    @Min(value = 1)
+    private int maxCapacity;
 }
