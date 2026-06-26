@@ -14,10 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -66,6 +63,9 @@ public class PoolSessionService {
 
     public List<PoolSession> getWeekSchedule(LocalDate weekStart) {
         LocalDate weekEnd = weekStart.plusDays(6);
-        return poolSessionRepository.findBySessionDateBetween(weekStart, weekEnd);
+        return poolSessionRepository.findBySessionDateBetween(weekStart, weekEnd).stream()
+                .sorted(Comparator.comparing(PoolSession::getSessionDate)
+                        .thenComparing(PoolSession::getStartTime))
+                .toList();
     }
 }

@@ -3,6 +3,7 @@ package com.hansenvillage.hansenapp.service;
 import com.hansenvillage.hansenapp.dto.FamilyRegistrationRequest;
 import com.hansenvillage.hansenapp.dto.LoginRequest;
 import com.hansenvillage.hansenapp.dto.LoginResponse;
+import com.hansenvillage.hansenapp.dto.RefreshRequest;
 import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.entity.FamilyRole;
 import com.hansenvillage.hansenapp.entity.Role;
@@ -16,6 +17,7 @@ import com.hansenvillage.hansenapp.repository.FamilyRepository;
 import com.hansenvillage.hansenapp.repository.FamilyRoleRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
 import com.hansenvillage.hansenapp.security.JwtService;
+import com.hansenvillage.hansenapp.security.SecurityFamily;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -77,6 +79,27 @@ public class AuthService {
         LoginResponse response = new LoginResponse();
         response.setAccessToken(accessToken);
         response.setRefreshToken(refreshToken);
+
+        return response;
+    }
+
+    @Transactional(readOnly = true)
+    public LoginResponse refreshToken(RefreshRequest request) {
+        SecurityFamily securityFamily = jwtService.parseRefreshToken(request.getRefreshToken());
+
+        Family family = new Family();
+        family.setId(securityFamily.getId());
+        family.setEmail(securityFamily.getEmail());
+        family.setPassword("");
+
+        List<Role> roles = securityFamily.getRoles();
+
+        String newAccessToken = jwtService.generateToken(family, roles);
+        String newRefreshToken = jwtService.generateRefreshToken(family, roles);
+
+        LoginResponse response = new LoginResponse();
+        response.setAccessToken(newAccessToken);
+        response.setRefreshToken(newRefreshToken);
 
         return response;
     }
