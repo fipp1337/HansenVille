@@ -39,4 +39,29 @@ public class PoolSessionService {
 
         return poolSessionRepository.save(session);
     }
+
+    public PoolSession findById(long id) {
+
+        return poolSessionRepository.findById(id)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND, id));
+    }
+
+    public PoolSession update(long id, PoolSessionRequest request) {
+
+        PoolSession session = poolSessionRepository.findById(id)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND, id));
+
+//        poolSessionMapper.updateEntity(request, session);
+
+        return poolSessionRepository.save(session);
+    }
+
+    public void delete(long id) {
+
+        if (!poolSessionRepository.existsById(id)) {
+            throw FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND, id);
+        }
+        poolSessionRepository.deleteById(id);
+    }
+
 }
