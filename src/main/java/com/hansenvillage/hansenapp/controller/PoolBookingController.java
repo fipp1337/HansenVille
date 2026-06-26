@@ -39,11 +39,11 @@ public class PoolBookingController {
 
     @GetMapping("/family/{familyId}")
     @PreAuthorize("hasRole('USER', 'ADMIN')")
-    public List<PoolBooking> getBookingsByFamily(@PathVariable UUID familyId) {
-        if (!Objects.equals(SecurityUtils.currentFamilyId(), familyId)){
+    public List<PoolBooking> getBookingsByFamily(@PathVariable UUID userId) {
+        if (!Objects.equals(SecurityUtils.currentFamilyId(), userId)){
             throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
         }
-        return poolBookingService.getBookingsByFamilyId(familyId);
+        return poolBookingService.getBookingsByUserId(userId);
     }
 
     @GetMapping

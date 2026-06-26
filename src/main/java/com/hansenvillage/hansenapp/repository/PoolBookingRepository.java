@@ -15,5 +15,5 @@ public interface PoolBookingRepository extends JpaRepository<PoolBooking, UUID> 
 
     boolean existsByUserIdAndPoolSessionId(UUID userId, UUID poolSessionId); // Важная штука против повторной записи
 
-    List<PoolBooking> findByUserFamilyId(UUID familyId);
+    List<PoolBooking> findByUserId(UUID id);
 }
