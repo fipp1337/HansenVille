@@ -25,20 +25,20 @@ public class PoolBookingController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('USER', 'ADMIN')")
+//    @PreAuthorize("hasRole('USER', 'ADMIN')")
     public PoolBooking createBooking(@Valid @RequestBody PoolBookingRequest request) {
         return poolBookingService.poolBooking(request);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public PoolBooking getBooking(@PathVariable UUID id) {
         return poolBookingService.getBookingById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND));
     }
 
     @GetMapping("/family/{familyId}")
-    @PreAuthorize("hasRole('USER', 'ADMIN')")
+//    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public List<PoolBooking> getBookingsByFamily(@PathVariable UUID userId) {
         if (!Objects.equals(SecurityUtils.currentFamilyId(), userId)){
             throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
@@ -47,14 +47,14 @@ public class PoolBookingController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasAnyRole('ADMIN')")
     public List<PoolBooking> getAllBookings() {
         return poolBookingService.getAllBookings();
     }
 
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('USER', 'ADMIN')")
+//    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public void deleteBooking (@PathVariable UUID id) {
         poolBookingService.deleteBooking(id);
     }

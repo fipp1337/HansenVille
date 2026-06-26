@@ -29,6 +29,4 @@ public class PoolSession {
 
     private int bookedCount = 0;
 
-    private int dayOfWeek;
-
 }
