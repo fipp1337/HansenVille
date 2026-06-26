@@ -8,11 +8,13 @@ import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.security.SecurityUtils;
 import com.hansenvillage.hansenapp.service.PoolSessionService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +29,13 @@ public class PoolSessionController {
     public PoolSessionController(PoolSessionService poolSessionService) {
         this.poolSessionService = poolSessionService;
     }
+
+    @GetMapping("/week")
+    public List<PoolSession> getWeekSchedule(
+            @RequestParam LocalDate weekStart) {
+
+        return poolSessionService.getWeekSchedule(weekStart);
+        }
 
     @PostMapping
     public ResponseEntity<List<PoolSession>> create(
