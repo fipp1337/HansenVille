@@ -21,7 +21,8 @@ public class PoolSession {
 
     private Integer maxCapacity;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private SessionStatus status;
 
     private LocalDate sessionDate;
 

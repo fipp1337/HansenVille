@@ -2,6 +2,7 @@ package com.hansenvillage.hansenapp.mapper;
 
 import com.hansenvillage.hansenapp.dto.PoolSessionRequest;
 import com.hansenvillage.hansenapp.entity.PoolSession;
+import com.hansenvillage.hansenapp.entity.SessionStatus;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
