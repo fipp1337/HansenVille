@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,34 +35,41 @@ public class PoolSessionService {
     }
 
     public PoolSession create(PoolSessionRequest request) {
-
         PoolSession session = poolSessionMapper.toEntity(request);
-
         return poolSessionRepository.save(session);
     }
 
-    public PoolSession findById(long id) {
-
-        return poolSessionRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND, id));
+    public Optional<PoolSession> getById(Long id) {
+        return poolSessionRepository.findById(id);
     }
 
-    public PoolSession update(long id, PoolSessionRequest request) {
-
-        PoolSession session = poolSessionRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND, id));
-
-        poolSessionMapper.updateEntity(request, session);
-
-        return poolSessionRepository.save(session);
+    public List<PoolSession> getAll() {
+        return poolSessionRepository.findAll();
     }
 
-    public void delete(long id) {
+    @Transactional
+    public PoolSession update(Long id, PoolSessionRequest request) {
+        PoolSession existing = poolSessionRepository.findById(id)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND));
 
+        PoolSession updated = poolSessionMapper.toEntity(request);
+        existing.setStartTime(updated.getStartTime());
+        existing.setEndTime(updated.getEndTime());
+        existing.setMaxCapacity(updated.getMaxCapacity());
+        existing.setStatus(updated.getStatus());
+        existing.setSessionDate(updated.getSessionDate());
+        existing.setDayOfWeek(updated.getDayOfWeek());
+
+        return poolSessionRepository.save(existing);
+    }
+
+    @Transactional
+    public void delete(Long id) {
         if (!poolSessionRepository.existsById(id)) {
-            throw FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND, id);
+            throw FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND);
         }
         poolSessionRepository.deleteById(id);
     }
+
 
 }
