@@ -14,6 +14,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class PoolBookingService {
@@ -45,5 +50,45 @@ public class PoolBookingService {
         PoolBooking poolBooking = poolBookingMapper.toEntity(request);
 
         return poolBookingRepository.save(poolBooking);
+    }
+
+    public Optional<PoolBooking> getBookingById(Long id) {
+        return poolBookingRepository.findById(id);
+    }
+
+    public List<PoolBooking> getAllBookings() {
+        return poolBookingRepository.findAll();
+    }
+
+    public List<PoolBooking> getBookingsByFamilyId(Long familyId) {
+        return poolBookingRepository.findByUserFamilyId(familyId);
+    }
+
+    @Transactional
+    public void deleteBooking(Long id) {
+        PoolBooking booking = poolBookingRepository.findById(id)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND));
+
+        PoolSession session = poolSessionRepository.findById(booking.getPoolSessionId())
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND));
+
+        LocalDateTime sessionStart = LocalDateTime.of(
+                session.getSessionDate(),
+                session.getStartTime()
+        );
+
+        LocalDateTime now = LocalDateTime.now();
+
+        long hoursUntilSession = ChronoUnit.HOURS.between(now, sessionStart);
+
+        if (hoursUntilSession < 6) {
+            throw FamilyException.of(FamilyErrorCode.TIME_OUT);
+        }
+        if (session.getBookedCount() > 0) {
+            session.setBookedCount(session.getBookedCount() - 1);
+            poolSessionRepository.save(session);
+        }
+
+        poolBookingRepository.deleteById(id);
     }
 }
