@@ -8,10 +8,12 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import java.util.UUID;
+
 @Repository
-public interface PoolBookingRepository extends JpaRepository<PoolBooking, Long> {
+public interface PoolBookingRepository extends JpaRepository<PoolBooking, UUID> {
 
-    boolean existsByUserIdAndPoolSessionId(Long userId, Long poolSessionId); // Важная штука против повторной записи
+    boolean existsByUserIdAndPoolSessionId(UUID userId, UUID poolSessionId); // Важная штука против повторной записи
 
-    List<PoolBooking> findByUserFamilyId(Long familyId);
+    List<PoolBooking> findByUserFamilyId(UUID familyId);
 }

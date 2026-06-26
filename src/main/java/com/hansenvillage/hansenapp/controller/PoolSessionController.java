@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.boot.origin.OriginTrackedValue.of;
 
@@ -33,27 +34,20 @@ public class PoolSessionController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public PoolSession getById(@PathVariable Long id) {
-        return poolSessionService.getById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND));
-    }
-
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<PoolSession> getAll() {
-        return poolSessionService.getAll();
+    public PoolSession getById(@PathVariable UUID id) {
+        return poolSessionService.findById(id);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public PoolSession update(@PathVariable Long id, @Valid @RequestBody PoolSessionRequest request) {
+    public PoolSession update(@PathVariable UUID id, @Valid @RequestBody PoolSessionRequest request) {
         return poolSessionService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMIN')")
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable UUID id) {
 
         poolSessionService.delete(id);
     }

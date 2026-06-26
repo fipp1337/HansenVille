@@ -9,8 +9,9 @@ import org.springframework.data.jpa.repository.Lock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface PoolSessionRepository extends JpaRepository<PoolSession, Long> {
+public interface PoolSessionRepository extends JpaRepository<PoolSession, UUID> {
 
 }

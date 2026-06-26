@@ -4,7 +4,7 @@
 
 CREATE TABLE pool_sessions
 (
-    id           BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     start_time   TIME        NOT NULL,
     end_time     TIME        NOT NULL,
     max_capacity INT DEFAULT 40,

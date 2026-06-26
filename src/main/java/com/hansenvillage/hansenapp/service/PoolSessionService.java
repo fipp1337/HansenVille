@@ -1,9 +1,7 @@
 package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.PoolSessionRequest;
-import com.hansenvillage.hansenapp.dto.PoolTemplateRequest;
 import com.hansenvillage.hansenapp.entity.PoolSession;
-import com.hansenvillage.hansenapp.entity.PoolTemplate;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.mapper.PoolSessionMapper;
@@ -17,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.Optional;
 
 @Service
@@ -39,37 +38,28 @@ public class PoolSessionService {
         return poolSessionRepository.save(session);
     }
 
-    public Optional<PoolSession> getById(Long id) {
-        return poolSessionRepository.findById(id);
+    public PoolSession findById(UUID id) {
+
+        return poolSessionRepository.findById(id)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND, id));
     }
 
-    public List<PoolSession> getAll() {
-        return poolSessionRepository.findAll();
-    }
+        public PoolSession update(UUID id, PoolSessionRequest request) {
+
+            PoolSession session = poolSessionRepository.findById(id)
+                    .orElseThrow(() -> FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND, id));
+
+            poolSessionMapper.updateEntity(request, session);
+
+            return poolSessionRepository.save(session);
+        }
 
     @Transactional
-    public PoolSession update(Long id, PoolSessionRequest request) {
-        PoolSession existing = poolSessionRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND));
-
-        PoolSession updated = poolSessionMapper.toEntity(request);
-        existing.setStartTime(updated.getStartTime());
-        existing.setEndTime(updated.getEndTime());
-        existing.setMaxCapacity(updated.getMaxCapacity());
-        existing.setStatus(updated.getStatus());
-        existing.setSessionDate(updated.getSessionDate());
-        existing.setDayOfWeek(updated.getDayOfWeek());
-
-        return poolSessionRepository.save(existing);
-    }
-
-    @Transactional
-    public void delete(Long id) {
+    public void delete(UUID id) {
         if (!poolSessionRepository.existsById(id)) {
-            throw FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND);
+            throw FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND, id);
         }
         poolSessionRepository.deleteById(id);
     }
-
 
 }

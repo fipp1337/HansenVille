@@ -4,7 +4,7 @@
 
 CREATE TABLE pool_templates
 (
-    id          BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     start_time  TIME NOT NULL,
     end_time    TIME NOT NULL,
     day_of_week INT  NOT NULL,

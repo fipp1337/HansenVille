@@ -1,6 +1,8 @@
 package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.AddMemberRequest;
+import com.hansenvillage.hansenapp.dto.UserResponse;
+import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.entity.User;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
@@ -9,7 +11,14 @@ import com.hansenvillage.hansenapp.repository.FamilyRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+import static com.hansenvillage.hansenapp.security.SecurityUtils.currentFamilyId;
 
 @Service
 @RequiredArgsConstructor
@@ -20,30 +29,54 @@ public class UserService {
     private final UserMapper userMapper;
 
     @Transactional
-    public User addNewMember(Long familyId, AddMemberRequest request) {
+    public User addNewMember(AddMemberRequest request) {
 
-        familyRepository.findById(familyId)
-                .orElseThrow(() -> new IllegalArgumentException("Family not found with id: " + familyId));
+        UUID familyId = currentFamilyId();
 
         User member = userMapper.toEntity(request);
+
+        int updated = familyRepository.incrementMemberCount(familyId);
+
+        if (updated == 0) {
+            throw FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, familyId);
+        }
+
         return userRepository.save(member);
-//        memberCount++
     }
 
-    public void removeMember(long id) {
-
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND));
-        userRepository.delete(user);
-//        memberCount--
-    }
-
-    public User updateUser(long id, String newName) {
+    public User updateUser(UUID id, String newName) {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND));
         user.setName(newName);
 
         return user;
+    }
+
+    public List<UserResponse> getFamilyMembers(UUID familyId) {
+
+        if (!familyRepository.existsById(familyId)) {
+            throw FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, familyId);
+        }
+
+        List<User> members = userRepository.findByFamilyId(familyId);
+
+        return userMapper.toResponse(members);
+    }
+
+    public void removeMember(UUID id) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, id));
+
+        userRepository.delete(user);
+
+        UUID familyId = currentFamilyId();
+
+        int updated = familyRepository.decrementMemberCount(familyId);
+
+        if (updated == 0) {
+            throw FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, familyId);
+        }
     }
 }

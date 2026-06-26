@@ -3,6 +3,7 @@ package com.hansenvillage.hansenapp.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalTime;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -11,7 +12,7 @@ public class PoolTemplate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
 
     private LocalTime startTime;
 

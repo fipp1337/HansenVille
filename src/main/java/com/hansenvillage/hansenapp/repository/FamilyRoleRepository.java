@@ -7,9 +7,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface FamilyRoleRepository extends JpaRepository<FamilyRole, Long> {
+public interface FamilyRoleRepository extends JpaRepository<FamilyRole, UUID> {
 
-    Collection<FamilyRole> findByFamilyId(Long id);
+    Collection<FamilyRole> findByFamilyId(UUID id);
 }
