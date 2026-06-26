@@ -30,7 +30,7 @@ public class FamilyRegistrationRequest {
 
     @Data
     public static class MemberRequest {
-        @NotBlank(message = "Name is blank")
+        @NotBlank
         private String name;
     }
 }
