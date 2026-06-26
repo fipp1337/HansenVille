@@ -3,12 +3,14 @@ package com.hansenvillage.hansenapp.dto;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class PoolBookingRequest {
 
     @NotNull
-    private Long userId;
+    private UUID userId;
 
     @NotNull
-    private Long poolSessionId;
+    private UUID poolSessionId;
 }

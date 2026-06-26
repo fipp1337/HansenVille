@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/booking")
@@ -31,14 +32,14 @@ public class PoolBookingController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public PoolBooking getBooking(@PathVariable Long id) {
+    public PoolBooking getBooking(@PathVariable UUID id) {
         return poolBookingService.getBookingById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND));
     }
 
     @GetMapping("/family/{familyId}")
     @PreAuthorize("hasRole('USER', 'ADMIN')")
-    public List<PoolBooking> getBookingsByFamily(@PathVariable Long familyId) {
+    public List<PoolBooking> getBookingsByFamily(@PathVariable UUID familyId) {
         if (!Objects.equals(SecurityUtils.currentFamilyId(), familyId)){
             throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
         }
@@ -54,7 +55,7 @@ public class PoolBookingController {
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('USER', 'ADMIN')")
-    public void deleteBooking (@PathVariable Long id) {
+    public void deleteBooking (@PathVariable UUID id) {
         poolBookingService.deleteBooking(id);
     }
 }

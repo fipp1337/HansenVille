@@ -6,9 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-    int countByFamilyId(Long familyId);
-    List<User> findByFamilyId(Long familyId);
+public interface UserRepository extends JpaRepository<User, UUID> {
+    int countByFamilyId(UUID familyId);
+    List<User> findByFamilyId(UUID familyId);
 }

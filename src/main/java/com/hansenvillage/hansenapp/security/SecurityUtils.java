@@ -5,6 +5,7 @@ import com.hansenvillage.hansenapp.entity.Role;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public final class SecurityUtils {
 
@@ -24,7 +25,7 @@ public final class SecurityUtils {
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.INVALID_CREDENTIALS));
     }
 
-    public static Long currentFamilyId() {
+    public static UUID currentFamilyId() {
         return currentFamily().getId();
     }
 

@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -97,7 +98,7 @@ public class JwtService {
                 throw FamilyException.of(FamilyErrorCode.INVALID_TOKEN);
             }
 
-            Long id = Long.parseLong(claims.getSubject());
+            UUID id = UUID.fromString(claims.getSubject());
             String email = claims.getStringClaim("email");
             List<Role> roles = claims.getStringListClaim("roles").stream()
                     .map(Role::valueOf)
@@ -126,7 +127,7 @@ public class JwtService {
                 throw FamilyException.of(FamilyErrorCode.INVALID_TOKEN);
             }
 
-            Long id = Long.parseLong(claims.getSubject());
+            UUID id = UUID.fromString(claims.getSubject());
             String email = claims.getStringClaim("email");
             List<Role> roles = claims.getStringListClaim("roles").stream()
                     .map(Role::valueOf)

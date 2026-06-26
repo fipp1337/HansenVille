@@ -3,6 +3,8 @@ package com.hansenvillage.hansenapp.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 @Entity
 @Table(name = "pool_bookings")
@@ -10,9 +12,9 @@ public class PoolBooking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private UUID id;
 
-    private long userId;
+    private UUID userId;
 
-    private long poolSessionId;
+    private UUID poolSessionId;
 }

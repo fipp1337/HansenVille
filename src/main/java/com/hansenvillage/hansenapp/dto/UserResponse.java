@@ -2,10 +2,12 @@ package com.hansenvillage.hansenapp.dto;
 
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class UserResponse {
 
-    private Long id;
+    private UUID id;
     private String name;
 //    private LocalDate createdAt;
 }

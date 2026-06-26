@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +53,7 @@ public class PoolBookingService {
         return poolBookingRepository.save(poolBooking);
     }
 
-    public Optional<PoolBooking> getBookingById(Long id) {
+    public Optional<PoolBooking> getBookingById(UUID id) {
         return poolBookingRepository.findById(id);
     }
 
@@ -60,12 +61,12 @@ public class PoolBookingService {
         return poolBookingRepository.findAll();
     }
 
-    public List<PoolBooking> getBookingsByFamilyId(Long familyId) {
+    public List<PoolBooking> getBookingsByFamilyId(UUID familyId) {
         return poolBookingRepository.findByUserFamilyId(familyId);
     }
 
     @Transactional
-    public void deleteBooking(Long id) {
+    public void deleteBooking(UUID id) {
         PoolBooking booking = poolBookingRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND));
 
