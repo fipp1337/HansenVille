@@ -9,7 +9,7 @@ public enum FamilyErrorCode {
     FAMILY_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "Member not found: %s"),
     FAMILY_NOT_FOUND(HttpStatus.NOT_FOUND, "Family not found: %s"),
 //    PRODUCT_QUANTITY_EMPTY(HttpStatus.NOT_FOUND, "StockQuantity is empty or not enough: %s"),
-    SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Session not found: %s"),
+//    SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Session not found: %s"),
     TEMPLATE_NOT_FOUND(HttpStatus.NOT_FOUND, "Template not found: %s"),
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "Email already exists"),
     BOOKING_NOT_FOUND(HttpStatus.NOT_FOUND,"Booking not found"),
