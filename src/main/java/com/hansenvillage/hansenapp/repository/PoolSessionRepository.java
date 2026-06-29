@@ -7,6 +7,7 @@ import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.Lock;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,4 +15,6 @@ import java.util.UUID;
 @Repository
 public interface PoolSessionRepository extends JpaRepository<PoolSession, UUID> {
     List<PoolSession> findBySessionDateBetween(LocalDate weekStart, LocalDate weekEnd);
+    boolean existsBySessionDateAndStartTimeAndEndTime(LocalDate sessionDate, LocalTime startTime, LocalTime endTime);
+    List<PoolSession> findBySessionDateBetweenOrderBySessionDateAscStartTimeAsc(LocalDate startDate, LocalDate endDate);
 }

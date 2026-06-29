@@ -13,7 +13,7 @@ import java.util.UUID;
 public class PoolSession {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private UUID id;
 
     private LocalTime startTime;
@@ -29,4 +29,6 @@ public class PoolSession {
 
     private int bookedCount = 0;
 
+    @Version
+    private Long version;
 }
