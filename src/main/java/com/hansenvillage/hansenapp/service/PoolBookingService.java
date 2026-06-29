@@ -92,6 +92,10 @@ public class PoolBookingService {
     }
 
     @Transactional
+    @Retryable(
+            retryFor = { ObjectOptimisticLockingFailureException.class },
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 100))
     public void deleteBooking(UUID id) {
         PoolBooking booking = poolBookingRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND));
