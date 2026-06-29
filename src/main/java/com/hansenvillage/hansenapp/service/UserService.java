@@ -28,17 +28,8 @@ public class UserService {
 
     @Transactional
     public User addNewMember(AddMemberRequest request) {
-
-        UUID familyId = currentFamilyId();
-
         User member = userMapper.toEntity(request);
-
-        int updated = familyRepository.incrementMemberCount(familyId);
-
-        if (updated == 0) {
-            throw FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, familyId);
-        }
-
+        member.setFamilyId(currentFamilyId());
         return userRepository.save(member);
     }
 
@@ -65,18 +56,9 @@ public class UserService {
 
     @Transactional
     public void removeMember(UUID id) {
-
         User user = userRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, id));
 
         userRepository.delete(user);
-
-        UUID familyId = currentFamilyId();
-
-        int updated = familyRepository.decrementMemberCount(familyId);
-
-        if (updated == 0) {
-            throw FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, familyId);
         }
-    }
 }
