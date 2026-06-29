@@ -8,5 +8,5 @@ CREATE TABLE pool_templates
     start_time  TIME NOT NULL,
     end_time    TIME NOT NULL,
     day_of_week INT  NOT NULL,
-    max_capacity INT
+    max_capacity INT NOT NULL
 );

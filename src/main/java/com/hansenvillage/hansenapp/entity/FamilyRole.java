@@ -25,7 +25,7 @@ import java.util.UUID;
 public class FamilyRole {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private UUID id;
 
     private UUID familyId;

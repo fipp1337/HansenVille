@@ -15,7 +15,7 @@ import java.util.UUID;
 public class Family {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue
     private UUID id;
 
     private String email;

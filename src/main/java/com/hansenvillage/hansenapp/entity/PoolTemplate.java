@@ -11,7 +11,7 @@ import java.util.UUID;
 public class PoolTemplate {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private UUID id;
 
     private LocalTime startTime;
@@ -20,5 +20,5 @@ public class PoolTemplate {
 
     private int dayOfWeek;
 
-    private int maxCapacity = 40;
+    private int maxCapacity;
 }
