@@ -101,7 +101,7 @@ public class PoolBookingService {
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND));
 
         PoolSession session = poolSessionRepository.findById(booking.getPoolSessionId())
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND));
 
         LocalDateTime sessionStart = LocalDateTime.of(
                 session.getSessionDate(),
