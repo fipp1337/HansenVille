@@ -39,13 +39,13 @@ public class PoolSessionService {
     public PoolSession findById(UUID id) {
 
         return poolSessionRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND, id));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_IS_FULL, id));
     }
 
         public PoolSession update(UUID id, PoolSessionRequest request) {
 
             PoolSession session = poolSessionRepository.findById(id)
-                    .orElseThrow(() -> FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND, id));
+                    .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_IS_FULL, id));
 
             poolSessionMapper.updateEntity(request, session);
 
@@ -55,7 +55,7 @@ public class PoolSessionService {
     @Transactional
     public void delete(UUID id) {
         if (!poolSessionRepository.existsById(id)) {
-            throw FamilyException.of(FamilyErrorCode.SESSION_NOT_FOUND, id);
+            throw FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, id);
         }
         poolSessionRepository.deleteById(id);
     }
