@@ -30,5 +30,5 @@ public class PoolSession {
     private int bookedCount = 0;
 
     @Version
-    private Long version;
+    private Integer version;
 }

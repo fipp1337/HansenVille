@@ -9,5 +9,6 @@ public class UserResponse {
 
     private UUID id;
     private String name;
+    private Integer age;
 //    private LocalDate createdAt;
 }

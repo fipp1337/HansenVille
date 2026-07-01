@@ -63,10 +63,10 @@ public class AuthService {
     @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
         Family family = familyRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.INVALID_TOKEN));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.WRONG_EMAIL));
 
         if (!passwordEncoder.matches(request.getPassword(), family.getPassword())) {
-            throw FamilyException.of(FamilyErrorCode.INVALID_TOKEN);
+            throw FamilyException.of(FamilyErrorCode.WRONG_PASSWORD);
         }
 
         List<Role> roles = familyRoleRepository.findByFamilyId(family.getId()).stream()

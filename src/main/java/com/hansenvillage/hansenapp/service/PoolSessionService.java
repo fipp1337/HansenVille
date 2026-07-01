@@ -7,6 +7,7 @@ import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.mapper.PoolSessionMapper;
 import com.hansenvillage.hansenapp.mapper.PoolTemplateMapper;
+import com.hansenvillage.hansenapp.repository.PoolBookingRepository;
 import com.hansenvillage.hansenapp.repository.PoolSessionRepository;
 import com.hansenvillage.hansenapp.repository.PoolTemplateRepository;
 import jakarta.transaction.Transactional;
@@ -24,6 +25,7 @@ public class PoolSessionService {
     private final PoolTemplateRepository poolTemplateRepository;
     private final PoolTemplateMapper poolTemplateMapper;
     private final PoolSessionMapper poolSessionMapper;
+    private final PoolBookingRepository poolBookingRepository;
 
     @Transactional
     public List<PoolSession> getAvailableSessionsForNextWeek(LocalDate fromDate) {
@@ -39,13 +41,13 @@ public class PoolSessionService {
     public PoolSession findById(UUID id) {
 
         return poolSessionRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_IS_FULL, id));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, id));
     }
 
         public PoolSession update(UUID id, PoolSessionRequest request) {
 
             PoolSession session = poolSessionRepository.findById(id)
-                    .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_IS_FULL, id));
+                    .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, id));
 
             poolSessionMapper.updateEntity(request, session);
 
@@ -57,6 +59,7 @@ public class PoolSessionService {
         if (!poolSessionRepository.existsById(id)) {
             throw FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, id);
         }
+        poolBookingRepository.deleteByPoolSessionId(id);
         poolSessionRepository.deleteById(id);
     }
 

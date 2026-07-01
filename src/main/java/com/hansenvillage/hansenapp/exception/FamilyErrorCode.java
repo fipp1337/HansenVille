@@ -3,6 +3,8 @@ package com.hansenvillage.hansenapp.exception;
 import org.springframework.http.HttpStatus;
 
 public enum FamilyErrorCode {
+    WRONG_PASSWORD(HttpStatus.UNAUTHORIZED, "User register is failed, wrong password: %s"),
+    WRONG_EMAIL(HttpStatus.UNAUTHORIZED, "User register is failed, wrong email: %s"),
     REGISTER_IS_FAILED(HttpStatus.UNAUTHORIZED, "User register is failed: %s"),
     FAMILY_ADD_MEMBER_FAILED(HttpStatus.CONFLICT, "Member add is failed: %s"),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found: %s"),
@@ -10,6 +12,8 @@ public enum FamilyErrorCode {
     FAMILY_NOT_FOUND(HttpStatus.NOT_FOUND, "Family not found: %s"),
 //    PRODUCT_QUANTITY_EMPTY(HttpStatus.NOT_FOUND, "StockQuantity is empty or not enough: %s"),
 //    SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Session not found: %s"),
+    OUT_OF_TICKETS(HttpStatus.NOT_ACCEPTABLE, "Not enough tickets"),
+    NOT_YOUR_BOOKING(HttpStatus.NOT_ACCEPTABLE, "Not your booking"),
     TEMPLATE_NOT_FOUND(HttpStatus.NOT_FOUND, "Template not found: %s"),
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "Email already exists"),
     BOOKING_NOT_FOUND(HttpStatus.NOT_FOUND,"Booking not found"),

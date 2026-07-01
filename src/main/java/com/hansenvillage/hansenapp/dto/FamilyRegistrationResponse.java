@@ -9,5 +9,4 @@ public class FamilyRegistrationResponse {
     private UUID id;
     private String email;
     private String address;
-    private int memberCount;
 }
