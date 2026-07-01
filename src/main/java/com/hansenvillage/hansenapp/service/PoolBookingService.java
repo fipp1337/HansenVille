@@ -52,6 +52,12 @@ public class PoolBookingService {
         PoolSession session = poolSessionRepository.findById(request.getPoolSessionId())
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND));
 
+        LocalDateTime sessionStart = LocalDateTime.of(session.getSessionDate(), session.getStartTime());
+
+        if (LocalDateTime.now().isAfter(sessionStart)) {
+            throw FamilyException.of(FamilyErrorCode.SESSION_ALREADY_STARTED);
+        }
+
         if (session.getBookedCount() >= session.getMaxCapacity()) {
             throw FamilyException.of(FamilyErrorCode.POOL_SESSION_IS_FULL);
         }
