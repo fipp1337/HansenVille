@@ -2,7 +2,6 @@ package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.AddMemberRequest;
 import com.hansenvillage.hansenapp.dto.UserResponse;
-import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.entity.User;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
@@ -11,7 +10,6 @@ import com.hansenvillage.hansenapp.repository.FamilyRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
