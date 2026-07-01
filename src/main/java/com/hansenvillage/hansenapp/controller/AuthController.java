@@ -26,9 +26,7 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public FamilyRegistrationResponse register(@Valid @RequestBody FamilyRegistrationRequest request) {
         Family savedFamily = authService.registerFamily(request);
-
         return familyMapper.toResponse(savedFamily);
-
     }
 
     @PostMapping("/login")

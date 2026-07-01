@@ -32,5 +32,6 @@ public class FamilyRegistrationRequest {
     public static class MemberRequest {
         @NotBlank
         private String name;
+        private Integer age;
     }
 }
