@@ -1,6 +1,6 @@
 package com.hansenvillage.hansenapp.entity;
 
-public enum SessionStatus {
+public enum PoolSessionStatus {
     ACTIVE,
     CANCELLED
 }

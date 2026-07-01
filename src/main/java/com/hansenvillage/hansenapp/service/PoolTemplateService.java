@@ -3,20 +3,15 @@ package com.hansenvillage.hansenapp.service;
 import com.hansenvillage.hansenapp.dto.PoolTemplateRequest;
 import com.hansenvillage.hansenapp.entity.PoolSession;
 import com.hansenvillage.hansenapp.entity.PoolTemplate;
-import com.hansenvillage.hansenapp.entity.SessionStatus;
+import com.hansenvillage.hansenapp.entity.PoolSessionStatus;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.repository.PoolSessionRepository;
 import com.hansenvillage.hansenapp.repository.PoolTemplateRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.CannotAcquireLockException;
-import org.springframework.dao.PessimisticLockingFailureException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -60,7 +55,7 @@ public class PoolTemplateService {
                     session.setMaxCapacity(template.getMaxCapacity());
                     session.setBookedCount(0);
 
-                    session.setStatus(SessionStatus.ACTIVE);
+                    session.setStatus(PoolSessionStatus.ACTIVE);
 
                     poolSessionRepository.save(session);
                 }

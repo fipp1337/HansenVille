@@ -1,7 +1,7 @@
 package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.PoolSessionRequest;
-import com.hansenvillage.hansenapp.dto.PublishWeekScheduleRequest;
+import com.hansenvillage.hansenapp.dto.PoolPublishWeekScheduleRequest;
 import com.hansenvillage.hansenapp.entity.PoolSession;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
@@ -33,7 +33,7 @@ public class PoolSessionService {
         return new ArrayList<>();
     }
 
-    public List<PoolSession> create(PublishWeekScheduleRequest request) {
+    public List<PoolSession> create(PoolPublishWeekScheduleRequest request) {
         List<PoolSession> sessions = poolSessionMapper.toEntityList(request);
         return poolSessionRepository.saveAll(sessions);
     }

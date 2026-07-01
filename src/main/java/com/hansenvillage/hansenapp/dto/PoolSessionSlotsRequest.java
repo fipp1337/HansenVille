@@ -8,7 +8,7 @@ import lombok.Setter;
 import java.time.LocalTime;
 @Getter
 @Setter
-public class SessionSlotsRequest {
+public class PoolSessionSlotsRequest {
     @NotNull
     private LocalTime startTime;
     @NotNull
