@@ -17,15 +17,16 @@ import java.time.LocalDate;
 public class PoolTemplateController {
 
     private final PoolTemplateService poolTemplateService;
+
     @PostMapping
     // @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> createTemplate(@Valid @RequestBody PoolTemplateRequest request) {
         poolTemplateService.createTemplate(request);
-        return ResponseEntity.ok("Pool template successfully created");
+        return ResponseEntity.ok("Pool templates successfully created");
     }
 
     @PostMapping("/generate")
-// @PreAuthorize("hasRole('ADMIN')")
+    // @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> generateSchedule(@Valid @RequestBody GenerateScheduleRequest request) {
         poolTemplateService.generateSchedule(request.getStartDate(), request.getEndDate());
         return ResponseEntity.ok("Schedule successfully generated from " + request.getStartDate() + " to " + request.getEndDate());
