@@ -10,6 +10,7 @@ public enum FamilyErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found: %s"),
     FAMILY_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "Member not found: %s"),
     FAMILY_NOT_FOUND(HttpStatus.NOT_FOUND, "Family not found: %s"),
+    SESSION_ALREADY_STARTED(HttpStatus.CONFLICT, "Session was started"),
 //    PRODUCT_QUANTITY_EMPTY(HttpStatus.NOT_FOUND, "StockQuantity is empty or not enough: %s"),
 //    SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Session not found: %s"),
     OUT_OF_TICKETS(HttpStatus.NOT_ACCEPTABLE, "Not enough tickets"),

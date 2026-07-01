@@ -18,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,7 +49,11 @@ public class PoolSessionController {
     @GetMapping("{id}")
     public ResponseEntity<List<PoolBookingResponse>> getBookingsBySession(@PathVariable("id") UUID id) {
         List<PoolBookingResponse> details = poolBookingService.getBookingDetailsForSession(id);
-        return ResponseEntity.ok(details);
+
+        List<PoolBookingResponse> sortedDetails = details.stream()
+                .sorted(Comparator.comparingInt(PoolBookingResponse::getUserAge))
+                .toList();
+        return ResponseEntity.ok(sortedDetails);
     }
 
     @PutMapping("/{id}")
