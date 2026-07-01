@@ -24,5 +24,4 @@ public class Family {
 
     private String address;
 
-    private int memberCount;
 }

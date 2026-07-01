@@ -7,8 +7,7 @@ CREATE TABLE families (
     password VARCHAR(255) NOT NULL,
     email    VARCHAR(255) NOT NULL unique,
     address  VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    member_count INT
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE users (
@@ -16,7 +15,7 @@ CREATE TABLE users (
     family_id UUID NOT NULL REFERENCES families (id),
     name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    age INT
+    age INT NOT NULL
 );
 
 CREATE TABLE families_roles (

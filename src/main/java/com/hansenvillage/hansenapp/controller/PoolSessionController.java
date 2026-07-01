@@ -1,11 +1,13 @@
 package com.hansenvillage.hansenapp.controller;
 
+import com.hansenvillage.hansenapp.dto.PoolBookingResponse;
 import com.hansenvillage.hansenapp.dto.PoolSessionRequest;
 import com.hansenvillage.hansenapp.dto.PublishWeekScheduleRequest;
 import com.hansenvillage.hansenapp.entity.PoolSession;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.security.SecurityUtils;
+import com.hansenvillage.hansenapp.service.PoolBookingService;
 import com.hansenvillage.hansenapp.service.PoolSessionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ import static org.springframework.boot.origin.OriginTrackedValue.of;
 public class PoolSessionController {
 
     private final PoolSessionService poolSessionService;
+    private final PoolBookingService poolBookingService;
 
     @GetMapping("/week")
     public List<PoolSession> getWeekSchedule(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -40,10 +43,12 @@ public class PoolSessionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(sessions);
     }
 
-    @GetMapping("/{id}")
+
 //    @PreAuthorize("hasAnyRole('ADMIN')")
-    public PoolSession getById(@PathVariable UUID id) {
-        return poolSessionService.findById(id);
+    @GetMapping("{id}")
+    public ResponseEntity<List<PoolBookingResponse>> getBookingsBySession(@PathVariable("id") UUID id) {
+        List<PoolBookingResponse> details = poolBookingService.getBookingDetailsForSession(id);
+        return ResponseEntity.ok(details);
     }
 
     @PutMapping("/{id}")

@@ -8,4 +8,6 @@ import org.mapstruct.Mapper;
 public interface PoolBookingMapper {
 
     PoolBooking toEntity(PoolBookingRequest request);
+
+
 }

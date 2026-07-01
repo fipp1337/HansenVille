@@ -70,20 +70,17 @@ public class PoolTemplateService {
 
     @Transactional
     public void createTemplate(PoolTemplateRequest request) {
-        if (request.getEndTime().isBefore(request.getStartTime())) {
-            throw FamilyException.of(FamilyErrorCode.INVALID_DATES);
-        }
+        List<PoolTemplate> templates = request.getSlots().stream()
+                .map(slot -> {
+                    PoolTemplate template = new PoolTemplate();
+                    template.setDayOfWeek(request.getDayOfWeek());
+                    template.setMaxCapacity(request.getMaxCapacity());
+                    template.setStartTime(slot.getStartTime());
+                    template.setEndTime(slot.getEndTime());
+                    return template;
+                })
+                .toList();
 
-        if (request.getDayOfWeek() < 1 || request.getDayOfWeek() > 7) {
-            throw FamilyException.of(FamilyErrorCode.INVALID_DATES);
-        }
-
-        PoolTemplate template = new PoolTemplate();
-        template.setStartTime(request.getStartTime());
-        template.setEndTime(request.getEndTime());
-        template.setDayOfWeek(request.getDayOfWeek());
-        template.setMaxCapacity(request.getMaxCapacity());
-
-        poolTemplateRepository.save(template);
+        poolTemplateRepository.saveAll(templates);
     }
 }
