@@ -14,7 +14,6 @@ import com.hansenvillage.hansenapp.repository.PoolBookingRepository;
 import com.hansenvillage.hansenapp.repository.PoolSessionRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
 import com.hansenvillage.hansenapp.security.SecurityUtils;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.PessimisticLockingFailureException;
@@ -22,6 +21,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -38,16 +38,15 @@ public class PoolBookingService {
     private final PoolSessionRepository poolSessionRepository;
     private final PoolBookingRepository poolBookingRepository;
     private final UserRepository userRepository;
-    private final FamilyRepository familyRepository;
     private final PoolBookingMapper poolBookingMapper;
 
-    @Transactional
     @Retryable(
             retryFor = {
                     ObjectOptimisticLockingFailureException.class
             },
             maxAttempts = 3,
             backoff = @Backoff(delay = 100))
+    @Transactional
     public PoolBooking poolBooking(PoolBookingRequest request) {
         PoolSession session = poolSessionRepository.findById(request.getPoolSessionId())
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND));
@@ -120,11 +119,11 @@ public class PoolBookingService {
         return poolBookingRepository.findByFamilyId(familyId);
     }
 
-    @Transactional
     @Retryable(
             retryFor = {ObjectOptimisticLockingFailureException.class},
             maxAttempts = 3,
             backoff = @Backoff(delay = 100))
+    @Transactional
     public void deleteBooking(UUID id) {
         PoolBooking booking = poolBookingRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND));
