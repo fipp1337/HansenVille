@@ -21,7 +21,7 @@ import java.util.UUID;
 import static org.springframework.boot.origin.OriginTrackedValue.of;
 
 @RestController
-@RequestMapping("/api/session")
+@RequestMapping("/api/pool/session")
 @RequiredArgsConstructor
 public class PoolSessionController {
 
