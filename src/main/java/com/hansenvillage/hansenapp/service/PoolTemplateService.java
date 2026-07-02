@@ -8,7 +8,7 @@ import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.repository.PoolSessionRepository;
 import com.hansenvillage.hansenapp.repository.PoolTemplateRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -9,7 +9,7 @@ import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.mapper.UserMapper;
 import com.hansenvillage.hansenapp.repository.FamilyRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
