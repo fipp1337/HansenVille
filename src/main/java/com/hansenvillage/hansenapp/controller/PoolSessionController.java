@@ -43,7 +43,7 @@ public class PoolSessionController {
 
 //    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("{id}")
-    public ResponseEntity<List<PoolBookingResponse>> getBookingsBySession(@PathVariable("id") UUID id) {
+    public ResponseEntity<List<PoolBookingResponse>> getBooksBySession(@PathVariable("id") UUID id) {
         List<PoolBookingResponse> details = poolBookingService.getBookingDetailsForSession(id);
 
         List<PoolBookingResponse> sortedDetails = details.stream()

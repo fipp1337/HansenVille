@@ -25,7 +25,7 @@ public class PoolTemplateService {
 
 
     @Transactional
-    public void generateSchedule(LocalDate startDate, LocalDate endDate) {
+    public void generate(LocalDate startDate, LocalDate endDate) {
         if (endDate.isBefore(startDate)) {
             throw FamilyException.of(FamilyErrorCode.INVALID_DATES);
         }
@@ -64,7 +64,7 @@ public class PoolTemplateService {
     }
 
     @Transactional
-    public void createTemplate(PoolTemplateRequest request) {
+    public void create(PoolTemplateRequest request) {
         List<PoolTemplate> templates = request.getSlots().stream()
                 .map(slot -> {
                     PoolTemplate template = new PoolTemplate();

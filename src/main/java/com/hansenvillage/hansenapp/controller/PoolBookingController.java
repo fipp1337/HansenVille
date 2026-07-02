@@ -27,13 +27,13 @@ public class PoolBookingController {
     @ResponseStatus(HttpStatus.CREATED)
 //    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public PoolBooking createBooking(@Valid @RequestBody PoolBookingRequest request) {
-        return poolBookingService.poolBooking(request);
+        return poolBookingService.book(request);
     }
 
     @GetMapping("/{id}")
 //    @PreAuthorize("hasRole('ADMIN')")
     public PoolBooking getBooking(@PathVariable UUID id) {
-        return poolBookingService.getBookingById(id)
+        return poolBookingService.getBookById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND));
     }
 

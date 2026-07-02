@@ -18,14 +18,14 @@ public class PoolTemplateController {
     @PostMapping
     // @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> createTemplate(@Valid @RequestBody PoolTemplateRequest request) {
-        poolTemplateService.createTemplate(request);
+        poolTemplateService.create(request);
         return ResponseEntity.ok("Pool templates successfully created");
     }
 
     @PostMapping("/generate")
     // @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> generateSchedule(@Valid @RequestBody PoolGenerateScheduleRequest request) {
-        poolTemplateService.generateSchedule(request.getStartDate(), request.getEndDate());
+        poolTemplateService.generate(request.getStartDate(), request.getEndDate());
         return ResponseEntity.ok("Schedule successfully generated from " + request.getStartDate() + " to " + request.getEndDate());
     }
 }
