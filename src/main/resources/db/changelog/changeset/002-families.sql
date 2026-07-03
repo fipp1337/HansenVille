@@ -7,6 +7,7 @@ CREATE TABLE families (
     password VARCHAR(255) NOT NULL,
     email    VARCHAR(255) NOT NULL unique,
     address  VARCHAR(255) NOT NULL,
+    member_count INT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

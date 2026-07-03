@@ -23,7 +23,7 @@ public class PoolSession {
     private Integer maxCapacity;
 
     @Enumerated(EnumType.STRING)
-    private PoolSessionStatus status;
+    private SessionStatus status;
 
     private LocalDate sessionDate;
 

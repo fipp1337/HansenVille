@@ -45,7 +45,7 @@ public class PoolBookingService {
             maxAttempts = 3,
             backoff = @Backoff(delay = 100))
     @Transactional
-    public PoolBooking poolBooking(PoolBookingRequest request) {
+    public PoolBooking book(PoolBookingRequest request) {
         PoolSession session = poolSessionRepository.findById(request.getPoolSessionId())
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND));
 
