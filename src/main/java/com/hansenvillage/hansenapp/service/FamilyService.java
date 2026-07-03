@@ -19,13 +19,10 @@ import java.util.UUID;
 public class FamilyService {
    private final FamilyRepository familyRepository;
    private final UserRepository userRepository;
-   private final UserMapper userMapper;
 
     public int getFamilySize(UUID familyId) {
         return userRepository.countByFamilyId(familyId);
     }
-
-    ///    List<UserResponse> getMYFamilyMembers() ???
 
     public Family findById(UUID id) {
 

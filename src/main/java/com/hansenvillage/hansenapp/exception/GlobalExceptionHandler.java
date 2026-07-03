@@ -13,10 +13,18 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ResponseError> handleStore(Exception ex) {
+        return ResponseEntity
+                .status(400)
+                .body(new ResponseError(400, ex.getMessage()));
+    }
 
     @ExceptionHandler(FamilyException.class)
     public ResponseEntity<ResponseError> handleStore(FamilyException ex) {
