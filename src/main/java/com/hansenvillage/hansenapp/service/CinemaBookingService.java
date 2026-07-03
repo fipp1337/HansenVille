@@ -2,21 +2,23 @@ package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.CinemaBookingRequest;
 import com.hansenvillage.hansenapp.entity.CinemaBooking;
+import com.hansenvillage.hansenapp.entity.CinemaSeat;
 import com.hansenvillage.hansenapp.entity.CinemaSession;
 import com.hansenvillage.hansenapp.entity.User;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.mapper.CinemaBookingMapper;
 import com.hansenvillage.hansenapp.repository.CinemaBookingRepository;
+import com.hansenvillage.hansenapp.repository.CinemaSeatRepository;
 import com.hansenvillage.hansenapp.repository.CinemaSessionRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
 import com.hansenvillage.hansenapp.security.SecurityUtils;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -32,38 +34,44 @@ public class CinemaBookingService {
     private final CinemaSessionRepository cinemaSessionRepository;
     private final UserRepository userRepository;
     private final CinemaBookingMapper cinemaBookingMapper;
+    private final CinemaSeatRepository cinemaSeatRepository;
 
-    @Transactional
     @Retryable(
             retryFor = {
                     ObjectOptimisticLockingFailureException.class
             },
             maxAttempts = 3,
             backoff = @Backoff(delay = 100))
-    public CinemaBooking cinemaBooking(CinemaBookingRequest request) {
+    @Transactional
+    public CinemaBooking book(CinemaBookingRequest request) {
+
         CinemaSession session = cinemaSessionRepository.findById(request.getCinemaSessionId())
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND));
+                .orElseThrow(() ->
+                        FamilyException.of(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND, request.getCinemaSessionId()));
 
         if (session.getBookedCount() >= session.getMaxCapacity()) {
             throw FamilyException.of(FamilyErrorCode.CINEMA_SESSION_IS_FULL);
         }
 
+        CinemaSeat seat = cinemaSeatRepository.findById(request.getSeatId())
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.SEAT_NOT_FOUND, request.getSeatId()));
+
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, request.getUserId()));
 
         if (!Objects.equals(user.getFamilyId(), SecurityUtils.currentFamilyId())) {
             throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
         }
 
-        if (cinemaBookingRepository.existsByUserIdAndCinemaSessionId(user.getId(), session.getId())) {
-            throw FamilyException.of(FamilyErrorCode.CINEMA_HAS_BEEN_BOOKED);
+        if (cinemaBookingRepository.existsByCinemaSessionIdAndSeatId(request.getCinemaSessionId(), request.getSeatId())) {
+            throw FamilyException.of(FamilyErrorCode.SEAT_ALREADY_BOOKED);
         }
 
         session.setBookedCount(session.getBookedCount() + 1);
         cinemaSessionRepository.save(session);
 
-        CinemaBooking cinemaBooking = cinemaBookingMapper.toEntity(request);
-        return cinemaBookingRepository.save(cinemaBooking);
+        CinemaBooking booking = cinemaBookingMapper.toEntity(request);
+        return cinemaBookingRepository.save(booking);
     }
 
     public CinemaBooking getBookingById(UUID id) {
@@ -77,7 +85,7 @@ public class CinemaBookingService {
 
     public List<CinemaBooking> getBookingsByUserId(UUID userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, userId));
         if (!SecurityUtils.isAdmin() && !Objects.equals(user.getFamilyId(), SecurityUtils.currentFamilyId())) {
             throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
         }
@@ -86,14 +94,18 @@ public class CinemaBookingService {
     }
 
     public List<CinemaBooking> getBookingsByFamilyId(UUID familyId) {
+
+        if (!SecurityUtils.isAdmin() && !Objects.equals(familyId, SecurityUtils.currentFamilyId())) {
+            throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
+        }
         return cinemaBookingRepository.findByFamilyId(familyId);
     }
 
-    @Transactional
     @Retryable(
             retryFor = { ObjectOptimisticLockingFailureException.class },
             maxAttempts = 3,
             backoff = @Backoff(delay = 100))
+    @Transactional
     public void deleteBooking(UUID id) {
         CinemaBooking booking = cinemaBookingRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND));

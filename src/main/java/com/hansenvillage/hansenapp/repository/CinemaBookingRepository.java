@@ -1,7 +1,6 @@
 package com.hansenvillage.hansenapp.repository;
 
 import com.hansenvillage.hansenapp.entity.CinemaBooking;
-import com.hansenvillage.hansenapp.entity.PoolBooking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,7 +12,7 @@ import java.util.UUID;
 @Repository
 public interface CinemaBookingRepository extends JpaRepository<CinemaBooking, UUID> {
 
-    boolean existsByUserIdAndCinemaSessionId(UUID userId, UUID cinemaSessionId);
+    boolean existsByCinemaSessionIdAndSeatId(UUID cinemaSessionId, UUID seatId);
 
     List<CinemaBooking> findByUserId(UUID userId);
 

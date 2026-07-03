@@ -2,13 +2,8 @@ package com.hansenvillage.hansenapp.controller;
 
 import com.hansenvillage.hansenapp.dto.CinemaPublishWeekScheduleRequest;
 import com.hansenvillage.hansenapp.dto.CinemaSessionRequest;
-import com.hansenvillage.hansenapp.dto.PoolSessionRequest;
-import com.hansenvillage.hansenapp.dto.PublishWeekScheduleRequest;
-import com.hansenvillage.hansenapp.entity.CinemaBooking;
 import com.hansenvillage.hansenapp.entity.CinemaSession;
-import com.hansenvillage.hansenapp.entity.PoolSession;
 import com.hansenvillage.hansenapp.service.CinemaSessionService;
-import com.hansenvillage.hansenapp.service.PoolSessionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
