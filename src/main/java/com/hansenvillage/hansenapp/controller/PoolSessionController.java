@@ -21,13 +21,11 @@ import java.util.UUID;
 import static org.springframework.boot.origin.OriginTrackedValue.of;
 
 @RestController
-@RequestMapping("/api/pool/session")
+@RequestMapping("/api/session")
 @RequiredArgsConstructor
 public class PoolSessionController {
-
     private final PoolSessionService poolSessionService;
     private final PoolBookingService poolBookingService;
-
     @GetMapping("/week")
     public List<PoolSession> getWeekSchedule(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
                                                  LocalDate weekStart) {
@@ -42,7 +40,7 @@ public class PoolSessionController {
 
 
 //    @PreAuthorize("hasAnyRole('ADMIN')")
-    @GetMapping("{id}")
+    @GetMapping("/bookings/{id}")
     public ResponseEntity<List<PoolBookingResponse>> getBooksBySession(@PathVariable("id") UUID id) {
         List<PoolBookingResponse> details = poolBookingService.getBookingDetailsForSession(id);
 
@@ -50,6 +48,12 @@ public class PoolSessionController {
                 .sorted(Comparator.comparingInt(PoolBookingResponse::getUserAge))
                 .toList();
         return ResponseEntity.ok(sortedDetails);
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<PoolSession> getSessionInfoById(@PathVariable UUID id) {
+        PoolSession session = poolSessionService.findById(id);
+        return ResponseEntity.ok(session);
     }
 
     @PutMapping("/{id}")
@@ -64,6 +68,4 @@ public class PoolSessionController {
     public void delete(@PathVariable UUID id) {
         poolSessionService.delete(id);
     }
-
-
 }

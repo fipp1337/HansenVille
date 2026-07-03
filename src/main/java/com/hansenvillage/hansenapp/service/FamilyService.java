@@ -25,10 +25,7 @@ public class FamilyService {
     }
 
     public Family findById(UUID id) {
-
         return familyRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, id));
     }
-
-
 }

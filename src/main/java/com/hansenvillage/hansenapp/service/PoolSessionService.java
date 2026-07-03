@@ -39,7 +39,6 @@ public class PoolSessionService {
     }
 
     public PoolSession findById(UUID id) {
-
         return poolSessionRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, id));
     }
