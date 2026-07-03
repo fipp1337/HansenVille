@@ -35,13 +35,14 @@ public class UserService {
         return userRepository.save(member);
     }
 
+    @Transactional
     public User updateUser(UUID id, String newName) {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND));
         user.setName(newName);
 
-        return user;
+        return userRepository.save(user);
     }
 
     public List<UserResponse> getFamilyMembers(UUID familyId) {

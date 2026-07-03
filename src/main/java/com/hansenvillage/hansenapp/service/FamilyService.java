@@ -17,9 +17,9 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class FamilyService {
-   private final FamilyRepository familyRepository;
-   private final UserRepository userRepository;
-   private final UserMapper userMapper;
+    private final FamilyRepository familyRepository;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     public int getFamilySize(UUID familyId) {
         return userRepository.countByFamilyId(familyId);
@@ -32,6 +32,4 @@ public class FamilyService {
         return familyRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, id));
     }
-
-
 }
