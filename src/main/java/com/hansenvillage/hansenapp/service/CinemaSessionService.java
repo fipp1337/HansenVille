@@ -2,15 +2,14 @@ package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.CinemaPublishWeekScheduleRequest;
 import com.hansenvillage.hansenapp.dto.CinemaSessionRequest;
-import com.hansenvillage.hansenapp.dto.PublishWeekScheduleRequest;
 import com.hansenvillage.hansenapp.entity.CinemaSession;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.mapper.CinemaSessionMapper;
 import com.hansenvillage.hansenapp.repository.CinemaSessionRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Comparator;

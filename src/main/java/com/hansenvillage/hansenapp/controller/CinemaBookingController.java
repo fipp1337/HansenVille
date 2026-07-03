@@ -27,7 +27,7 @@ public class CinemaBookingController {
     @ResponseStatus(HttpStatus.CREATED)
 //    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public CinemaBooking createBooking(@Valid @RequestBody CinemaBookingRequest request) {
-        return cinemaBookingService.cinemaBooking(request);
+        return cinemaBookingService.book(request);
     }
 
     @GetMapping("/{id}")

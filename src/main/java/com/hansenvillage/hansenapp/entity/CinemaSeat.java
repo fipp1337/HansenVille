@@ -7,26 +7,24 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "cinema_bookings")
-public class CinemaBooking {
+@Table(name = "cinema_seats")
+public class CinemaSeat {
 
     @Id
     @GeneratedValue
     private UUID id;
 
-    private UUID userId;
+    private UUID hallId;
 
-    private UUID cinemaSessionId;
+    private String rowLabel;
 
-    private UUID seatId;
+    private int sofaNumber;
 
-//    status     VARCHAR(20) NOT NULL DEFAULT 'CONFIRMED',
+    private int spotNumber;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
 }
