@@ -17,4 +17,19 @@ public interface FamilyRepository extends JpaRepository<Family, UUID> {
     Optional<Family> findByEmail(String email);
     boolean existsByEmail(String email);
 
+    @Modifying
+    @Query("""
+            UPDATE Family f
+            SET f.memberCount = f.memberCount + 1
+            WHERE f.id = :familyId
+            """)
+    Integer incrementMemberCount(UUID familyId);
+
+    @Modifying
+    @Query("""
+            UPDATE Family f
+            SET f.memberCount = f.memberCount - 1
+            WHERE f.id = :familyId
+            """)
+    Integer decrementMemberCount(UUID familyId);
 }
