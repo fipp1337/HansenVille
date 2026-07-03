@@ -42,7 +42,7 @@ class PoolBookingServiceTest {
     PoolBookingService poolBookingService;
 
     @Test
-    void poolBooking() {
+    void book() {
 
     }
 
@@ -54,10 +54,9 @@ class PoolBookingServiceTest {
 
         when(poolBookingRepository.findById(bookingId)).thenReturn(Optional.of(expectedBooking));
 
-        Optional<PoolBooking> result = poolBookingService.getBookById(bookingId);
+        PoolBooking result = poolBookingService.getBookingById(bookingId);
 
-        assertTrue(result.isPresent());
-        assertEquals(bookingId, result.get().getId());
+        assertEquals(bookingId, result.getId());
 
         verify(poolBookingRepository, times(1)).findById(bookingId);
     }
@@ -98,7 +97,6 @@ class PoolBookingServiceTest {
 
     @Test
     void deleteBooking_ShouldDecreaseBookedCountAndDelete_WhenAdminDeletes() {
-        // --- ARRANGE ---
         UUID bookingId = UUID.randomUUID();
         UUID sessionId = UUID.randomUUID();
 

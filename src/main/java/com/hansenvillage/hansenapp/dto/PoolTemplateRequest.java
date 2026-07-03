@@ -22,10 +22,10 @@ public class PoolTemplateRequest {
 
     @Data
     public static class TimeSlot {
-        @NotNull(message = "Время начала обязательно")
+        @NotNull
         private LocalTime startTime;
 
-        @NotNull(message = "Время окончания обязательно")
+        @NotNull
         private LocalTime endTime;
     }
 }
