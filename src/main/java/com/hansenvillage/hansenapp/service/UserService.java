@@ -2,7 +2,6 @@ package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.AddMemberRequest;
 import com.hansenvillage.hansenapp.dto.UserResponse;
-import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.entity.User;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
@@ -11,7 +10,6 @@ import com.hansenvillage.hansenapp.repository.FamilyRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,8 +28,17 @@ public class UserService {
 
     @Transactional
     public User addNewMember(AddMemberRequest request) {
+
+        UUID familyId = currentFamilyId();
+
         User member = userMapper.toEntity(request);
-        member.setFamilyId(currentFamilyId());
+
+        int updated = familyRepository.incrementMemberCount(familyId);
+
+        if (updated == 0) {
+            throw FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, familyId);
+        }
+
         return userRepository.save(member);
     }
 
@@ -44,21 +51,30 @@ public class UserService {
         return user;
     }
 
-    public List<UserResponse> getFamilyMembers(UUID familyId) {
+    public List<UserResponse> getFamilyMembers(UUID id) {
 
-        if (!familyRepository.existsById(familyId)) {
-            throw FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, familyId);
+        if (!familyRepository.existsById(id)) {
+            throw FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, id);
         }
 
-        List<User> members = userRepository.findByFamilyId(familyId);
+        List<User> members = userRepository.findByFamilyId(id);
 
         return userMapper.toResponse(members);
     }
 
     public void removeMember(UUID id) {
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, id));
 
         userRepository.delete(user);
+
+        UUID familyId = currentFamilyId();
+
+        int updated = familyRepository.decrementMemberCount(familyId);
+
+        if (updated == 0) {
+            throw FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, familyId);
         }
+    }
 }
