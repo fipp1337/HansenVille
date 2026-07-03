@@ -30,12 +30,9 @@ public interface CinemaSessionMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "movieName", source = "slot.movieName")
-    @Mapping(target = "sessionDate", source = "date")
     @Mapping(target = "startTime", source = "slot.startTime")
     @Mapping(target = "duration", source = "slot.duration")
     @Mapping(target = "maxCapacity", source = "slot.maxCapacity")
-    @Mapping(target = "status", expression = "java(SessionStatus.ACTIVE)")
-    @Mapping(target = "bookedCount", constant = "0")
-    @Mapping(target = "version", ignore = true)
+    @Mapping(target = "sessionDate", source = "slot.sessionDate")
     CinemaSession toEntity(CinemaSessionSlotRequest slot, LocalDate date);
 }

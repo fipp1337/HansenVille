@@ -1,5 +1,8 @@
 package com.hansenvillage.hansenapp.dto;
 
+import com.hansenvillage.hansenapp.entity.SessionStatus;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -17,7 +20,8 @@ public class PoolSessionRequest {
 
     private Integer maxCapacity;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private SessionStatus status;
 
     private LocalDate sessionDate;
 }

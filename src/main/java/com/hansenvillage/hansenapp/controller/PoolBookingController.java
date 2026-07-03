@@ -33,8 +33,7 @@ public class PoolBookingController {
     @GetMapping("/{id}")
 //    @PreAuthorize("hasRole('ADMIN')")
     public PoolBooking getBooking(@PathVariable UUID id) {
-        return poolBookingService.getBookById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND));
+        return poolBookingService.getBookingById(id);
     }
 
     @GetMapping("/family/{familyId}")

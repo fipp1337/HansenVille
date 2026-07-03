@@ -48,6 +48,9 @@ public class AuthService {
         Family family = familyMapper.toEntity(request);
         family.setPassword(passwordEncoder.encode(request.getPassword()));
 
+        int memberCount = request.getMembers() != null ? request.getMembers().size() : 0;
+        family.setMemberCount(memberCount);
+
         Family savedFamily = familyRepository.save(family);
 
         FamilyRole familyRole = familyRoleMapper.createUserRole(savedFamily.getId());
