@@ -63,6 +63,7 @@ public class UserService {
         return userMapper.toResponse(members);
     }
 
+    @Transactional
     public void removeMember(UUID id) {
 
         User user = userRepository.findById(id)
