@@ -3,7 +3,7 @@ package com.hansenvillage.hansenapp.service;
 import com.hansenvillage.hansenapp.dto.PoolTemplateRequest;
 import com.hansenvillage.hansenapp.entity.PoolSession;
 import com.hansenvillage.hansenapp.entity.PoolTemplate;
-import com.hansenvillage.hansenapp.entity.PoolSessionStatus;
+import com.hansenvillage.hansenapp.entity.SessionStatus;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.repository.PoolSessionRepository;
@@ -55,7 +55,7 @@ public class PoolTemplateService {
                     session.setMaxCapacity(template.getMaxCapacity());
                     session.setBookedCount(0);
 
-                    session.setStatus(PoolSessionStatus.ACTIVE);
+                    session.setStatus(SessionStatus.ACTIVE);
 
                     poolSessionRepository.save(session);
                 }

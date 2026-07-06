@@ -4,7 +4,7 @@ import com.hansenvillage.hansenapp.dto.PoolSessionRequest;
 import com.hansenvillage.hansenapp.dto.PoolPublishWeekScheduleRequest;
 import com.hansenvillage.hansenapp.dto.PoolSessionSlotsRequest;
 import com.hansenvillage.hansenapp.entity.PoolSession;
-import com.hansenvillage.hansenapp.entity.PoolSessionStatus;
+import com.hansenvillage.hansenapp.entity.SessionStatus;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -25,7 +25,7 @@ public interface PoolSessionMapper {
         }
 
         if (entity.getStatus() == null) {
-            entity.setStatus(PoolSessionStatus.ACTIVE);
+            entity.setStatus(SessionStatus.ACTIVE);
         }
 //        entity.setBookedCount(0);
     }

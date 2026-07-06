@@ -15,8 +15,6 @@ import com.hansenvillage.hansenapp.repository.PoolSessionRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
 import com.hansenvillage.hansenapp.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.CannotAcquireLockException;
-import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -92,13 +90,12 @@ public class PoolBookingService {
         poolSessionRepository.save(session);
 
         PoolBooking poolBooking = poolBookingMapper.toEntity(request);
-
-
         return poolBookingRepository.save(poolBooking);
     }
 
-    public Optional<PoolBooking> getBookById(UUID id) {
-        return poolBookingRepository.findById(id);
+    public PoolBooking getBookingById(UUID id) {
+        return poolBookingRepository.findById(id)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND));
     }
 
     public List<PoolBooking> getAllBookings() {
