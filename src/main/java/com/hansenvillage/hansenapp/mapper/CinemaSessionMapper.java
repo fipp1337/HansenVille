@@ -5,15 +5,17 @@ import com.hansenvillage.hansenapp.entity.CinemaSession;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-
 import java.time.LocalDate;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface CinemaSessionMapper {
 
-    CinemaSession updateEntity(CinemaSessionRequest request,
-                               @MappingTarget CinemaSession session);
+    CinemaSession updateEntity(CinemaSessionRequest request, @MappingTarget CinemaSession session);
+
+    CinemaSessionResponse toResponse(CinemaSession entity);
+
+    List<CinemaSessionResponse> toResponseList(List<CinemaSession> entities);
 
     default List<CinemaSession> toEntityList(CinemaPublishWeekScheduleRequest request) {
         if (request == null || request.getDays() == null) {
@@ -26,7 +28,6 @@ public interface CinemaSessionMapper {
                         .map(slot -> toEntity(slot, day.getSessionDate())))
                 .toList();
     }
-
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "movieName", source = "slot.movieName")
