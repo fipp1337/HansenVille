@@ -1,8 +1,8 @@
 package com.hansenvillage.hansenapp.controller;
 
 import com.hansenvillage.hansenapp.dto.PoolBookingResponse;
-import com.hansenvillage.hansenapp.dto.PoolSessionRequest;
 import com.hansenvillage.hansenapp.dto.PoolPublishWeekScheduleRequest;
+import com.hansenvillage.hansenapp.dto.PoolSessionRequest;
 import com.hansenvillage.hansenapp.dto.PoolSessionResponse;
 import com.hansenvillage.hansenapp.entity.PoolSession;
 import com.hansenvillage.hansenapp.mapper.PoolSessionMapper;
@@ -12,15 +12,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-
-import static org.springframework.boot.origin.OriginTrackedValue.of;
 
 @RestController
 @RequestMapping("/api/pool/session")

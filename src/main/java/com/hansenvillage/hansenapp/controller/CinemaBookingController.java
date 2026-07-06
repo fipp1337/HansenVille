@@ -3,12 +3,8 @@ package com.hansenvillage.hansenapp.controller;
 import com.hansenvillage.hansenapp.dto.CinemaBookingRequest;
 import com.hansenvillage.hansenapp.dto.CinemaBookingResponse;
 import com.hansenvillage.hansenapp.entity.CinemaBooking;
-import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
-import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.mapper.CinemaBookingMapper;
-import com.hansenvillage.hansenapp.security.SecurityUtils;
 import com.hansenvillage.hansenapp.service.CinemaBookingService;
-import com.hansenvillage.hansenapp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/cinema/booking")
 @RequiredArgsConstructor
