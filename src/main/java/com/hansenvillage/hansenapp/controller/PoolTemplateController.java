@@ -5,6 +5,7 @@ import com.hansenvillage.hansenapp.dto.PoolTemplateRequest;
 import com.hansenvillage.hansenapp.service.PoolTemplateService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,16 +17,14 @@ public class PoolTemplateController {
     private final PoolTemplateService poolTemplateService;
 
     @PostMapping
-    // @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> createTemplate(@Valid @RequestBody PoolTemplateRequest request) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void createTemplate(@Valid @RequestBody PoolTemplateRequest request) {
         poolTemplateService.create(request);
-        return ResponseEntity.ok("Pool templates successfully created");
     }
 
     @PostMapping("/generate")
-    // @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> generateSchedule(@Valid @RequestBody PoolGenerateScheduleRequest request) {
+    @ResponseStatus(HttpStatus.OK)
+    public void generateSchedule(@Valid @RequestBody PoolGenerateScheduleRequest request) {
         poolTemplateService.generate(request.getStartDate(), request.getEndDate());
-        return ResponseEntity.ok("Schedule successfully generated from " + request.getStartDate() + " to " + request.getEndDate());
     }
 }

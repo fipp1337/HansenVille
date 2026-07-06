@@ -2,6 +2,7 @@ package com.hansenvillage.hansenapp.mapper;
 
 import com.hansenvillage.hansenapp.dto.PoolSessionRequest;
 import com.hansenvillage.hansenapp.dto.PoolPublishWeekScheduleRequest;
+import com.hansenvillage.hansenapp.dto.PoolSessionResponse;
 import com.hansenvillage.hansenapp.dto.PoolSessionSlotsRequest;
 import com.hansenvillage.hansenapp.entity.PoolSession;
 import com.hansenvillage.hansenapp.entity.SessionStatus;
@@ -52,4 +53,7 @@ public interface PoolSessionMapper {
     @Mapping(target = "endTime", source = "slot.endTime")
     @Mapping(target = "maxCapacity", source = "slot.maxCapacity")
     PoolSession toEntity(PoolSessionSlotsRequest slot, LocalDate date);
+
+    List<PoolSessionResponse> toResponseList(List<PoolSession> entities);
+    PoolSessionResponse toResponse(PoolSession entity);
 }

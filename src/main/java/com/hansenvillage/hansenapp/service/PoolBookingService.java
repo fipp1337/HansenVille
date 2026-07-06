@@ -25,10 +25,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -113,6 +110,9 @@ public class PoolBookingService {
     }
 
     public List<PoolBooking> getBookingsByFamilyId(UUID familyId) {
+        if (!SecurityUtils.isAdmin() && !SecurityUtils.currentFamilyId().equals(familyId)) {
+            throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
+        }
         return poolBookingRepository.findByFamilyId(familyId);
     }
 
@@ -156,6 +156,13 @@ public class PoolBookingService {
             throw FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, sessionId);
         }
 
-        return poolBookingRepository.findBookingDetailsBySessionId(sessionId);
+        List<PoolBookingResponse> details = poolBookingRepository.findBookingDetailsBySessionId(sessionId);
+
+        return details.stream()
+                .sorted(Comparator.comparing(
+                        PoolBookingResponse::getUserAge,
+                        Comparator.nullsLast(Comparator.naturalOrder())
+                ))
+                .toList();
     }
 }
