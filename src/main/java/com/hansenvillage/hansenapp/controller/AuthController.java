@@ -4,7 +4,6 @@ import com.hansenvillage.hansenapp.dto.*;
 import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.mapper.FamilyMapper;
 import com.hansenvillage.hansenapp.service.AuthService;
-import com.hansenvillage.hansenapp.service.FamilyService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +14,7 @@ public class AuthController {
     private final AuthService authService;
     private final FamilyMapper familyMapper;
 
-    public AuthController(AuthService authService, FamilyService familyService, FamilyMapper familyMapper) {
+    public AuthController(AuthService authService, FamilyMapper familyMapper) {
         this.authService = authService;
         this.familyMapper = familyMapper;
     }

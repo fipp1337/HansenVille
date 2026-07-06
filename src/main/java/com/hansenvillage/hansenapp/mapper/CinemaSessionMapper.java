@@ -1,10 +1,14 @@
 package com.hansenvillage.hansenapp.mapper;
 
-import com.hansenvillage.hansenapp.dto.*;
+import com.hansenvillage.hansenapp.dto.CinemaPublishWeekScheduleRequest;
+import com.hansenvillage.hansenapp.dto.CinemaSessionRequest;
+import com.hansenvillage.hansenapp.dto.CinemaSessionResponse;
+import com.hansenvillage.hansenapp.dto.CinemaSessionSlotRequest;
 import com.hansenvillage.hansenapp.entity.CinemaSession;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+
 import java.time.LocalDate;
 import java.util.List;
 

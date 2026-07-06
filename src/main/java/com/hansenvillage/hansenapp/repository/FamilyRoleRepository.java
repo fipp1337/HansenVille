@@ -1,12 +1,10 @@
 package com.hansenvillage.hansenapp.repository;
 
-import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.entity.FamilyRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository

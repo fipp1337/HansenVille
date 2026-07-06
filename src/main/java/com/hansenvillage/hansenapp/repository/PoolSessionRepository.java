@@ -3,13 +3,10 @@ package com.hansenvillage.hansenapp.repository;
 import com.hansenvillage.hansenapp.entity.PoolSession;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import jakarta.persistence.LockModeType;
-import org.springframework.data.jpa.repository.Lock;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository

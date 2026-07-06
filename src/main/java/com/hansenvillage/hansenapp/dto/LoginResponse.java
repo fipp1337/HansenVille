@@ -1,6 +1,5 @@
 package com.hansenvillage.hansenapp.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
