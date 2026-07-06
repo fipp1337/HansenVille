@@ -3,7 +3,9 @@ package com.hansenvillage.hansenapp.controller;
 import com.hansenvillage.hansenapp.dto.PoolBookingResponse;
 import com.hansenvillage.hansenapp.dto.PoolSessionRequest;
 import com.hansenvillage.hansenapp.dto.PoolPublishWeekScheduleRequest;
+import com.hansenvillage.hansenapp.dto.PoolSessionResponse;
 import com.hansenvillage.hansenapp.entity.PoolSession;
+import com.hansenvillage.hansenapp.mapper.PoolSessionMapper;
 import com.hansenvillage.hansenapp.service.PoolBookingService;
 import com.hansenvillage.hansenapp.service.PoolSessionService;
 import jakarta.validation.Valid;
@@ -21,50 +23,45 @@ import java.util.UUID;
 import static org.springframework.boot.origin.OriginTrackedValue.of;
 
 @RestController
-@RequestMapping("/api/session")
+@RequestMapping("/api/pool/session")
 @RequiredArgsConstructor
 public class PoolSessionController {
     private final PoolSessionService poolSessionService;
     private final PoolBookingService poolBookingService;
+    private final PoolSessionMapper poolSessionMapper;
+
     @GetMapping("/week")
-    public List<PoolSession> getWeekSchedule(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                                                 LocalDate weekStart) {
-        return poolSessionService.getWeekSchedule(weekStart);
-        }
+    public List<PoolSessionResponse> getWeekSchedule(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStart) {
+        List<PoolSession> schedule = poolSessionService.getWeekSchedule(weekStart);
+        return poolSessionMapper.toResponseList(schedule);
+    }
 
     @PostMapping
-    public ResponseEntity<List<PoolSession>> create(@Valid @RequestBody PoolPublishWeekScheduleRequest request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public List<PoolSessionResponse> create(@Valid @RequestBody PoolPublishWeekScheduleRequest request) {
         List<PoolSession> sessions = poolSessionService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(sessions);
+        return poolSessionMapper.toResponseList(sessions);
     }
 
-
-//    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/bookings/{id}")
-    public ResponseEntity<List<PoolBookingResponse>> getBooksBySession(@PathVariable("id") UUID id) {
-        List<PoolBookingResponse> details = poolBookingService.getBookingDetailsForSession(id);
-
-        List<PoolBookingResponse> sortedDetails = details.stream()
-                .sorted(Comparator.comparingInt(PoolBookingResponse::getUserAge))
-                .toList();
-        return ResponseEntity.ok(sortedDetails);
+    public List<PoolBookingResponse> getBooksBySession(@PathVariable("id") UUID id) {
+        return poolBookingService.getBookingDetailsForSession(id);
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<PoolSession> getSessionInfoById(@PathVariable UUID id) {
+    @GetMapping("/{id}")
+    public PoolSessionResponse getSessionInfoById(@PathVariable UUID id) {
         PoolSession session = poolSessionService.findById(id);
-        return ResponseEntity.ok(session);
+        return poolSessionMapper.toResponse(session);
     }
 
     @PutMapping("/{id}")
-//    @PreAuthorize("hasRole('ADMIN')")
-    public PoolSession update(@PathVariable UUID id, @Valid @RequestBody PoolSessionRequest request) {
-        return poolSessionService.update(id, request);
+    public PoolSessionResponse update(@PathVariable UUID id, @Valid @RequestBody PoolSessionRequest request) {
+        PoolSession updated = poolSessionService.update(id, request);
+        return poolSessionMapper.toResponse(updated);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-//    @PreAuthorize("hasRole('ADMIN')")
     public void delete(@PathVariable UUID id) {
         poolSessionService.delete(id);
     }
