@@ -2,7 +2,7 @@ package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.PoolTemplateRequest;
 import com.hansenvillage.hansenapp.entity.PoolSession;
-import com.hansenvillage.hansenapp.entity.PoolSessionStatus;
+import com.hansenvillage.hansenapp.entity.SessionStatus;
 import com.hansenvillage.hansenapp.entity.PoolTemplate;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
@@ -95,7 +95,7 @@ class PoolTemplateServiceTest {
         PoolSession savedSession = sessionCaptor.getValue();
         assertEquals(monday, savedSession.getSessionDate());
         assertEquals(LocalTime.of(9, 0), savedSession.getStartTime());
-        assertEquals(PoolSessionStatus.ACTIVE, savedSession.getStatus());
+        assertEquals(SessionStatus.ACTIVE, savedSession.getStatus());
         assertEquals(15, savedSession.getMaxCapacity());
         assertEquals(0, savedSession.getBookedCount());
     }

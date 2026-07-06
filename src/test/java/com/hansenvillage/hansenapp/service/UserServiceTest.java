@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,21 +33,28 @@ class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-
     @Test
     void addNewMember_ShouldSaveMemberWithCurrentFamilyId() {
+
         AddMemberRequest request = new AddMemberRequest();
         User mappedUser = new User();
         User savedUser = new User();
         UUID mockFamilyId = UUID.randomUUID();
 
+
+        mappedUser.setFamilyId(mockFamilyId);
+
         when(userMapper.toEntity(request)).thenReturn(mappedUser);
+
+        when(familyRepository.incrementMemberCount(mockFamilyId)).thenReturn(1);
         when(userRepository.save(mappedUser)).thenReturn(savedUser);
 
         try (MockedStatic<SecurityUtils> mockedSecurity = mockStatic(SecurityUtils.class)) {
             mockedSecurity.when(SecurityUtils::currentFamilyId).thenReturn(mockFamilyId);
 
+
             User result = userService.addNewMember(request);
+
 
             assertNotNull(result);
             assertEquals(mockFamilyId, mappedUser.getFamilyId());
@@ -56,30 +62,32 @@ class UserServiceTest {
         }
     }
 
-
     @Test
     void updateUser_ShouldModifyNameAndSave_WhenUserExists() {
-        // --- ARRANGE ---
+
         UUID userId = UUID.randomUUID();
-        String newName = "Дмитрий";
+        String newName = "Dmitry";
         User existingUser = new User();
-        existingUser.setName("Старое Имя");
+        existingUser.setName("Old name");
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
         when(userRepository.save(existingUser)).thenReturn(existingUser);
 
+
         User result = userService.updateUser(userId, newName);
+
 
         assertNotNull(result);
         assertEquals(newName, result.getName());
-
         verify(userRepository, times(1)).save(existingUser);
     }
 
     @Test
     void updateUser_ShouldThrowException_WhenUserDoesNotExist() {
+
         UUID userId = UUID.randomUUID();
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
 
         FamilyException exception = assertThrows(FamilyException.class, () -> {
             userService.updateUser(userId, "Имя");
@@ -89,6 +97,7 @@ class UserServiceTest {
 
     @Test
     void getFamilyMembers_ShouldReturnResponses_WhenFamilyExists() {
+
         UUID familyId = UUID.randomUUID();
         List<User> members = List.of(new User(), new User());
         List<UserResponse> expectedResponses = List.of(new UserResponse(), new UserResponse());
@@ -97,7 +106,9 @@ class UserServiceTest {
         when(userRepository.findByFamilyId(familyId)).thenReturn(members);
         when(userMapper.toResponse(members)).thenReturn(expectedResponses);
 
+
         List<UserResponse> actualResponses = userService.getFamilyMembers(familyId);
+
 
         assertNotNull(actualResponses);
         assertEquals(2, actualResponses.size());
@@ -106,8 +117,10 @@ class UserServiceTest {
 
     @Test
     void getFamilyMembers_ShouldThrowException_WhenFamilyDoesNotExist() {
+
         UUID familyId = UUID.randomUUID();
         when(familyRepository.existsById(familyId)).thenReturn(false);
+
 
         FamilyException exception = assertThrows(FamilyException.class, () -> {
             userService.getFamilyMembers(familyId);
@@ -116,22 +129,34 @@ class UserServiceTest {
         verify(userRepository, never()).findByFamilyId(any());
     }
 
-
     @Test
     void removeMember_ShouldDeleteUser_WhenUserExists() {
+
         UUID userId = UUID.randomUUID();
         User user = new User();
+        UUID mockFamilyId = UUID.randomUUID();
+
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        userService.removeMember(userId);
+        when(familyRepository.decrementMemberCount(mockFamilyId)).thenReturn(1);
 
-        verify(userRepository, times(1)).delete(user);
+        try (MockedStatic<SecurityUtils> mockedSecurity = mockStatic(SecurityUtils.class)) {
+            mockedSecurity.when(SecurityUtils::currentFamilyId).thenReturn(mockFamilyId);
+
+
+            userService.removeMember(userId);
+
+
+            verify(userRepository, times(1)).delete(user);
+        }
     }
 
     @Test
     void removeMember_ShouldThrowException_WhenUserNotFound() {
+
         UUID userId = UUID.randomUUID();
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
 
         FamilyException exception = assertThrows(FamilyException.class, () -> {
             userService.removeMember(userId);

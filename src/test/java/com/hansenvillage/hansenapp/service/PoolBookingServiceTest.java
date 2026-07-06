@@ -146,10 +146,9 @@ class PoolBookingServiceTest {
 
         when(poolBookingRepository.findById(bookingId)).thenReturn(Optional.of(expectedBooking));
 
-        Optional<PoolBooking> result = poolBookingService.getBookById(bookingId);
+        PoolBooking result = poolBookingService.getBookingById(bookingId);
 
-        assertTrue(result.isPresent());
-        assertEquals(bookingId, result.get().getId());
+        assertEquals(bookingId, result.getId());
 
         verify(poolBookingRepository, times(1)).findById(bookingId);
     }
