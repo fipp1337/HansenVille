@@ -11,11 +11,11 @@ import java.util.List;
 
 @Getter
 @Setter
-public class PoolDaysScheduleRequest {
+public class CinemaDaysScheduleRequest {
 
     @NotNull
     private LocalDate sessionDate;
     @NotEmpty
     @Valid
-    private List<PoolSessionSlotsRequest> sessions;
+    private List<CinemaSessionSlotRequest> sessions;
 }

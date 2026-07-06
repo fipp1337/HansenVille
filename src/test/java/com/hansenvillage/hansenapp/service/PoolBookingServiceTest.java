@@ -206,7 +206,6 @@ class PoolBookingServiceTest {
 
     @Test
     void deleteBooking_ShouldDecreaseBookedCountAndDelete_WhenAdminDeletes() {
-        // --- ARRANGE ---
         UUID bookingId = UUID.randomUUID();
         UUID sessionId = UUID.randomUUID();
 
@@ -329,4 +328,3 @@ class PoolBookingServiceTest {
         }
     }
 }
-

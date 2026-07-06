@@ -13,4 +13,3 @@ CREATE TABLE pool_sessions
     booked_count INT DEFAULT 0,
     version INT DEFAULT 0 NOT NULL
 );
-
