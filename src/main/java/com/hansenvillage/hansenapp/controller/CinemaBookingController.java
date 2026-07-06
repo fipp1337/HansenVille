@@ -1,9 +1,11 @@
 package com.hansenvillage.hansenapp.controller;
 
 import com.hansenvillage.hansenapp.dto.CinemaBookingRequest;
+import com.hansenvillage.hansenapp.dto.CinemaBookingResponse;
 import com.hansenvillage.hansenapp.entity.CinemaBooking;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
+import com.hansenvillage.hansenapp.mapper.CinemaBookingMapper;
 import com.hansenvillage.hansenapp.security.SecurityUtils;
 import com.hansenvillage.hansenapp.service.CinemaBookingService;
 import com.hansenvillage.hansenapp.service.UserService;
@@ -14,51 +16,48 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-
 @RestController
 @RequestMapping("/api/cinema/booking")
 @RequiredArgsConstructor
 public class CinemaBookingController {
 
-    private final UserService userService;
     private final CinemaBookingService cinemaBookingService;
+    private final CinemaBookingMapper cinemaBookingMapper;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-//    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public CinemaBooking createBooking(@Valid @RequestBody CinemaBookingRequest request) {
-        return cinemaBookingService.book(request);
+    public CinemaBookingResponse createBooking(@Valid @RequestBody CinemaBookingRequest request) {
+        CinemaBooking booking = cinemaBookingService.book(request);
+        return cinemaBookingMapper.toResponse(booking);
     }
 
     @GetMapping("/{id}")
-//    @PreAuthorize("hasRole('ADMIN')")
-    public CinemaBooking getBooking(@PathVariable UUID id) {
-        return cinemaBookingService.getBookingById(id);
+    public CinemaBookingResponse getBooking(@PathVariable UUID id) {
+        CinemaBooking booking = cinemaBookingService.getBookingById(id);
+        return cinemaBookingMapper.toResponse(booking);
     }
 
     @GetMapping("/family/{familyId}")
-    public List<CinemaBooking> getBookingsByFamily(@PathVariable UUID familyId) {
-        if (!SecurityUtils.isAdmin() && !SecurityUtils.currentFamilyId().equals(familyId)) {
-            throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
-        }
-        return cinemaBookingService.getBookingsByFamilyId(familyId);
+    public List<CinemaBookingResponse> getBookingsByFamily(@PathVariable UUID familyId) {
+        List<CinemaBooking> bookings = cinemaBookingService.getBookingsByFamilyId(familyId);
+        return cinemaBookingMapper.toResponseList(bookings);
     }
 
     @GetMapping("/user/{userId}")
-    public List<CinemaBooking> getBookingsByUser(@PathVariable UUID userId) {
-        return cinemaBookingService.getBookingsByUserId(userId);
+    public List<CinemaBookingResponse> getBookingsByUser(@PathVariable UUID userId) {
+        List<CinemaBooking> bookings = cinemaBookingService.getBookingsByUserId(userId);
+        return cinemaBookingMapper.toResponseList(bookings);
     }
 
     @GetMapping
-//    @PreAuthorize("hasAnyRole('ADMIN')")
-    public List<CinemaBooking> getAllBookings() {
-        return cinemaBookingService.getAllBookings();
+    public List<CinemaBookingResponse> getAllBookings() {
+        List<CinemaBooking> bookings = cinemaBookingService.getAllBookings();
+        return cinemaBookingMapper.toResponseList(bookings);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-//    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public void deleteBooking (@PathVariable UUID id) {
+    public void deleteBooking(@PathVariable UUID id) {
         cinemaBookingService.deleteBooking(id);
     }
 }

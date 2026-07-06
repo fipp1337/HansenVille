@@ -13,12 +13,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthService authService;
-    private final FamilyService familyService;
     private final FamilyMapper familyMapper;
 
     public AuthController(AuthService authService, FamilyService familyService, FamilyMapper familyMapper) {
         this.authService = authService;
-        this.familyService = familyService;
         this.familyMapper = familyMapper;
     }
 
