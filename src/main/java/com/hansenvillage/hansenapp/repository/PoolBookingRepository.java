@@ -9,12 +9,11 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
-
 import java.util.UUID;
 
 @Repository
 public interface PoolBookingRepository extends JpaRepository<PoolBooking, UUID> {
-    boolean existsByUserIdAndPoolSessionId(UUID userId, UUID poolSessionId); // Важная штука против повторной записи
+    boolean existsByUserIdAndPoolSessionId(UUID userId, UUID poolSessionId);
     List<PoolBooking> findByUserId(UUID id);
 
     @Query("SELECT pb FROM PoolBooking pb JOIN User u ON pb.userId = u.id WHERE u.familyId = :familyId")
@@ -33,11 +32,33 @@ public interface PoolBookingRepository extends JpaRepository<PoolBooking, UUID> 
 
     void deleteByPoolSessionId(UUID poolSessionId);
 
-    @Query("SELECT new com.hansenvillage.hansenapp.dto.PoolBookingResponse(" +
-            "b.id, b.poolSessionId, b.userId, u.name, u.age) " +
-            "FROM PoolBooking b " +
-            "JOIN User u ON b.userId = u.id " +
-            "WHERE b.poolSessionId = :sessionId")
-    List<PoolBookingResponse> findBookingDetailsBySessionId(@Param("sessionId") UUID sessionId);
     List<PoolBooking> findByPoolSessionId(UUID poolSessionId);
+    @Query("""
+        SELECT new com.hansenvillage.hansenapp.dto.PoolBookingResponse(
+            b.id, b.poolSessionId, b.userId, u.name, u.age
+        )
+        FROM PoolBooking b
+        JOIN User u ON b.userId = u.id
+        WHERE b.poolSessionId = :sessionId
+    """)
+    List<PoolBookingResponse> findBookingDetailsBySessionId(@Param("sessionId") UUID sessionId);
+
+    @Query("""
+        SELECT new com.hansenvillage.hansenapp.dto.PoolBookingResponse(
+            b.id, b.poolSessionId, b.userId, u.name, u.age
+        )
+        FROM PoolBooking b
+        JOIN User u ON b.userId = u.id
+        WHERE u.familyId = :familyId
+    """)
+    List<PoolBookingResponse> findResponsesByFamilyId(@Param("familyId") UUID familyId);
+
+    @Query("""
+        SELECT new com.hansenvillage.hansenapp.dto.PoolBookingResponse(
+            b.id, b.poolSessionId, b.userId, u.name, u.age
+        )
+        FROM PoolBooking b
+        JOIN User u ON b.userId = u.id
+    """)
+    List<PoolBookingResponse> findAllResponses();
 }

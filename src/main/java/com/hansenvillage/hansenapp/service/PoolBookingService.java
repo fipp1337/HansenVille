@@ -42,7 +42,7 @@ public class PoolBookingService {
             maxAttempts = 3,
             backoff = @Backoff(delay = 100))
     @Transactional
-    public PoolBooking book(PoolBookingRequest request) {
+    public PoolBookingResponse book(PoolBookingRequest request) {
         PoolSession session = poolSessionRepository.findById(request.getPoolSessionId())
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND));
 
@@ -87,33 +87,41 @@ public class PoolBookingService {
         poolSessionRepository.save(session);
 
         PoolBooking poolBooking = poolBookingMapper.toEntity(request);
-        return poolBookingRepository.save(poolBooking);
+        PoolBooking savedBooking = poolBookingRepository.save(poolBooking);
+        return poolBookingMapper.toResponse(savedBooking, user);
     }
 
-    public PoolBooking getBookingById(UUID id) {
-        return poolBookingRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND));
+    public PoolBookingResponse getBookingById(UUID id) {
+        PoolBooking booking = poolBookingRepository.findById(id)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND, id));
+        User user = userRepository.findById(booking.getUserId())
+                .orElse(new User());
+        return poolBookingMapper.toResponse(booking, user);
     }
 
-    public List<PoolBooking> getAllBookings() {
-        return poolBookingRepository.findAll();
+    public List<PoolBookingResponse> getAllBookings() {
+        return poolBookingRepository.findAllResponses();
     }
 
-    public List<PoolBooking> getBookingsByUserId(UUID userId) {
+    public List<PoolBookingResponse> getBookingsByUserId(UUID userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, userId));
+
         if (!SecurityUtils.isAdmin() && !Objects.equals(user.getFamilyId(), SecurityUtils.currentFamilyId())) {
             throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
         }
 
-        return poolBookingRepository.findByUserId(userId);
+        return poolBookingRepository.findByUserId(userId).stream()
+                .map(booking -> poolBookingMapper.toResponse(booking, user))
+                .toList();
     }
 
-    public List<PoolBooking> getBookingsByFamilyId(UUID familyId) {
-        if (!SecurityUtils.isAdmin() && !SecurityUtils.currentFamilyId().equals(familyId)) {
+    public List<PoolBookingResponse> getBookingsByFamilyId(UUID familyId) {
+        if (!SecurityUtils.isAdmin() && !Objects.equals(familyId, SecurityUtils.currentFamilyId())) {
             throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
         }
-        return poolBookingRepository.findByFamilyId(familyId);
+
+        return poolBookingRepository.findResponsesByFamilyId(familyId);
     }
 
     @Retryable(
@@ -156,19 +164,13 @@ public class PoolBookingService {
             throw FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, sessionId);
         }
 
-        // Достаем сущности
-        List<PoolBooking> bookings = poolBookingRepository.findByPoolSessionId(sessionId);
+        List<PoolBookingResponse> details = poolBookingRepository.findBookingDetailsBySessionId(sessionId);
 
-        // Маппер сам подтянет имена и возраст для всего списка
-        List<PoolBookingResponse> responses = poolBookingMapper.toResponseList(bookings);
-
-        // Только сортируем готовые DTO
-        return responses.stream()
+        return details.stream()
                 .sorted(Comparator.comparing(
                         PoolBookingResponse::getUserAge,
                         Comparator.nullsLast(Comparator.naturalOrder())
                 ))
                 .toList();
     }
-
 }

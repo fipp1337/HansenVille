@@ -1,6 +1,7 @@
 package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.PoolBookingRequest;
+import com.hansenvillage.hansenapp.dto.PoolBookingResponse;
 import com.hansenvillage.hansenapp.entity.PoolBooking;
 import com.hansenvillage.hansenapp.entity.PoolSession;
 import com.hansenvillage.hansenapp.entity.User;
@@ -42,11 +43,10 @@ class PoolBookingServiceTest {
     private PoolBookingMapper poolBookingMapper;
 
     @InjectMocks
-    PoolBookingService poolBookingService;
+    private PoolBookingService poolBookingService;
 
     @Test
     void book_ShouldThrowException_WhenOutOfTickets() {
-        // --- ARRANGE ---
         UUID userId = UUID.randomUUID();
         UUID familyId = UUID.randomUUID();
         UUID sessionId = UUID.randomUUID();
@@ -61,7 +61,6 @@ class PoolBookingServiceTest {
 
         PoolSession session = new PoolSession();
         session.setId(sessionId);
-
         session.setSessionDate(LocalDate.now().plusDays(1));
         session.setStartTime(LocalTime.of(12, 0));
         session.setBookedCount(0);
@@ -70,7 +69,6 @@ class PoolBookingServiceTest {
         when(poolSessionRepository.findById(sessionId)).thenReturn(Optional.of(session));
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(poolBookingRepository.existsByUserIdAndPoolSessionId(userId, sessionId)).thenReturn(false);
-
         when(userRepository.countByFamilyId(familyId)).thenReturn(3);
         when(poolBookingRepository.countBookingsForFamilyInWeek(eq(familyId), any(), any())).thenReturn(6L);
 
@@ -82,7 +80,6 @@ class PoolBookingServiceTest {
             });
 
             assertEquals(FamilyErrorCode.OUT_OF_TICKETS, exception.getErrorCode());
-
             verify(poolSessionRepository, never()).save(any());
             verify(poolBookingRepository, never()).save(any());
         }
@@ -93,6 +90,7 @@ class PoolBookingServiceTest {
         UUID userId = UUID.randomUUID();
         UUID familyId = UUID.randomUUID();
         UUID sessionId = UUID.randomUUID();
+        UUID bookingId = UUID.randomUUID();
 
         PoolBookingRequest request = new PoolBookingRequest();
         request.setUserId(userId);
@@ -111,26 +109,30 @@ class PoolBookingServiceTest {
 
         PoolBooking initialBooking = new PoolBooking();
         PoolBooking savedBooking = new PoolBooking();
-        savedBooking.setId(UUID.randomUUID());
+        savedBooking.setId(bookingId);
+        savedBooking.setUserId(userId);
+
+        PoolBookingResponse expectedResponse = new PoolBookingResponse();
+        expectedResponse.setBookingId(bookingId);
 
         when(poolSessionRepository.findById(sessionId)).thenReturn(Optional.of(session));
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(poolBookingRepository.existsByUserIdAndPoolSessionId(userId, sessionId)).thenReturn(false);
-
         when(userRepository.countByFamilyId(familyId)).thenReturn(3);
         when(poolBookingRepository.countBookingsForFamilyInWeek(eq(familyId), any(), any())).thenReturn(2L);
-
         when(poolBookingMapper.toEntity(request)).thenReturn(initialBooking);
         when(poolBookingRepository.save(initialBooking)).thenReturn(savedBooking);
+
+        // Мокаем новый интерфейсный маппер с двумя аргументами
+        when(poolBookingMapper.toResponse(savedBooking, user)).thenReturn(expectedResponse);
 
         try (MockedStatic<SecurityUtils> mockedSecurity = mockStatic(SecurityUtils.class)) {
             mockedSecurity.when(SecurityUtils::currentFamilyId).thenReturn(familyId);
 
-            PoolBooking result = poolBookingService.book(request);
+            PoolBookingResponse result = poolBookingService.book(request); // Тип изменен на PoolBookingResponse
 
             assertNotNull(result);
-            assertEquals(savedBooking.getId(), result.getId());
-
+            assertEquals(bookingId, result.getBookingId());
             assertEquals(4, session.getBookedCount());
 
             verify(poolSessionRepository, times(1)).save(session);
@@ -141,28 +143,41 @@ class PoolBookingServiceTest {
     @Test
     void getBookingById_ShouldReturnBooking_WhenBookingExists() {
         UUID bookingId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
         PoolBooking expectedBooking = new PoolBooking();
         expectedBooking.setId(bookingId);
+        expectedBooking.setUserId(userId);
+
+        User mockUser = new User();
+        mockUser.setId(userId);
+
+        PoolBookingResponse expectedResponse = new PoolBookingResponse();
+        expectedResponse.setBookingId(bookingId);
 
         when(poolBookingRepository.findById(bookingId)).thenReturn(Optional.of(expectedBooking));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+        when(poolBookingMapper.toResponse(expectedBooking, mockUser)).thenReturn(expectedResponse);
 
-        PoolBooking result = poolBookingService.getBookingById(bookingId);
+        PoolBookingResponse result = poolBookingService.getBookingById(bookingId); // Тип изменен на PoolBookingResponse
 
-        assertEquals(bookingId, result.getId());
-
+        assertNotNull(result);
+        assertEquals(bookingId, result.getBookingId());
         verify(poolBookingRepository, times(1)).findById(bookingId);
     }
 
     @Test
     void getAllBookings_ShouldReturnListOfBookings() {
-        List<PoolBooking> mockBookings = List.of(new PoolBooking(), new PoolBooking());
-        when(poolBookingRepository.findAll()).thenReturn(mockBookings);
+        List<PoolBookingResponse> mockResponses = List.of(new PoolBookingResponse(), new PoolBookingResponse());
 
-        List<PoolBooking> result = poolBookingService.getAllBookings();
+        // Тест перенаправлен на новый производительный метод репозитория
+        when(poolBookingRepository.findAllResponses()).thenReturn(mockResponses);
+
+        List<PoolBookingResponse> result = poolBookingService.getAllBookings();
 
         assertNotNull(result);
         assertEquals(2, result.size());
-        verify(poolBookingRepository, times(1)).findAll();
+        verify(poolBookingRepository, times(1)).findAllResponses();
     }
 
     @Test
@@ -177,30 +192,40 @@ class PoolBookingServiceTest {
         PoolBooking booking = new PoolBooking();
         List<PoolBooking> expectedBookings = List.of(booking);
 
+        PoolBookingResponse response = new PoolBookingResponse();
+
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
         when(poolBookingRepository.findByUserId(userId)).thenReturn(expectedBookings);
+        when(poolBookingMapper.toResponse(booking, testUser)).thenReturn(response);
 
         try (MockedStatic<SecurityUtils> mockedSecurity = mockStatic(SecurityUtils.class)) {
             mockedSecurity.when(SecurityUtils::isAdmin).thenReturn(false);
             mockedSecurity.when(SecurityUtils::currentFamilyId).thenReturn(familyId);
 
-            List<PoolBooking> result = poolBookingService.getBookingsByUserId(userId);
+            List<PoolBookingResponse> result = poolBookingService.getBookingsByUserId(userId); // Тип изменен
 
             assertEquals(1, result.size());
-            assertEquals(expectedBookings, result);
+            assertEquals(response, result.get(0));
         }
     }
 
     @Test
     void getBookingsByFamilyId_ShouldReturnFamilyBookings() {
         UUID familyId = UUID.randomUUID();
-        List<PoolBooking> mockBookings = List.of(new PoolBooking());
-        when(poolBookingRepository.findByFamilyId(familyId)).thenReturn(mockBookings);
+        List<PoolBookingResponse> mockResponses = List.of(new PoolBookingResponse());
 
-        List<PoolBooking> result = poolBookingService.getBookingsByFamilyId(familyId);
+        // Тест перенаправлен на новый метод с JPQL конструктором
+        when(poolBookingRepository.findResponsesByFamilyId(familyId)).thenReturn(mockResponses);
 
-        assertEquals(1, result.size());
-        verify(poolBookingRepository, times(1)).findByFamilyId(familyId);
+        try (MockedStatic<SecurityUtils> mockedSecurity = mockStatic(SecurityUtils.class)) {
+            mockedSecurity.when(SecurityUtils::isAdmin).thenReturn(false);
+            mockedSecurity.when(SecurityUtils::currentFamilyId).thenReturn(familyId);
+
+            List<PoolBookingResponse> result = poolBookingService.getBookingsByFamilyId(familyId); // Тип изменен
+
+            assertEquals(1, result.size());
+            verify(poolBookingRepository, times(1)).findResponsesByFamilyId(familyId);
+        }
     }
 
     @Test
@@ -227,9 +252,7 @@ class PoolBookingServiceTest {
             poolBookingService.deleteBooking(bookingId);
 
             assertEquals(4, session.getBookedCount());
-
             verify(poolSessionRepository).save(session);
-
             verify(poolBookingRepository).deleteById(bookingId);
         }
     }
@@ -238,12 +261,12 @@ class PoolBookingServiceTest {
     void getBookingDetailsForSession_ShouldThrowException_WhenSessionDoesNotExist() {
         UUID sessionId = UUID.randomUUID();
         when(poolSessionRepository.existsById(sessionId)).thenReturn(false);
+
         FamilyException exception = assertThrows(FamilyException.class, () -> {
             poolBookingService.getBookingDetailsForSession(sessionId);
         });
 
         assertEquals(FamilyErrorCode.POOL_SESSION_NOT_FOUND, exception.getErrorCode());
-
         verify(poolBookingRepository, never()).findBookingDetailsBySessionId(any());
     }
 
@@ -288,7 +311,6 @@ class PoolBookingServiceTest {
             });
 
             verify(poolSessionRepository, times(1)).save(session);
-
             verify(poolBookingRepository, times(1)).save(initialBooking);
         }
     }
@@ -320,7 +342,6 @@ class PoolBookingServiceTest {
             });
 
             assertEquals(FamilyErrorCode.TIME_OUT, exception.getErrorCode());
-
             assertEquals(5, session.getBookedCount());
             verify(poolSessionRepository, never()).save(any());
             verify(poolBookingRepository, never()).deleteById(any());
