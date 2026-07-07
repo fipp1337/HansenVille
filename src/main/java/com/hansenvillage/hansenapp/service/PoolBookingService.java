@@ -95,7 +95,7 @@ public class PoolBookingService {
         PoolBooking booking = poolBookingRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND, id));
         User user = userRepository.findById(booking.getUserId())
-                .orElse(new User());
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, id));
         return poolBookingMapper.toResponse(booking, user);
     }
 
