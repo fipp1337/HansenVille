@@ -128,6 +128,8 @@ public class BookingFlowE2ETest extends BaseE2ETest {
         assertThat(poolBookingRepository.findById(bookingId)).isEmpty();
         PoolSession sessionFromDbAfterDelete = poolSessionRepository.findById(poolSession.getId()).orElseThrow();
         assertThat(sessionFromDbAfterDelete.getBookedCount()).isEqualTo(0);
-    }
 
+        poolSessionRepository.deleteById(poolSession.getId());
+        assertThat(poolSessionRepository.findById(poolSession.getId())).isEmpty();
+    }
 }
