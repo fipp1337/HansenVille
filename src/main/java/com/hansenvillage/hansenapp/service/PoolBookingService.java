@@ -156,13 +156,19 @@ public class PoolBookingService {
             throw FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, sessionId);
         }
 
-        List<PoolBookingResponse> details = poolBookingRepository.findBookingDetailsBySessionId(sessionId);
+        // Достаем сущности
+        List<PoolBooking> bookings = poolBookingRepository.findByPoolSessionId(sessionId);
 
-        return details.stream()
+        // Маппер сам подтянет имена и возраст для всего списка
+        List<PoolBookingResponse> responses = poolBookingMapper.toResponseList(bookings);
+
+        // Только сортируем готовые DTO
+        return responses.stream()
                 .sorted(Comparator.comparing(
                         PoolBookingResponse::getUserAge,
                         Comparator.nullsLast(Comparator.naturalOrder())
                 ))
                 .toList();
     }
+
 }

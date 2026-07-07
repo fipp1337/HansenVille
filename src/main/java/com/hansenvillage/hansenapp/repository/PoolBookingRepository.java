@@ -39,4 +39,5 @@ public interface PoolBookingRepository extends JpaRepository<PoolBooking, UUID> 
             "JOIN User u ON b.userId = u.id " +
             "WHERE b.poolSessionId = :sessionId")
     List<PoolBookingResponse> findBookingDetailsBySessionId(@Param("sessionId") UUID sessionId);
+    List<PoolBooking> findByPoolSessionId(UUID poolSessionId);
 }
