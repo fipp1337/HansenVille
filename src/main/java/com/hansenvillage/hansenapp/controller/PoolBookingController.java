@@ -6,6 +6,7 @@ import com.hansenvillage.hansenapp.service.PoolBookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,6 +31,7 @@ public class PoolBookingController {
     }
 
     @GetMapping("/sessions/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
     public List<PoolBookingResponse> getBooksBySession(@PathVariable("id") UUID id) {
         return poolBookingService.getBookingDetailsForSession(id);
     }
