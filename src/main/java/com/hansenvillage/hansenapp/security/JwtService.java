@@ -1,5 +1,6 @@
 package com.hansenvillage.hansenapp.security;
 
+import com.hansenvillage.hansenapp.entity.AdminUser;
 import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.entity.Role;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
@@ -36,48 +37,22 @@ public class JwtService {
         this.refreshExpirationMs = refreshExpirationMs;
     }
 
+
     public String generateToken(Family family, List<Role> roles) {
-        try {
-            Date now = new Date();
-            List<String> roleNames = roles.stream().map(Role::name).toList();
-
-            JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                    .subject(String.valueOf(family.getId()))
-                    .claim("email", family.getEmail())
-                    .claim("roles", roleNames)
-                    .issueTime(now)
-                    .expirationTime(new Date(now.getTime() + expirationMs))
-                    .build();
-
-            SignedJWT signedJwt = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claims);
-            signedJwt.sign(new MACSigner(secret));
-            return signedJwt.serialize();
-        } catch (JOSEException e) {
-            throw new IllegalStateException("Failed to generate JWT", e);
-        }
+        return buildToken(String.valueOf(family.getId()), family.getEmail(), roles, expirationMs, "access");
     }
 
     public String generateRefreshToken(Family family, List<Role> roles) {
-        try {
-            Date now = new Date();
-            List<String> roleNames = roles.stream().map(Role::name).toList();
-
-            JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                    .subject(String.valueOf(family.getId()))
-                    .claim("email", family.getEmail())
-                    .claim("roles", roleNames)
-                    .claim("type", "refresh")
-                    .issueTime(now)
-                    .expirationTime(new Date(now.getTime() + refreshExpirationMs))
-                    .build();
-
-            SignedJWT signedJwt = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claims);
-            signedJwt.sign(new MACSigner(secret));
-            return signedJwt.serialize();
-        } catch (JOSEException e) {
-            throw new IllegalStateException("Failed to generate Refresh JWT", e);
-        }
+        return buildToken(String.valueOf(family.getId()), family.getEmail(), roles, refreshExpirationMs, "refresh");
     }
+
+//    public String generateAdminToken(AdminUser admin) {
+//        return buildToken(String.valueOf(admin.getId()), admin.getEmail(), admin.getRoles().stream().toList(), expirationMs, "access");
+//    }
+//
+//    public String generateAdminRefreshToken(AdminUser admin) {
+//        return buildToken(String.valueOf(admin.getId()), admin.getEmail(), admin.getRoles().stream().toList(), refreshExpirationMs, "refresh");
+//    }
 
     public SecurityFamily parseRefreshToken(String token) {
         try {
@@ -142,7 +117,28 @@ public class JwtService {
             throw FamilyException.of(FamilyErrorCode.INVALID_TOKEN);
         }
 
-
     }
 
+
+    private String buildToken(String subject, String email, List<Role> roles, long expiration, String type) {
+        try {
+            Date now = new Date();
+            List<String> roleNames = roles.stream().map(Role::name).toList();
+
+            JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                    .subject(subject)
+                    .claim("email", email)
+                    .claim("roles", roleNames)
+                    .claim("type", type)
+                    .issueTime(now)
+                    .expirationTime(new Date(now.getTime() + expiration))
+                    .build();
+
+            SignedJWT signedJwt = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claims);
+            signedJwt.sign(new MACSigner(secret));
+            return signedJwt.serialize();
+        } catch (JOSEException e) {
+            throw new IllegalStateException("Failed to generate JWT", e);
+        }
+    }
 }
