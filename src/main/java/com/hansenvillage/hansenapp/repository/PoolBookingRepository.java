@@ -75,4 +75,8 @@ public interface PoolBookingRepository extends JpaRepository<PoolBooking, UUID> 
           AND (s.sessionDate > CURRENT_DATE OR (s.sessionDate = CURRENT_DATE AND s.startTime > CURRENT_TIME))
     """)
     List<PoolBookingResponse> findFutureRegisteredByUserId(@Param("userId") UUID userId);
+
+    @Modifying
+    @Query("DELETE FROM PoolBooking b WHERE b.userId IN :userIds")
+    void deleteByUserIdIn(@Param("userIds") List<UUID> userIds);
 }

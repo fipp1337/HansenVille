@@ -8,6 +8,7 @@ import com.hansenvillage.hansenapp.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,14 +39,14 @@ public class AuthController {
     }
 
 //    @PreAuthorize("hasRole('SUPER_ADMIN')")
-//    @PostMapping("/admin/register")
-//    @ResponseStatus(HttpStatus.CREATED)
-//    public void registerAdminOrManager(@Valid @RequestBody AdminRegistrationRequest request) {
-//        adminService.registerAdminOrManager(request);
-//    }
-//
-//    @PostMapping("/admin/login")
-//    public LoginResponse adminLogin(@Valid @RequestBody LoginRequest request) {
-//        return adminService.loginAdmin(request);
-//    }
+    @PostMapping("/admin/register")
+    public ResponseEntity<String> registerAdmin(@RequestBody AdminRegistrationRequest request) {
+        adminService.registerAdmin(request);
+        return ResponseEntity.ok("Admin registered successfully");
+}
+
+    @PostMapping("/admin/login")
+    public LoginResponse adminLogin(@Valid @RequestBody LoginRequest request) {
+        return adminService.loginAdmin(request);
+    }
 }

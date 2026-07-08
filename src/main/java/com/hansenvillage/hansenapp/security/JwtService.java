@@ -46,13 +46,13 @@ public class JwtService {
         return buildToken(String.valueOf(family.getId()), family.getEmail(), roles, refreshExpirationMs, "refresh");
     }
 
-//    public String generateAdminToken(AdminUser admin) {
-//        return buildToken(String.valueOf(admin.getId()), admin.getEmail(), admin.getRoles().stream().toList(), expirationMs, "access");
-//    }
-//
-//    public String generateAdminRefreshToken(AdminUser admin) {
-//        return buildToken(String.valueOf(admin.getId()), admin.getEmail(), admin.getRoles().stream().toList(), refreshExpirationMs, "refresh");
-//    }
+    public String generateAdminToken(AdminUser admin) {
+        return buildToken(String.valueOf(admin.getId()), admin.getEmail(), admin.getRoles().stream().toList(), expirationMs, "access");
+    }
+
+    public String generateAdminRefreshToken(AdminUser admin) {
+        return buildToken(String.valueOf(admin.getId()), admin.getEmail(), admin.getRoles().stream().toList(), refreshExpirationMs, "refresh");
+    }
 
     public SecurityFamily parseRefreshToken(String token) {
         try {

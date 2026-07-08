@@ -4,6 +4,7 @@ import com.hansenvillage.hansenapp.entity.Role;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Set;
 @Data
 public class AdminRegistrationRequest {
@@ -12,5 +13,7 @@ public class AdminRegistrationRequest {
     @NotBlank
     private String password;
     @NotBlank
-    private Set<Role> roles;
+    private List<Role> roles;
+    @NotBlank
+    private String name;
 }
