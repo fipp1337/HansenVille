@@ -39,11 +39,6 @@ public class PoolSessionController {
         return poolSessionMapper.toResponseList(sessions);
     }
 
-    @GetMapping("/bookings/{id}")
-    public List<PoolBookingResponse> getBooksBySession(@PathVariable("id") UUID id) {
-        return poolBookingService.getBookingDetailsForSession(id);
-    }
-
     @GetMapping("/{id}")
     public PoolSessionResponse getSessionInfoById(@PathVariable UUID id) {
         PoolSession session = poolSessionService.findById(id);

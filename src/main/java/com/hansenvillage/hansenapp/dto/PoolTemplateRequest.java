@@ -10,7 +10,6 @@ import java.util.List;
 
 @Data
 public class PoolTemplateRequest {
-
     @NotNull
     private int dayOfWeek;
 

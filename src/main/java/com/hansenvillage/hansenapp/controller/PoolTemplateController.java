@@ -1,12 +1,15 @@
 package com.hansenvillage.hansenapp.controller;
 
 import com.hansenvillage.hansenapp.dto.PoolGenerateScheduleRequest;
-import com.hansenvillage.hansenapp.dto.PoolTemplateRequest;
+import com.hansenvillage.hansenapp.dto.PoolTemplateResponse;
+import com.hansenvillage.hansenapp.dto.PoolWeekTemplateRequest;
 import com.hansenvillage.hansenapp.service.PoolTemplateService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/pool/template")
@@ -17,8 +20,14 @@ public class PoolTemplateController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void createTemplate(@Valid @RequestBody PoolTemplateRequest request) {
-        poolTemplateService.create(request);
+    public void createTemplates(@Valid @RequestBody PoolWeekTemplateRequest request) {
+        poolTemplateService.createWeeklyTemplates(request);
+    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<PoolTemplateResponse> getTemplates() {
+        return poolTemplateService.getTemplates();
     }
 
     @PostMapping("/generate")
