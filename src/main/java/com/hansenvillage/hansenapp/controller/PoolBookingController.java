@@ -6,6 +6,7 @@ import com.hansenvillage.hansenapp.service.PoolBookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +30,12 @@ public class PoolBookingController {
         return poolBookingService.getBookingById(id);
     }
 
+    @GetMapping("/sessions/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
+    public List<PoolBookingResponse> getBooksBySession(@PathVariable("id") UUID id) {
+        return poolBookingService.getBookingDetailsForSession(id);
+    }
+
     @GetMapping("/family/{familyId}")
     public List<PoolBookingResponse> getBookingsByFamily(@PathVariable UUID familyId) {
         return poolBookingService.getBookingsByFamilyId(familyId);
@@ -39,10 +46,10 @@ public class PoolBookingController {
         return poolBookingService.getBookingsByUserId(userId);
     }
 
-    @GetMapping
-    public List<PoolBookingResponse> getAllBookings() {
-        return poolBookingService.getAllBookings();
-    }
+//    @GetMapping
+//    public List<PoolBookingResponse> getAllBookings() {
+//        return poolBookingService.getAllBookings();
+//    }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

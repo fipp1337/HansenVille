@@ -2,6 +2,8 @@ package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.PoolPublishWeekScheduleRequest;
 import com.hansenvillage.hansenapp.dto.PoolSessionRequest;
+import com.hansenvillage.hansenapp.entity.PoolBooking;
+import com.hansenvillage.hansenapp.entity.PoolBookingStatus;
 import com.hansenvillage.hansenapp.entity.PoolSession;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
@@ -61,6 +63,11 @@ public class PoolSessionService {
         if (!poolSessionRepository.existsById(id)) {
             throw FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, id);
         }
+        List<PoolBooking> bookings = poolBookingRepository.findByPoolSessionId(id);
+        for (PoolBooking booking : bookings) {
+            booking.setStatus(PoolBookingStatus.CANCELED_WITH_RETURN);
+        }
+        poolBookingRepository.saveAll(bookings);
         poolBookingRepository.deleteByPoolSessionId(id);
         poolSessionRepository.deleteById(id);
     }

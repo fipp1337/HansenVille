@@ -3,21 +3,22 @@ package com.hansenvillage.hansenapp.controller;
 import com.hansenvillage.hansenapp.dto.*;
 import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.mapper.FamilyMapper;
+import com.hansenvillage.hansenapp.service.AdminService;
 import com.hansenvillage.hansenapp.service.AuthService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
     private final FamilyMapper familyMapper;
+    private final AdminService adminService;
 
-    public AuthController(AuthService authService, FamilyMapper familyMapper) {
-        this.authService = authService;
-        this.familyMapper = familyMapper;
-    }
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
@@ -35,4 +36,16 @@ public class AuthController {
     public LoginResponse refresh(@Valid @RequestBody RefreshRequest request) {
         return authService.refreshToken(request);
     }
+
+//    @PreAuthorize("hasRole('SUPER_ADMIN')")
+//    @PostMapping("/admin/register")
+//    @ResponseStatus(HttpStatus.CREATED)
+//    public void registerAdminOrManager(@Valid @RequestBody AdminRegistrationRequest request) {
+//        adminService.registerAdminOrManager(request);
+//    }
+//
+//    @PostMapping("/admin/login")
+//    public LoginResponse adminLogin(@Valid @RequestBody LoginRequest request) {
+//        return adminService.loginAdmin(request);
+//    }
 }

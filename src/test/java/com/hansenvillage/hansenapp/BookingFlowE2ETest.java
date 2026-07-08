@@ -47,11 +47,13 @@ public class BookingFlowE2ETest extends BaseE2ETest {
     void shouldExecuteFullUserJourneySuccessfully() {
         String email = "admin@gmail.com";
         String password = "admin";
+        String phoneNumber = "+380959595089";
 
         FamilyRegistrationRequest familyRegistrationRequest = new FamilyRegistrationRequest();
         familyRegistrationRequest.setEmail(email);
         familyRegistrationRequest.setPassword(password);
         familyRegistrationRequest.setAddress("B12K9");
+        familyRegistrationRequest.setPhoneNumber(phoneNumber);
 
         FamilyRegistrationRequest.MemberRequest memberOne =  new FamilyRegistrationRequest.MemberRequest();
         memberOne.setName("Kirill");

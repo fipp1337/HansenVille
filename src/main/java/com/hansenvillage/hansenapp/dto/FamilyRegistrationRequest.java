@@ -22,6 +22,9 @@ public class FamilyRegistrationRequest {
     @NotBlank
     private String address;
 
+    @NotBlank
+    private String phoneNumber;
+
     @NotEmpty
     @Valid
     private List<MemberRequest> members;

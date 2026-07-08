@@ -23,6 +23,7 @@ public enum FamilyErrorCode {
     BOOKING_NOT_FOUND(HttpStatus.NOT_FOUND,"Booking not found"),
     INVALID_FAMILY(HttpStatus.BAD_REQUEST, "Invalid family"),
     TIME_OUT(HttpStatus.CONFLICT, "Time out"),
+    BOOKING_ALREADY_CANCELLED(HttpStatus.CONFLICT, "Book already has been canceled"),
 //    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "Comment not found: %s"),
 //    CART_NOT_FOUND(HttpStatus.NOT_FOUND, "Cart not found for user: %s"),
 //    WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "Wallet not found for user: %s"),
