@@ -29,4 +29,8 @@ public interface FamilyRepository extends JpaRepository<Family, UUID> {
             WHERE f.id = :familyId
             """)
     Integer decrementMemberCount(UUID familyId);
+
+    void deleteByEmail(String email);
+
+    void deleteByAddress(String address);
 }

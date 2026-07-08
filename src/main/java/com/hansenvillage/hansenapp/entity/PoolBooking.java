@@ -1,9 +1,6 @@
 package com.hansenvillage.hansenapp.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.UUID;
@@ -20,4 +17,7 @@ public class PoolBooking {
     private UUID userId;
 
     private UUID poolSessionId;
+
+    @Enumerated(EnumType.STRING)
+    private PoolBookingStatus status = PoolBookingStatus.REGISTERED;
 }

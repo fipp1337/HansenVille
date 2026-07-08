@@ -1,18 +1,13 @@
 package com.hansenvillage.hansenapp.service;
 
-import com.hansenvillage.hansenapp.dto.FamilyRegistrationRequest;
-import com.hansenvillage.hansenapp.dto.LoginRequest;
-import com.hansenvillage.hansenapp.dto.LoginResponse;
-import com.hansenvillage.hansenapp.dto.RefreshRequest;
-import com.hansenvillage.hansenapp.entity.Family;
-import com.hansenvillage.hansenapp.entity.FamilyRole;
-import com.hansenvillage.hansenapp.entity.Role;
-import com.hansenvillage.hansenapp.entity.User;
+import com.hansenvillage.hansenapp.dto.*;
+import com.hansenvillage.hansenapp.entity.*;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.mapper.FamilyMapper;
 import com.hansenvillage.hansenapp.mapper.FamilyRoleMapper;
 import com.hansenvillage.hansenapp.mapper.UserMapper;
+import com.hansenvillage.hansenapp.repository.AdminUserRepository;
 import com.hansenvillage.hansenapp.repository.FamilyRepository;
 import com.hansenvillage.hansenapp.repository.FamilyRoleRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
@@ -34,10 +29,10 @@ public class AuthService {
     private final FamilyRoleRepository familyRoleRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
-
     private final UserMapper userMapper;
     private final FamilyMapper familyMapper;
     private final FamilyRoleMapper familyRoleMapper;
+
 
     @Transactional
     public Family registerFamily(FamilyRegistrationRequest request) {
@@ -106,4 +101,6 @@ public class AuthService {
 
         return response;
     }
+
+
 }
