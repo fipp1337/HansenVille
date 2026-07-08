@@ -34,28 +34,28 @@ public class PoolSessionController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
+//    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
     public List<PoolSessionResponse> create(@Valid @RequestBody PoolPublishWeekScheduleRequest request) {
         List<PoolSession> sessions = poolSessionService.create(request);
         return poolSessionMapper.toResponseList(sessions);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
+//    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
     public PoolSessionResponse getSessionInfoById(@PathVariable UUID id) {
         PoolSession session = poolSessionService.findById(id);
         return poolSessionMapper.toResponse(session);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
+//    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
     public PoolSessionResponse update(@PathVariable UUID id, @Valid @RequestBody PoolSessionRequest request) {
         PoolSession updated = poolSessionService.update(id, request);
         return poolSessionMapper.toResponse(updated);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
+//    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id) {
         poolSessionService.delete(id);
