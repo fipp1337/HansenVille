@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface UserRepository extends JpaRepository<User, UUID> {
     int countByFamilyId(UUID familyId);
     List<User> findByFamilyId(UUID familyId);
+    void deleteByFamilyId(UUID familyId);
 }

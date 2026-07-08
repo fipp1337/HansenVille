@@ -9,6 +9,6 @@ import java.util.UUID;
 
 @Repository
 public interface FamilyRoleRepository extends JpaRepository<FamilyRole, UUID> {
-
+    void deleteByFamilyId(UUID familyId);
     Collection<FamilyRole> findByFamilyId(UUID id);
 }

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,7 +14,7 @@ import java.util.UUID;
 public interface FamilyRepository extends JpaRepository<Family, UUID> {
     Optional<Family> findByEmail(String email);
     boolean existsByEmail(String email);
-
+    List<Family> findByAddress(String address);
     @Modifying
     @Query("""
             UPDATE Family f

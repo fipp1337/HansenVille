@@ -4,9 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.Data;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "admin_users")
@@ -17,5 +15,8 @@ public class AdminUser {
     private UUID id;
     private String email;
     private String password;
-
+    private String name;
+    @Convert(converter = RoleListConverter.class)
+    @Column(name = "role")
+    private List<Role> roles = new ArrayList<>();
 }

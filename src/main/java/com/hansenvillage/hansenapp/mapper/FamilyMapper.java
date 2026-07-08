@@ -8,7 +8,7 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface FamilyMapper {
 
-//    @Mapping(target = "memberCount",
+    //    @Mapping(target = "memberCount",
 //            expression = "java(request.getMembers().size())")
     Family toEntity(FamilyRegistrationRequest request);
 
