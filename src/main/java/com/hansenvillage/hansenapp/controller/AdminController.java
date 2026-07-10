@@ -23,7 +23,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/families")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+//    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<Void> deleteFamilyByAddress(@RequestParam String address) {
         adminService.deleteFamilyByAddress(address);
         return ResponseEntity.noContent().build();

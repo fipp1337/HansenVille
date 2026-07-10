@@ -110,6 +110,11 @@ public class CinemaBookingService {
         CinemaBooking booking = cinemaBookingRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND));
 
+        User bookingUser = userRepository.findById(booking.getUserId())
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND));
+
+        SecurityUtils.assertOwner(bookingUser.getFamilyId());
+
         CinemaSession session = cinemaSessionRepository.findById(booking.getCinemaSessionId())
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND));
 

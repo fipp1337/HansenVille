@@ -32,6 +32,7 @@ public class AuthService {
     private final UserMapper userMapper;
     private final FamilyMapper familyMapper;
     private final FamilyRoleMapper familyRoleMapper;
+    private final PhoneService phoneService;
 
 
     @Transactional
@@ -42,6 +43,10 @@ public class AuthService {
 
         Family family = familyMapper.toEntity(request);
         family.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
+            family.setPhoneNumber(phoneService.validateAndFormatPhone(request.getPhoneNumber()));
+        }
 
         int memberCount = request.getMembers() != null ? request.getMembers().size() : 0;
         family.setMemberCount(memberCount);
@@ -101,6 +106,4 @@ public class AuthService {
 
         return response;
     }
-
-
 }

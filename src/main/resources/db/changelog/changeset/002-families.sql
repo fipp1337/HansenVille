@@ -6,7 +6,7 @@ CREATE TABLE families (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     password VARCHAR(255) NOT NULL,
     email    VARCHAR(255) NOT NULL unique,
-    address  VARCHAR(255) NOT NULL,
+    address  VARCHAR(255) NOT NULL unique,
     member_count INT NOT NULL,
     phone_number VARCHAR NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP

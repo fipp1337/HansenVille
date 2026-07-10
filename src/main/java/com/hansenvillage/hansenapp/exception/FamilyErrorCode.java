@@ -16,6 +16,7 @@ public enum FamilyErrorCode {
 //    PRODUCT_QUANTITY_EMPTY(HttpStatus.NOT_FOUND, "StockQuantity is empty or not enough: %s"),
 //    SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Session not found: %s"),
     OUT_OF_TICKETS(HttpStatus.NOT_ACCEPTABLE, "Not enough tickets"),
+    INVALID_PHONE_FORMAT(HttpStatus.CONFLICT, "Invalid phone number format"),
     NOT_YOUR_BOOKING(HttpStatus.NOT_ACCEPTABLE, "Not your booking"),
     TEMPLATE_NOT_FOUND(HttpStatus.NOT_FOUND, "Template not found: %s"),
     GYM_ALREADY_BOOKED(HttpStatus.CONFLICT, "Gym already booked"),
