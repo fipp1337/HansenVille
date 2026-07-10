@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class FamilyRegistrationRequest {
     private String address;
 
     @NotBlank
+//    @Pattern(regexp = "^\\+380\\d{9}$", message = "Phone number format: +380XXXXXXXXX")
     private String phoneNumber;
 
     @NotEmpty
