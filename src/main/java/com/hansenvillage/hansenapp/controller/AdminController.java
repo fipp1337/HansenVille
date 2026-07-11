@@ -1,7 +1,10 @@
 package com.hansenvillage.hansenapp.controller;
 
+import com.hansenvillage.hansenapp.dto.FamilyAdminResponse;
 import com.hansenvillage.hansenapp.entity.Family;
+import com.hansenvillage.hansenapp.mapper.FamilyMapper;
 import com.hansenvillage.hansenapp.service.AdminService;
+import com.hansenvillage.hansenapp.service.FamilyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,11 +17,13 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
+    private final FamilyMapper familyMapper;
 
     @GetMapping("/families/search")
-//    @PreAuthorize("hasAnyRole('MANAGER', 'SUPER_ADMIN')")
-    public ResponseEntity<List<Family>> findFamiliesByAddress(@RequestParam String address) {
-        return ResponseEntity.ok(adminService.findFamiliesByAddress(address));
+//    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
+    public ResponseEntity<List<FamilyAdminResponse>> findFamiliesByAddress(@RequestParam String address) {
+        List<Family> families = adminService.findFamiliesByAddress(address);
+        return ResponseEntity.ok(familyMapper.toAdminResponse(families));
     }
 
     @DeleteMapping("/families")

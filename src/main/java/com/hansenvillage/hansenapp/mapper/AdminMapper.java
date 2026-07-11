@@ -7,4 +7,5 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface AdminMapper {
     AdminUser toEntity(AdminRegistrationRequest request);
+
 }
