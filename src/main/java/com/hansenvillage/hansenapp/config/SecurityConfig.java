@@ -41,7 +41,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/register", "/error").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/error").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/admin/register", "/error").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/admin//login").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/admin//login").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
