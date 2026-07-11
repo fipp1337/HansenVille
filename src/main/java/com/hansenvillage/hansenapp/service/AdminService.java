@@ -43,10 +43,10 @@ public class AdminService {
     @Transactional
     public LoginResponse loginAdmin(LoginRequest request) {
         AdminUser admin = adminUserRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, request.getEmail()));
 
         if (!passwordEncoder.matches(request.getPassword(), admin.getPassword())) {
-            throw FamilyException.of(FamilyErrorCode.WRONG_PASSWORD);
+            throw FamilyException.of(FamilyErrorCode.WRONG_PASSWORD, request.getPassword());
         }
 
         String accessToken = jwtService.generateAdminToken(admin);

@@ -43,7 +43,7 @@ public class AuthService {
     @Transactional
     public Family registerFamily(FamilyRegistrationRequest request) {
         if (familyRepository.existsByEmail(request.getEmail())) {
-            throw FamilyException.of(FamilyErrorCode.EMAIL_ALREADY_EXISTS);
+            throw FamilyException.of(FamilyErrorCode.EMAIL_ALREADY_EXISTS, request.getEmail());
         }
 
         Family family = familyMapper.toEntity(request);
@@ -71,10 +71,10 @@ public class AuthService {
     @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
         Family family = familyRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.WRONG_EMAIL));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.WRONG_EMAIL, request.getEmail()));
 
         if (!passwordEncoder.matches(request.getPassword(), family.getPassword())) {
-            throw FamilyException.of(FamilyErrorCode.WRONG_PASSWORD);
+            throw FamilyException.of(FamilyErrorCode.WRONG_PASSWORD, request.getPassword());
         }
 
         List<Role> roles = familyRoleRepository.findByFamilyId(family.getId()).stream()
