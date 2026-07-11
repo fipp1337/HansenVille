@@ -1,5 +1,6 @@
 package com.hansenvillage.hansenapp.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -26,6 +27,7 @@ public class Family {
 //    @Pattern(regexp = "^\\+380\\d{9}$", message = "Phone number format: +380XXXXXXXXX")
     private String phoneNumber;
 
+    @JsonIgnore
     private String password;
 
     private String address;
