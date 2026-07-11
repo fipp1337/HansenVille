@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -89,6 +90,8 @@ public class PoolTemplateService {
 
     public List<PoolTemplateResponse> getTemplates() {
         return poolTemplateRepository.findAll().stream()
+                .sorted(Comparator.comparing(PoolTemplate::getDayOfWeek)
+                        .thenComparing(PoolTemplate::getStartTime))
                 .map(template -> {
                     PoolTemplateResponse response = new PoolTemplateResponse();
                     response.setId(template.getId());
