@@ -1,18 +1,15 @@
 package com.hansenvillage.hansenapp.controller;
 
-import com.hansenvillage.hansenapp.dto.PoolBookingResponse;
 import com.hansenvillage.hansenapp.dto.PoolPublishWeekScheduleRequest;
 import com.hansenvillage.hansenapp.dto.PoolSessionRequest;
 import com.hansenvillage.hansenapp.dto.PoolSessionResponse;
 import com.hansenvillage.hansenapp.entity.PoolSession;
 import com.hansenvillage.hansenapp.mapper.PoolSessionMapper;
-import com.hansenvillage.hansenapp.service.PoolBookingService;
 import com.hansenvillage.hansenapp.service.PoolSessionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;

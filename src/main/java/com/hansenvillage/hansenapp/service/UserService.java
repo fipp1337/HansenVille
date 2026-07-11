@@ -1,7 +1,6 @@
 package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.AddMemberRequest;
-import com.hansenvillage.hansenapp.dto.FamilyUpdateRequest;
 import com.hansenvillage.hansenapp.dto.UserResponse;
 import com.hansenvillage.hansenapp.dto.UserUpdateRequest;
 import com.hansenvillage.hansenapp.entity.Family;
@@ -18,8 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-
-import static com.hansenvillage.hansenapp.security.SecurityUtils.currentFamilyId;
 
 @Service
 @RequiredArgsConstructor

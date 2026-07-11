@@ -1,7 +1,6 @@
 package com.hansenvillage.hansenapp.dto;
 
 import com.hansenvillage.hansenapp.entity.PoolBookingStatus;
-import com.hansenvillage.hansenapp.entity.SessionStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;

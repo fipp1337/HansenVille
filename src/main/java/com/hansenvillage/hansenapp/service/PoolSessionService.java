@@ -8,10 +8,8 @@ import com.hansenvillage.hansenapp.entity.PoolSession;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.mapper.PoolSessionMapper;
-import com.hansenvillage.hansenapp.mapper.PoolTemplateMapper;
 import com.hansenvillage.hansenapp.repository.PoolBookingRepository;
 import com.hansenvillage.hansenapp.repository.PoolSessionRepository;
-import com.hansenvillage.hansenapp.repository.PoolTemplateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +25,6 @@ import java.util.UUID;
 public class PoolSessionService {
 
     private final PoolSessionRepository poolSessionRepository;
-    private final PoolTemplateRepository poolTemplateRepository;
-    private final PoolTemplateMapper poolTemplateMapper;
     private final PoolSessionMapper poolSessionMapper;
     private final PoolBookingRepository poolBookingRepository;
 
