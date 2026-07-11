@@ -39,27 +39,27 @@ public class PoolBookingService {
     @Transactional
     public PoolBookingResponse book(PoolBookingRequest request) {
         PoolSession session = poolSessionRepository.findById(request.getPoolSessionId())
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, request.getPoolSessionId()));
 
         LocalDateTime sessionStart = LocalDateTime.of(session.getSessionDate(), session.getStartTime());
         if (LocalDateTime.now().isAfter(sessionStart)) {
-            throw FamilyException.of(FamilyErrorCode.SESSION_ALREADY_STARTED);
+            throw FamilyException.of(FamilyErrorCode.SESSION_ALREADY_STARTED, request.getPoolSessionId());
         }
 
         if (session.getBookedCount() >= session.getMaxCapacity()) {
-            throw FamilyException.of(FamilyErrorCode.POOL_SESSION_IS_FULL);
+            throw FamilyException.of(FamilyErrorCode.POOL_SESSION_IS_FULL, request.getPoolSessionId());
         }
 
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, request.getUserId()));
 
         UUID familyId = SecurityUtils.currentFamilyId();
         if (!Objects.equals(user.getFamilyId(), familyId)) {
-            throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
+            throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY, request.getUserId());
         }
 
         Family family = familyRepository.findById(familyId)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, familyId));
         long memberCount = family.getMemberCount();
         long maxAllowedTickets = memberCount * 2;
 
@@ -81,7 +81,7 @@ public class PoolBookingService {
             booking = existingBookingOpt.get();
 
             if (booking.getStatus() == PoolBookingStatus.REGISTERED) {
-                throw FamilyException.of(FamilyErrorCode.POOL_HAS_BEEN_BOOKED);
+                throw FamilyException.of(FamilyErrorCode.POOL_HAS_BEEN_BOOKED, request.getPoolSessionId());
             }
             booking.setStatus(PoolBookingStatus.REGISTERED);
         } else {
@@ -101,9 +101,9 @@ public class PoolBookingService {
         PoolBooking booking = poolBookingRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND, id));
         User user = userRepository.findById(booking.getUserId())
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, id));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, booking.getUserId()));
         PoolSession session = poolSessionRepository.findById(booking.getPoolSessionId())
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, booking.getPoolSessionId()));
 
         return poolBookingMapper.toResponse(booking, user, session);
     }
@@ -126,30 +126,30 @@ public class PoolBookingService {
     @Transactional
     public void deleteBooking(UUID id) {
         PoolBooking booking = poolBookingRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.BOOKING_NOT_FOUND, id));
 
         if (booking.getStatus() != PoolBookingStatus.REGISTERED) {
-            throw FamilyException.of(FamilyErrorCode.BOOKING_ALREADY_CANCELLED);
+            throw FamilyException.of(FamilyErrorCode.BOOKING_ALREADY_CANCELLED, id);
         }
 
         if (!SecurityUtils.isAdmin()) {
             User bookingUser = userRepository.findById(booking.getUserId())
-                    .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND));
+                    .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, booking.getUserId()));
 
             UUID currentFamilyId = SecurityUtils.currentFamilyId();
             if (!Objects.equals(bookingUser.getFamilyId(), currentFamilyId)) {
-                throw FamilyException.of(FamilyErrorCode.NOT_YOUR_BOOKING);
+                throw FamilyException.of(FamilyErrorCode.NOT_YOUR_BOOKING, bookingUser.getFamilyId());
             }
         }
 
         PoolSession session = poolSessionRepository.findById(booking.getPoolSessionId())
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, booking.getPoolSessionId()));
 
         LocalDateTime sessionStart = LocalDateTime.of(session.getSessionDate(), session.getStartTime());
         LocalDateTime now = LocalDateTime.now();
 
         if (now.isAfter(sessionStart)) {
-            throw FamilyException.of(FamilyErrorCode.SESSION_ALREADY_STARTED);
+            throw FamilyException.of(FamilyErrorCode.SESSION_ALREADY_STARTED, booking.getPoolSessionId());
         }
 
         long hoursToSession = ChronoUnit.HOURS.between(now, sessionStart);

@@ -50,7 +50,7 @@ public class CinemaBookingService {
                         FamilyException.of(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND, request.getCinemaSessionId()));
 
         if (session.getBookedCount() >= session.getMaxCapacity()) {
-            throw FamilyException.of(FamilyErrorCode.CINEMA_SESSION_IS_FULL);
+            throw FamilyException.of(FamilyErrorCode.CINEMA_SESSION_IS_FULL, request.getCinemaSessionId());
         }
 
         CinemaSeat seat = cinemaSeatRepository.findById(request.getSeatId())
@@ -60,11 +60,11 @@ public class CinemaBookingService {
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, request.getUserId()));
 
         if (!Objects.equals(user.getFamilyId(), SecurityUtils.currentFamilyId())) {
-            throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
+            throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY, request.getUserId());
         }
 
         if (cinemaBookingRepository.existsByCinemaSessionIdAndSeatId(request.getCinemaSessionId(), request.getSeatId())) {
-            throw FamilyException.of(FamilyErrorCode.SEAT_ALREADY_BOOKED);
+            throw FamilyException.of(FamilyErrorCode.SEAT_ALREADY_BOOKED, request.getSeatId());
         }
 
         session.setBookedCount(session.getBookedCount() + 1);

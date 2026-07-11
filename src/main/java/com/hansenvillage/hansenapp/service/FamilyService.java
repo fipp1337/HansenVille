@@ -36,7 +36,7 @@ public class FamilyService {
         SecurityUtils.assertOwner(id);
 
         Family family = familyRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND));
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, id));
 
         if (request.getEmail() != null && !request.getEmail().isBlank()) family.setEmail(request.getEmail());
         if (request.getPassword() != null && !request.getPassword().isBlank()) family.setPassword(passwordEncoder.encode(request.getPassword()));
