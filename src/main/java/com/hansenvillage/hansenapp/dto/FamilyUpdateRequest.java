@@ -1,9 +1,6 @@
 package com.hansenvillage.hansenapp.dto;
 
-import com.hansenvillage.hansenapp.entity.Role;
 import lombok.Data;
-
-import java.util.List;
 
 @Data
 public class FamilyUpdateRequest {

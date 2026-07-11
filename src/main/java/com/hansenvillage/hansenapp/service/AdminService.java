@@ -1,12 +1,10 @@
 package com.hansenvillage.hansenapp.service;
 
-import com.hansenvillage.hansenapp.controller.AuthController;
 import com.hansenvillage.hansenapp.dto.AdminRegistrationRequest;
 import com.hansenvillage.hansenapp.dto.LoginRequest;
 import com.hansenvillage.hansenapp.dto.LoginResponse;
 import com.hansenvillage.hansenapp.entity.AdminUser;
 import com.hansenvillage.hansenapp.entity.Family;
-import com.hansenvillage.hansenapp.entity.Role;
 import com.hansenvillage.hansenapp.entity.User;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
@@ -14,7 +12,6 @@ import com.hansenvillage.hansenapp.mapper.AdminMapper;
 import com.hansenvillage.hansenapp.repository.*;
 import com.hansenvillage.hansenapp.security.JwtService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

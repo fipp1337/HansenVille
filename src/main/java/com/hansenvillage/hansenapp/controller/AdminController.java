@@ -4,7 +4,6 @@ import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
