@@ -2,16 +2,17 @@ package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.FamilyUpdateRequest;
 import com.hansenvillage.hansenapp.entity.Family;
+import com.hansenvillage.hansenapp.entity.User;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
-import com.hansenvillage.hansenapp.repository.FamilyRepository;
-import com.hansenvillage.hansenapp.repository.UserRepository;
+import com.hansenvillage.hansenapp.repository.*;
 import com.hansenvillage.hansenapp.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -21,6 +22,9 @@ public class FamilyService {
    private final UserRepository userRepository;
    private final PasswordEncoder passwordEncoder;
    private final PhoneService phoneService;
+    private final PoolBookingRepository poolBookingRepository;
+    private final CinemaBookingRepository cinemaBookingRepository;
+    private final FamilyRoleRepository familyRoleRepository;
 
     public int getFamilySize(UUID familyId) {
         return userRepository.countByFamilyId(familyId);
@@ -47,5 +51,19 @@ public class FamilyService {
         }
 
         return familyRepository.save(family);
+    }
+
+    @Transactional
+    public void deleteFamily(UUID id) {
+        SecurityUtils.assertOwner(id);
+        List<User> familyMembers = userRepository.findByFamilyId(id);
+        List<UUID> userIds = familyMembers.stream().map(User::getId).toList();
+        if (!userIds.isEmpty()) {
+            poolBookingRepository.deleteByUserIdIn(userIds);
+            cinemaBookingRepository.deleteByUserIdIn(userIds);
+        }
+        userRepository.deleteByFamilyId(id);
+        familyRoleRepository.deleteByFamilyId(id);
+        familyRepository.deleteById(id);
     }
 }

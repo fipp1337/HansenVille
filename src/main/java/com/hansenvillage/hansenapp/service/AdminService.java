@@ -35,6 +35,21 @@ public class AdminService {
 
     @Transactional
     public void registerAdmin(AdminRegistrationRequest request) {
+        if (request.getEmail() == null || request.getEmail().isBlank()) {
+            throw FamilyException.of(FamilyErrorCode.WRONG_EMAIL);
+        }
+        if (request.getPassword() == null || request.getPassword().isBlank()) {
+            throw FamilyException.of(FamilyErrorCode.WRONG_PASSWORD);
+        }
+
+         if (request.getRoles() == null || request.getRoles().isEmpty()) {
+             throw FamilyException.of(FamilyErrorCode.ROLES_EMPTY);
+         }
+
+        // Дальнейшие проверки на дубликаты и сохранение
+        if (adminUserRepository.existsByEmail(request.getEmail())) {
+            throw FamilyException.of(FamilyErrorCode.EMAIL_ALREADY_EXISTS, request.getEmail());
+        }
         AdminUser admin = adminMapper.toEntity(request);
         admin.setPassword(passwordEncoder.encode(request.getPassword()));
         adminUserRepository.save(admin);
