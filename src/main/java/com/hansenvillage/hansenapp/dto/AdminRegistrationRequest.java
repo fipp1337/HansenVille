@@ -2,6 +2,7 @@ package com.hansenvillage.hansenapp.dto;
 
 import com.hansenvillage.hansenapp.entity.Role;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 import java.util.List;
@@ -12,7 +13,7 @@ public class AdminRegistrationRequest {
     private String email;
     @NotBlank
     private String password;
-    @NotBlank
+    @NotEmpty
     private List<Role> roles;
     @NotBlank
     private String name;

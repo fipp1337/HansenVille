@@ -46,6 +46,10 @@ public class AuthService {
             throw FamilyException.of(FamilyErrorCode.EMAIL_ALREADY_EXISTS, request.getEmail());
         }
 
+        if (familyRepository.existsByAddress(request.getAddress())) {
+            throw FamilyException.of(FamilyErrorCode.ADDRESS_ALREADY_EXISTS, request.getAddress());
+        }
+
         Family family = familyMapper.toEntity(request);
         family.setPassword(passwordEncoder.encode(request.getPassword()));
 
