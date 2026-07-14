@@ -31,6 +31,8 @@ public interface FamilyRepository extends JpaRepository<Family, UUID> {
             """)
     Integer decrementMemberCount(UUID familyId);
 
+    boolean existsByAddress(String address);
+
     void deleteByEmail(String email);
 
     void deleteByAddress(String address);

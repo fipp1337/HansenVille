@@ -3,8 +3,8 @@ package com.hansenvillage.hansenapp.exception;
 import org.springframework.http.HttpStatus;
 
 public enum FamilyErrorCode {
-    WRONG_PASSWORD(HttpStatus.UNAUTHORIZED, "User register is failed, wrong password: %s"),
-    WRONG_EMAIL(HttpStatus.UNAUTHORIZED, "User register is failed, wrong email: %s"),
+    WRONG_PASSWORD(HttpStatus.UNAUTHORIZED, "Wrong password: %s"),
+    WRONG_EMAIL(HttpStatus.UNAUTHORIZED, "Wrong email: %s"),
     REGISTER_IS_FAILED(HttpStatus.UNAUTHORIZED, "User register is failed: %s"),
     FAMILY_ADD_MEMBER_FAILED(HttpStatus.CONFLICT, "Member add is failed: %s"),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found: %s"),
@@ -28,11 +28,12 @@ public enum FamilyErrorCode {
     INVALID_FAMILY(HttpStatus.BAD_REQUEST, "Invalid family"),
     TIME_OUT(HttpStatus.CONFLICT, "Time out"),
     BOOKING_ALREADY_CANCELLED(HttpStatus.CONFLICT, "Book already has been canceled"),
+    ADDRESS_ALREADY_EXISTS(HttpStatus.CONFLICT, "Address already exists"),
 //    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "Comment not found: %s"),
 //    CART_NOT_FOUND(HttpStatus.NOT_FOUND, "Cart not found for user: %s"),
 //    WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "Wallet not found for user: %s"),
     NOT_ENOUGH_MEMBERS(HttpStatus.NOT_FOUND, "Product not in cart: %s"),
-    NO_POOL_TEMPLATES_FOUND(HttpStatus.NOT_FOUND, "No pool templates found: %s"),
+    NO_POOL_TEMPLATES_FOUND(HttpStatus.NOT_FOUND, "No pool templates found"),
     POOL_SESSION_IS_FULL(HttpStatus.CONFLICT, "Pool session is full: %s"),
     CINEMA_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Cinema session not found %s"),
     SEAT_NOT_FOUND(HttpStatus.NOT_FOUND, "Cinema seat not found %s"),
@@ -52,7 +53,9 @@ public enum FamilyErrorCode {
     NO_CINEMA_TEMPLATES_FOUND(HttpStatus.NOT_FOUND, "Cinema templates not found"),
     POOL_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Pool session not found: %s"),
 //    INVALID_TOP_UP(HttpStatus.BAD_REQUEST, "Top-up amount must be positive"),
-    FAMILY_EMPTY(HttpStatus.BAD_REQUEST, "Cart is empty");
+    FAMILY_EMPTY(HttpStatus.BAD_REQUEST, "Family is empty"),
+    ROLES_EMPTY(HttpStatus.BAD_REQUEST, "Roles must not be empty");
+
 
 //    INSUFFICIENT_STOCK(HttpStatus.BAD_REQUEST, "Insufficient stock for: %s"),
 //    INSUFFICIENT_BALANCE(HttpStatus.BAD_REQUEST, "Insufficient wallet balance. Required: %s, available: %s");

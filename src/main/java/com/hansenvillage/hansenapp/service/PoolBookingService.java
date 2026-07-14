@@ -132,7 +132,7 @@ public class PoolBookingService {
             throw FamilyException.of(FamilyErrorCode.BOOKING_ALREADY_CANCELLED, id);
         }
 
-        if (!SecurityUtils.isAdmin()) {
+        if (!SecurityUtils.isSuperAdmin()) {
             User bookingUser = userRepository.findById(booking.getUserId())
                     .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, booking.getUserId()));
 

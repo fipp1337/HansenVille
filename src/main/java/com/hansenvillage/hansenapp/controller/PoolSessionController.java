@@ -38,7 +38,6 @@ public class PoolSessionController {
     }
 
     @GetMapping("/{id}")
-//    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
     public PoolSessionResponse getSessionInfoById(@PathVariable UUID id) {
         PoolSession session = poolSessionService.findById(id);
         return poolSessionMapper.toResponse(session);
