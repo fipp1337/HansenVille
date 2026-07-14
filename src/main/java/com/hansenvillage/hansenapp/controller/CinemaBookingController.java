@@ -23,34 +23,41 @@ public class CinemaBookingController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CinemaBookingResponse createBooking(@Valid @RequestBody CinemaBookingRequest request) {
-        CinemaBooking booking = cinemaBookingService.book(request);
-        return cinemaBookingMapper.toResponse(booking);
+    public List<CinemaBookingResponse> createBooking(@Valid @RequestBody CinemaBookingRequest request) {
+        List<CinemaBooking> bookings = cinemaBookingService.book(request);
+        return cinemaBookingMapper.toResponse(bookings);
     }
 
     @GetMapping("/{id}")
-    public CinemaBookingResponse getBooking(@PathVariable UUID id) {
+    public CinemaBookingResponse getBookings(@PathVariable UUID id) {
         CinemaBooking booking = cinemaBookingService.getBookingById(id);
         return cinemaBookingMapper.toResponse(booking);
     }
 
     @GetMapping("/family/{familyId}")
     public List<CinemaBookingResponse> getBookingsByFamily(@PathVariable UUID familyId) {
-        List<CinemaBooking> bookings = cinemaBookingService.getBookingsByFamilyId(familyId);
+        List<CinemaBooking> bookings = cinemaBookingService.getAllUpcomingBookingsForFamily(familyId);
         return cinemaBookingMapper.toResponseList(bookings);
     }
 
     @GetMapping("/user/{userId}")
     public List<CinemaBookingResponse> getBookingsByUser(@PathVariable UUID userId) {
-        List<CinemaBooking> bookings = cinemaBookingService.getBookingsByUserId(userId);
+        List<CinemaBooking> bookings = cinemaBookingService.getAllUpcomingBookingsForUser(userId);
         return cinemaBookingMapper.toResponseList(bookings);
     }
 
-    @GetMapping
-    public List<CinemaBookingResponse> getAllBookings() {
-        List<CinemaBooking> bookings = cinemaBookingService.getAllBookings();
+    @GetMapping("/session/{sessionId}")
+    public List<CinemaBookingResponse> getBookingsBySessionId(@PathVariable UUID sessionId) {
+
+        List<CinemaBooking> bookings = cinemaBookingService.getBookingsBySessionId(sessionId);
         return cinemaBookingMapper.toResponseList(bookings);
     }
+
+//    @GetMapping
+//    public List<CinemaBookingResponse> getAllBookings() {
+//        List<CinemaBooking> bookings = cinemaBookingService.getAllBookings();
+//        return cinemaBookingMapper.toResponseList(bookings);
+//    }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

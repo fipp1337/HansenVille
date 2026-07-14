@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
 
@@ -22,18 +23,16 @@ public class CinemaSession {
 
     private String movieName;
 
-    private LocalTime startTime;
+    private String posterImage;
+
+    private LocalDateTime startAt;
 
     private int duration;
 
-    private int maxCapacity;
-
+    private UUID hallId;
+    
     @Enumerated(EnumType.STRING)
     private SessionStatus status;
-
-    private LocalDate sessionDate;
-
-    private int bookedCount = 0;
 
     @Version
     private Integer version;

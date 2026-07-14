@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Getter
@@ -21,15 +22,12 @@ public class CinemaSessionRequest {
     private String movieName;
 
     @NotNull
-    private LocalTime startTime;
+    private LocalDateTime startAt;
 
     @NotNull
     private int duration;
 
-    private Integer maxCapacity;
-
     @Enumerated(EnumType.STRING)
     private SessionStatus status;
 
-    private LocalDate sessionDate;
 }
