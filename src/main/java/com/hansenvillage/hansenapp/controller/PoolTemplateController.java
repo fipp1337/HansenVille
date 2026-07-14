@@ -19,7 +19,7 @@ public class PoolTemplateController {
     private final PoolTemplateService poolTemplateService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.CREATED)
 //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
     public void createTemplates(@Valid @RequestBody PoolWeekTemplateRequest request) {
         poolTemplateService.createWeeklyTemplates(request);
