@@ -37,7 +37,7 @@ public class FamilyService {
 
     @Transactional
     public Family updateFamilyInfo(UUID id, FamilyUpdateRequest request) {
-        SecurityUtils.assertOwner(id);
+        SecurityUtils.assertOwnerOrSuperAdmin(id);
 
         Family family = familyRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, id));
@@ -55,7 +55,7 @@ public class FamilyService {
 
     @Transactional
     public void deleteFamily(UUID id) {
-        SecurityUtils.assertOwner(id);
+        SecurityUtils.assertOwnerOrSuperAdmin(id);
         List<User> familyMembers = userRepository.findByFamilyId(id);
         List<UUID> userIds = familyMembers.stream().map(User::getId).toList();
         if (!userIds.isEmpty()) {

@@ -39,8 +39,12 @@ public final class SecurityUtils {
         return hasRole(Role.ADMIN);
     }
 
-    public static void assertOwnerOrAdmin(UUID familyId) {
-        if (!isAdmin() && !currentFamilyId().equals(familyId)) {
+    public static boolean isSuperAdmin() {
+        return hasRole(Role.SUPER_ADMIN);
+    }
+
+    public static void assertOwnerOrSuperAdmin(UUID familyId) {
+        if (!isSuperAdmin() && !currentFamilyId().equals(familyId)) {
             throw FamilyException.of(FamilyErrorCode.ACCESS_DENIED);
         }
     }
