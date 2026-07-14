@@ -28,7 +28,7 @@ public enum FamilyErrorCode {
 //    CART_NOT_FOUND(HttpStatus.NOT_FOUND, "Cart not found for user: %s"),
 //    WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "Wallet not found for user: %s"),
     NOT_ENOUGH_MEMBERS(HttpStatus.NOT_FOUND, "Product not in cart: %s"),
-    NO_POOL_TEMPLATES_FOUND(HttpStatus.NOT_FOUND, "No pool templates found: %s"),
+    NO_POOL_TEMPLATES_FOUND(HttpStatus.NOT_FOUND, "No pool templates found"),
     POOL_SESSION_IS_FULL(HttpStatus.CONFLICT, "Pool session is full: %s"),
     CINEMA_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Cinema session not found %s"),
     SEAT_NOT_FOUND(HttpStatus.NOT_FOUND, "Cinema seat not found %s"),
