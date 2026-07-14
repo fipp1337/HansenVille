@@ -19,5 +19,5 @@ public class CinemaHall {
     @GeneratedValue
     private UUID id;
 
-    private String name = "Домашній зал";
+    private String name;
 }

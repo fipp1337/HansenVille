@@ -1,5 +1,6 @@
 package com.hansenvillage.hansenapp.repository;
 
+import com.hansenvillage.hansenapp.dto.CinemaBookingResponse;
 import com.hansenvillage.hansenapp.entity.CinemaBooking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -13,12 +14,38 @@ import java.util.UUID;
 @Repository
 public interface CinemaBookingRepository extends JpaRepository<CinemaBooking, UUID> {
 
+    @Query("""
+                SELECT b.seatId
+                FROM CinemaBooking b
+                WHERE b.cinemaSessionId = :sessionId
+            """)
+    List<UUID> findSeatIdsByCinemaSessionId(@Param("sessionId") UUID sessionId);
+
     boolean existsByCinemaSessionIdAndSeatId(UUID cinemaSessionId, UUID seatId);
 
-    List<CinemaBooking> findByUserId(UUID userId);
+    @Query("""
+                    FROM CinemaBooking b
+                    JOIN CinemaSession session ON b.cinemaSessionId = session.id
+                    JOIN CinemaSeat seat ON b.seatId = seat.id
+                    WHERE b.userId = :userId
+                      AND session.startAt > CURRENT_TIMESTAMP
+                    ORDER BY session.startAt
+            """)
+    List<CinemaBooking> findFutureByUserId(@Param("userId") UUID userId);
 
-    @Query("SELECT pb FROM CinemaBooking pb JOIN User u ON pb.userId = u.id WHERE u.familyId = :familyId")
-    List<CinemaBooking> findByFamilyId(@Param("familyId") UUID familyId);
+    @Query("""
+                FROM CinemaBooking b
+                JOIN User u ON b.userId = u.id
+                JOIN CinemaSession session ON b.cinemaSessionId = session.id
+                JOIN CinemaSeat seat ON b.seatId = seat.id
+                WHERE u.familyId = :familyId
+                  AND session.startAt > CURRENT_TIMESTAMP
+            """)
+    List<CinemaBooking> findFutureByFamilyId(@Param("familyId") UUID familyId);
+
+    long countByCinemaSessionId(UUID cinemaSessionId);
+
+    List<CinemaBooking> getBookingsByCinemaSessionId(UUID cinemaSessionId);
 
     @Modifying
     @Query("DELETE FROM CinemaBooking b WHERE b.userId IN :userIds")

@@ -5,7 +5,7 @@ public enum Role {
     POOL_MANAGER,
     GYM_MANAGER,
     CINEMA_MANAGER,
-    CINEMA_HYM_MANAGER,
+//    CINEMA_HYM_MANAGER,
     ADMIN,
     SUPER_ADMIN
 }

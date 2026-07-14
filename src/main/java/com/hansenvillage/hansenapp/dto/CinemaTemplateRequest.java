@@ -21,5 +21,4 @@ public class CinemaTemplateRequest {
     @NotNull
     private int dayOfWeek;
 
-    private int maxCapacity = 15;
 }

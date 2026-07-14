@@ -21,10 +21,5 @@ public class CinemaSeat {
 
     private UUID hallId;
 
-    private String rowLabel;
-
-    private int sofaNumber;
-
-    private int spotNumber;
-
+    private String sofaNumber;
 }

@@ -3,6 +3,7 @@ package com.hansenvillage.hansenapp.controller;
 import com.hansenvillage.hansenapp.dto.CinemaPublishWeekScheduleRequest;
 import com.hansenvillage.hansenapp.dto.CinemaSessionRequest;
 import com.hansenvillage.hansenapp.dto.CinemaSessionResponse;
+import com.hansenvillage.hansenapp.dto.CinemaSessionWithSeatsResponse;
 import com.hansenvillage.hansenapp.entity.CinemaSession;
 import com.hansenvillage.hansenapp.mapper.CinemaSessionMapper;
 import com.hansenvillage.hansenapp.service.CinemaSessionService;
@@ -10,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -31,15 +33,15 @@ public class CinemaSessionController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+//    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public List<CinemaSessionResponse> create(@Valid @RequestBody CinemaPublishWeekScheduleRequest request) {
         List<CinemaSession> sessions = cinemaSessionService.create(request);
         return cinemaSessionMapper.toResponseList(sessions);
     }
 
     @GetMapping("/{id}")
-    public CinemaSessionResponse getById(@PathVariable UUID id) {
-        CinemaSession session = cinemaSessionService.findById(id);
-        return cinemaSessionMapper.toResponse(session);
+    public CinemaSessionWithSeatsResponse getById(@PathVariable UUID id) {
+        return cinemaSessionService.findById(id);
     }
 
     @PutMapping("/{id}")
