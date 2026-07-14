@@ -10,6 +10,6 @@ import java.util.UUID;
 public class CinemaSeatWithAvailableResponse {
 
     private UUID id;
-    private String sofaNumber;
+    private String seatNumber;
     private boolean available;
 }

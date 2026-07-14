@@ -76,19 +76,19 @@ class CinemaSessionServiceTest {
         UUID seatId1 = UUID.randomUUID();
         seat1.setId(seatId1);
         seat1.setHallId(session.getHallId());
-        seat1.setSofaNumber("A1");
+        seat1.setSeatNumber("A1");
 
         CinemaSeat seat2 = new CinemaSeat();
         UUID seatId2 = UUID.randomUUID();
         seat2.setId(seatId2);
         seat2.setHallId(session.getHallId());
-        seat2.setSofaNumber("A2");
+        seat2.setSeatNumber("A2");
 
         CinemaSeat seat3 = new CinemaSeat();
         UUID seatId3 = UUID.randomUUID();
         seat3.setId(seatId3);
         seat3.setHallId(session.getHallId());
-        seat3.setSofaNumber("B3");
+        seat3.setSeatNumber("B3");
 
         CinemaSeatResponse response1 = new CinemaSeatResponse();
         response1.setId(seatId1);
