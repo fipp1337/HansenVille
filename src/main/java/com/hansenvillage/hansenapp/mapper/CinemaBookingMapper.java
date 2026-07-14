@@ -14,6 +14,9 @@ public interface CinemaBookingMapper {
     CinemaBooking toEntity(CinemaBookingRequest request);
 
     @Mapping(source = "id", target = "bookingId")
+    List<CinemaBookingResponse> toResponse(List<CinemaBooking> entities);
+
+    @Mapping(source = "id", target = "bookingId")
     CinemaBookingResponse toResponse(CinemaBooking entity);
 
     List<CinemaBookingResponse> toResponseList(List<CinemaBooking> entities);

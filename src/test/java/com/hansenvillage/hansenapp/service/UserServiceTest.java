@@ -41,7 +41,6 @@ class UserServiceTest {
         User savedUser = new User();
         UUID mockFamilyId = UUID.randomUUID();
 
-
         mappedUser.setFamilyId(mockFamilyId);
 
         when(userMapper.toEntity(request)).thenReturn(mappedUser);

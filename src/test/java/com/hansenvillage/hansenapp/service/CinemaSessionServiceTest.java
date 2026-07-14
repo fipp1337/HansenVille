@@ -1,12 +1,15 @@
 package com.hansenvillage.hansenapp.service;
 
-import com.hansenvillage.hansenapp.dto.CinemaPublishWeekScheduleRequest;
-import com.hansenvillage.hansenapp.dto.CinemaSessionRequest;
+import com.hansenvillage.hansenapp.dto.*;
+import com.hansenvillage.hansenapp.entity.CinemaSeat;
 import com.hansenvillage.hansenapp.entity.CinemaSession;
-import com.hansenvillage.hansenapp.entity.SessionStatus;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
+import com.hansenvillage.hansenapp.mapper.CinemaSeatMapper;
 import com.hansenvillage.hansenapp.mapper.CinemaSessionMapper;
+import com.hansenvillage.hansenapp.repository.CinemaBookingRepository;
+import com.hansenvillage.hansenapp.repository.CinemaHallRepository;
+import com.hansenvillage.hansenapp.repository.CinemaSeatRepository;
 import com.hansenvillage.hansenapp.repository.CinemaSessionRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -31,9 +35,16 @@ class CinemaSessionServiceTest {
     private CinemaSessionRepository cinemaSessionRepository;
     @Mock
     private CinemaSessionMapper cinemaSessionMapper;
+    @Mock
+    private CinemaSeatMapper cinemaSeatMapper;
+    @Mock
+    private CinemaSeatRepository cinemaSeatRepository;
+    @Mock
+    private CinemaBookingRepository cinemaBookingRepository;
 
     @InjectMocks
     CinemaSessionService cinemaSessionService;
+    private CinemaSeat seat2;
 
     @Test
     void create() {
@@ -56,16 +67,68 @@ class CinemaSessionServiceTest {
     @Test
     void findById() {
 
-        UUID id = UUID.randomUUID();
+        UUID sessionId = UUID.randomUUID();
         CinemaSession session = new CinemaSession();
+        session.setId(sessionId);
+        session.setHallId(UUID.randomUUID());
 
-        when(cinemaSessionRepository.findById(id)).thenReturn(Optional.of(session));
+        CinemaSeat seat1 = new CinemaSeat();
+        UUID seatId1 = UUID.randomUUID();
+        seat1.setId(seatId1);
+        seat1.setHallId(session.getHallId());
+        seat1.setSofaNumber("A1");
 
-        CinemaSession result = cinemaSessionService.findById(id);
+        CinemaSeat seat2 = new CinemaSeat();
+        UUID seatId2 = UUID.randomUUID();
+        seat2.setId(seatId2);
+        seat2.setHallId(session.getHallId());
+        seat2.setSofaNumber("A2");
 
-        assertEquals(session, result);
+        CinemaSeat seat3 = new CinemaSeat();
+        UUID seatId3 = UUID.randomUUID();
+        seat3.setId(seatId3);
+        seat3.setHallId(session.getHallId());
+        seat3.setSofaNumber("B3");
 
-        verify(cinemaSessionRepository).findById(id);
+        CinemaSeatResponse response1 = new CinemaSeatResponse();
+        response1.setId(seatId1);
+
+        CinemaSeatResponse response2 = new CinemaSeatResponse();
+        response2.setId(seatId2);
+
+        CinemaSeatResponse response3 = new CinemaSeatResponse();
+        response3.setId(seatId3);
+
+        List<CinemaSeat> seats = List.of(seat1, seat2, seat3);
+
+        List<UUID> bookedSeatIds = List.of(seatId1, seatId2);
+
+        CinemaSessionResponse sessionResponse = new CinemaSessionResponse();
+        sessionResponse.setId(sessionId);
+
+        when(cinemaSessionRepository.findById(sessionId)).thenReturn(Optional.of(session));
+        when(cinemaSessionMapper.toResponse(session)).thenReturn(sessionResponse);
+        when(cinemaSeatRepository.findByHallId(session.getHallId())).thenReturn(seats);
+        when(cinemaBookingRepository.findSeatIdsByCinemaSessionId(session.getId())).thenReturn(bookedSeatIds);
+        when(cinemaSeatMapper.toResponse(seat1)).thenReturn(response1);
+        when(cinemaSeatMapper.toResponse(seat2)).thenReturn(response2);
+        when(cinemaSeatMapper.toResponse(seat3)).thenReturn(response3);
+
+        CinemaSessionWithSeatsResponse result = cinemaSessionService.findById(sessionId);
+
+        assertEquals(3, result.getSeats().size());
+
+        assertFalse(result.getSeats().get(0).isAvailable());
+        assertFalse(result.getSeats().get(1).isAvailable());
+        assertTrue(result.getSeats().get(2).isAvailable());
+
+        verify(cinemaSessionRepository).findById(sessionId);
+        verify(cinemaSessionMapper).toResponse(session);
+        verify(cinemaSeatRepository).findByHallId(session.getHallId());
+        verify(cinemaBookingRepository).findSeatIdsByCinemaSessionId(session.getId());
+        verify(cinemaSeatMapper).toResponse(seat1);
+        verify(cinemaSeatMapper).toResponse(seat2);
+        verify(cinemaSeatMapper).toResponse(seat3);
     }
 
     @Test
@@ -119,24 +182,28 @@ class CinemaSessionServiceTest {
     void getWeekSchedule_shouldReturnSessionsSortedByDateAndTime() {
 
         LocalDate weekStart = LocalDate.now();
-        LocalDate weekEnd = weekStart.plusDays(6);
+        LocalDateTime weekStartDateTime = weekStart.atStartOfDay();
+        LocalDateTime weekEndDateTime = weekStart.plusDays(6).atTime(LocalTime.MAX);
 
         CinemaSession first = new CinemaSession();
-        first.setSessionDate(LocalDate.of(2026, 7, 5));
-        first.setStartTime(LocalTime.of(18, 0));
+        first.setStartAt(weekStart.plusDays(5).atTime(18, 0));
 
         CinemaSession second = new CinemaSession();
-        second.setSessionDate(LocalDate.of(2026, 7, 3));
-        second.setStartTime(LocalTime.of(10, 0));
+        second.setStartAt(weekStart.plusDays(1).atTime(10, 0));
 
-        List<CinemaSession> unsorted = List.of(first, second);
+        CinemaSession third = new CinemaSession();
+        third.setStartAt(weekStart.plusDays(3).atTime(14, 30));
 
-        when(cinemaSessionRepository.findBySessionDateBetween(weekStart, weekEnd)).thenReturn(unsorted);
+        List<CinemaSession> unsorted = List.of(first, third, second);
 
-        List<CinemaSession> result = cinemaSessionService.getWeekSchedule(weekStart);
+        when(cinemaSessionRepository.findByStartAtBetween(
+                weekStartDateTime,
+                weekEndDateTime))
+                .thenReturn(unsorted);
 
-        assertEquals(List.of(second, first), result);
+        List<CinemaSession> result =
+                cinemaSessionService.getWeekSchedule(weekStart);
 
-        verify(cinemaSessionRepository).findBySessionDateBetween(weekStart, weekEnd);
+        assertEquals(List.of(second, third, first), result);
     }
 }
