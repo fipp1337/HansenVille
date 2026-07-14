@@ -27,7 +27,7 @@ public class CinemaSeatService {
 
                 CinemaSeat seat = new CinemaSeat();
                 seat.setHallId(hallId);
-                seat.setSofaNumber(row + sofa);
+                seat.setSeatNumber(row + sofa);
 
                 seats.add(seat);
             }

@@ -11,7 +11,7 @@ CREATE TABLE cinema_sessions
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     movie_name VARCHAR(255) NOT NULL,
---     poster_image
+    poster_image VARCHAR(500),
     start_at TIMESTAMP NOT NULL,
     duration INT NOT NULL,
     hall_id      UUID       NOT NULL REFERENCES cinema_halls(id),
@@ -22,8 +22,8 @@ CREATE TABLE cinema_sessions
 CREATE TABLE cinema_seats (
         id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         hall_id      UUID       NOT NULL REFERENCES cinema_halls(id),
-        sofa_number  VARCHAR(5)        NOT NULL,
-        UNIQUE (hall_id, sofa_number)
+        seat_number  VARCHAR(5)        NOT NULL,
+        UNIQUE (hall_id, seat_number)
 );
 
 CREATE TABLE cinema_bookings (

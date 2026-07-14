@@ -20,4 +20,5 @@ public class CinemaSessionResponse {
     private LocalDateTime startAt;
     private Integer duration;
 
+    private String posterUrl;
 }

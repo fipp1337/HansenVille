@@ -21,5 +21,5 @@ public class CinemaSeat {
 
     private UUID hallId;
 
-    private String sofaNumber;
+    private String seatNumber;
 }

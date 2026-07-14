@@ -14,6 +14,8 @@ public enum FamilyErrorCode {
     GYM_TEMPLATE_NOT_FOUND(HttpStatus.NOT_FOUND, "Gym templates not found: %s"),
     SESSION_ALREADY_STARTED(HttpStatus.CONFLICT, "Session was started"),
     TOO_MANY_SEATS(HttpStatus.CONFLICT, "You can't book more seats, than there are members in your family"),
+    FILE_UPLOAD_FAILED(HttpStatus.CONFLICT, "File upload failed"),
+    POSTER_NOT_FOUND(HttpStatus.NOT_FOUND, "Poster not found for session: %s"),
 //    PRODUCT_QUANTITY_EMPTY(HttpStatus.NOT_FOUND, "StockQuantity is empty or not enough: %s"),
 //    SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Session not found: %s"),
     OUT_OF_TICKETS(HttpStatus.NOT_ACCEPTABLE, "Not enough tickets"),

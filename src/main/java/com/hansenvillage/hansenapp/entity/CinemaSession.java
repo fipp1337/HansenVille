@@ -23,7 +23,7 @@ public class CinemaSession {
 
     private String movieName;
 
-    // posterImage
+    private String posterImage;
 
     private LocalDateTime startAt;
 
