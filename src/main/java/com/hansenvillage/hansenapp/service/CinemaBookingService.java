@@ -110,7 +110,7 @@ public class CinemaBookingService {
             throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
         }
 
-        return cinemaBookingRepository.findByUserId(userId);
+        return cinemaBookingRepository.findFutureByUserId(userId);
     }
 
     public List<CinemaBooking> getBookingsByFamilyId(UUID familyId) {
@@ -118,7 +118,7 @@ public class CinemaBookingService {
         if (!SecurityUtils.isSuperAdmin() && !Objects.equals(familyId, SecurityUtils.currentFamilyId())) {
             throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
         }
-        return cinemaBookingRepository.findByFamilyId(familyId);
+        return cinemaBookingRepository.findFutureByFamilyId(familyId);
     }
 
     @Retryable(
