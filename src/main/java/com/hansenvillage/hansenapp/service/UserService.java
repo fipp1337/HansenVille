@@ -47,7 +47,7 @@ public class UserService {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, id));
-        SecurityUtils.assertOwner(user.getFamilyId());
+        SecurityUtils.assertOwnerOrSuperAdmin(user.getFamilyId());
 
         if (request.getName() != null && !request.getName().isBlank()) user.setName(request.getName());
         if (request.getAge() != null) user.setAge(request.getAge());
@@ -71,7 +71,7 @@ public class UserService {
         User user = userRepository.findById(memberId)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, memberId));
 
-        SecurityUtils.assertOwner(user.getFamilyId());
+        SecurityUtils.assertOwnerOrSuperAdmin(user.getFamilyId());
 
         userRepository.delete(user);
 

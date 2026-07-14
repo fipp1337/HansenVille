@@ -106,11 +106,19 @@ public class CinemaBookingService {
     public List<CinemaBooking> getAllUpcomingBookingsForUser(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, userId));
-        if (!SecurityUtils.isAdmin() && !Objects.equals(user.getFamilyId(), SecurityUtils.currentFamilyId())) {
+        if (!SecurityUtils.isSuperAdmin() && !Objects.equals(user.getFamilyId(), SecurityUtils.currentFamilyId())) {
             throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
         }
 
-        return cinemaBookingRepository.findFutureByUserId(userId);
+        return cinemaBookingRepository.findByUserId(userId);
+    }
+
+    public List<CinemaBooking> getBookingsByFamilyId(UUID familyId) {
+
+        if (!SecurityUtils.isSuperAdmin() && !Objects.equals(familyId, SecurityUtils.currentFamilyId())) {
+            throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
+        }
+        return cinemaBookingRepository.findByFamilyId(familyId);
     }
 
     @Retryable(

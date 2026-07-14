@@ -39,7 +39,7 @@ public class AuthController {
 
 //    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PostMapping("/admin/register")
-    public ResponseEntity<String> registerAdmin(@RequestBody AdminRegistrationRequest request) {
+    public ResponseEntity<String> registerAdmin(@Valid @RequestBody AdminRegistrationRequest request) {
         adminService.registerAdmin(request);
         return ResponseEntity.ok("Admin registered successfully");
 }
