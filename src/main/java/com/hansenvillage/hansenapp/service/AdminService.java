@@ -82,7 +82,7 @@ public class AdminService {
         List<Family> families = familyRepository.findByAddress(address);
 
         if (families.isEmpty()) {
-            throw FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND);
+            throw FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, address);
         }
 
         for (Family family : families) {
