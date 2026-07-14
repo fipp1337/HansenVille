@@ -86,7 +86,7 @@ public class CinemaBookingService {
     public List<CinemaBooking> getBookingsByUserId(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, userId));
-        if (!SecurityUtils.isAdmin() && !Objects.equals(user.getFamilyId(), SecurityUtils.currentFamilyId())) {
+        if (!SecurityUtils.isSuperAdmin() && !Objects.equals(user.getFamilyId(), SecurityUtils.currentFamilyId())) {
             throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
         }
 
@@ -95,7 +95,7 @@ public class CinemaBookingService {
 
     public List<CinemaBooking> getBookingsByFamilyId(UUID familyId) {
 
-        if (!SecurityUtils.isAdmin() && !Objects.equals(familyId, SecurityUtils.currentFamilyId())) {
+        if (!SecurityUtils.isSuperAdmin() && !Objects.equals(familyId, SecurityUtils.currentFamilyId())) {
             throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
         }
         return cinemaBookingRepository.findByFamilyId(familyId);
@@ -113,7 +113,7 @@ public class CinemaBookingService {
         User bookingUser = userRepository.findById(booking.getUserId())
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND));
 
-        SecurityUtils.assertOwner(bookingUser.getFamilyId());
+        SecurityUtils.assertOwnerOrSuperAdmin(bookingUser.getFamilyId());
 
         CinemaSession session = cinemaSessionRepository.findById(booking.getCinemaSessionId())
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND));
