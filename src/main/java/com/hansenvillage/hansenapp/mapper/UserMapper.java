@@ -18,7 +18,7 @@ public interface UserMapper {
 
     List<UserResponse> toResponse(List<User> users);
 
-    List<User> toEntityList(List<FamilyRegistrationRequest.MemberRequest> dtoList);
+//    List<User> toEntityList(List<FamilyRegistrationRequest.MemberRequest> dtoList);
 
     UserUpdateResponse toUpdateResponse(User user);
 }

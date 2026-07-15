@@ -12,6 +12,16 @@ services:
     volumes:
       - postgres_hansen_data:/var/lib/postgresql/data
 
+  redis:
+      image: redis:7-alpine
+      container_name: redis-hansen
+      restart: unless-stopped
+      ports:
+        - "6379:6379"
+      command: redis-server --timeout 2000
+
 volumes:
   postgres_hansen_data:
     name: postgres_hansen_data
+  redis_hansen_data:
+      name: redis_hansen_data
