@@ -40,6 +40,7 @@ public class AdminService {
 
     @Transactional
     public void registerAdmin(AdminRegistrationRequest request) {
+        String email = request.getEmail().trim().toLowerCase();
         if (request.getEmail() == null || request.getEmail().isBlank()) {
             throw FamilyException.of(FamilyErrorCode.WRONG_EMAIL);
         }
@@ -62,7 +63,7 @@ public class AdminService {
 
     @Transactional
     public LoginResponse loginAdmin(LoginRequest request) {
-        AdminUser admin = adminUserRepository.findByEmail(request.getEmail())
+        AdminUser admin = adminUserRepository.findByEmailIgnoreCase(request.getEmail())
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, request.getEmail()));
 
         if (!passwordEncoder.matches(request.getPassword(), admin.getPassword())) {

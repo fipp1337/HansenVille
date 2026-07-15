@@ -98,11 +98,6 @@ public class CinemaBookingService {
         return cinemaBookingRepository.getBookingsByCinemaSessionId(sessionId);
     }
 
-    public List<CinemaBooking> getAllUpcomingBookingsForFamily(UUID familyId) {
-
-        return cinemaBookingRepository.findFutureByFamilyId(familyId);
-    }
-
     public List<CinemaBooking> getAllUpcomingBookingsForUser(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, userId));

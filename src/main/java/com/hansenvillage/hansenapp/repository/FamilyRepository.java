@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Repository
 public interface FamilyRepository extends JpaRepository<Family, UUID> {
-    Optional<Family> findByEmail(String email);
+    Optional<Family> findByEmailIgnoreCase(String email);
     boolean existsByEmail(String email);
     List<Family> findByAddress(String address);
     @Modifying

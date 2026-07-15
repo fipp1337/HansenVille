@@ -13,6 +13,7 @@ public class RedisService {
     private static final String REG_CODE_PREFIX = "reg:code:";
     private static final String LOGIN_CODE_PREFIX = "login:code:";
     private static final String LINK_STATE_PREFIX = "link:state:";
+    private static final String RESET_CODE_PREFIX = "reset:code:";
     private static final Duration CODE_TTL = Duration.ofMinutes(10);
 
     public RedisService(StringRedisTemplate redisTemplate) {
@@ -37,6 +38,21 @@ public class RedisService {
 
     public void deleteRegistrationData(String email) {
         String key = REG_CODE_PREFIX + email;
+        redisTemplate.delete(key);
+    }
+
+    public void storeResetCode(String email, String code) {
+        String key = RESET_CODE_PREFIX + email;
+        redisTemplate.opsForValue().set(key, code, CODE_TTL.toMinutes(), java.util.concurrent.TimeUnit.MINUTES);
+    }
+
+    public String getResetCode(String email) {
+        String key = RESET_CODE_PREFIX + email;
+        return redisTemplate.opsForValue().get(key);
+    }
+
+    public void deleteResetCode(String email) {
+        String key = RESET_CODE_PREFIX + email;
         redisTemplate.delete(key);
     }
 

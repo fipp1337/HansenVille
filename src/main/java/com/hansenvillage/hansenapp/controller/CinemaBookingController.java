@@ -34,11 +34,6 @@ public class CinemaBookingController {
         return cinemaBookingMapper.toResponse(booking);
     }
 
-    @GetMapping("/family/{familyId}")
-    public List<CinemaBookingResponse> getBookingsByFamily(@PathVariable UUID familyId) {
-        List<CinemaBooking> bookings = cinemaBookingService.getAllUpcomingBookingsForFamily(familyId);
-        return cinemaBookingMapper.toResponseList(bookings);
-    }
 
     @GetMapping("/user/{userId}")
     public List<CinemaBookingResponse> getBookingsByUser(@PathVariable UUID userId) {
