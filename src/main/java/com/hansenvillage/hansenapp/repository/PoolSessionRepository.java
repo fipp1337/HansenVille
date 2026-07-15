@@ -12,6 +12,6 @@ import java.util.UUID;
 @Repository
 public interface PoolSessionRepository extends JpaRepository<PoolSession, UUID> {
     List<PoolSession> findBySessionDateBetween(LocalDate weekStart, LocalDate weekEnd);
-    boolean existsBySessionDateAndStartTimeAndEndTime(LocalDate sessionDate, LocalTime startTime, LocalTime endTime);
+    boolean existsBySessionDateAndStartTimeAndEndTime(LocalDate sessionDate, LocalTime startTime);
     List<PoolSession> findBySessionDateBetweenOrderBySessionDateAscStartTimeAsc(LocalDate startDate, LocalDate endDate);
 }
