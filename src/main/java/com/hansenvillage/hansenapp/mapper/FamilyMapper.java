@@ -8,8 +8,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface FamilyMapper {
-    //    @Mapping(target = "memberCount",
-//            expression = "java(request.getMembers().size())")
+
     Family toEntity(FamilyRegistrationRequest request);
     FamilyInfoResponse toInfoResponse(Family family);
     FamilyRegistrationResponse toResponse(Family family);
