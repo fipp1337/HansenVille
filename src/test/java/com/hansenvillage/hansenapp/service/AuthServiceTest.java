@@ -90,7 +90,7 @@
 //        LoginRequest request = new LoginRequest();
 //        request.setEmail("wrong@mail.com");
 //
-//        when(familyRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
+//        when(familyRepository.findByEmailIgnoreCase(request.getEmail())).thenReturn(Optional.empty());
 //
 //        FamilyException exception = assertThrows(FamilyException.class, () -> {
 //            authService.login(request);
@@ -108,7 +108,7 @@
 //        Family family = new Family();
 //        family.setPassword("correct_encoded_pass");
 //
-//        when(familyRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(family));
+//        when(familyRepository.findByEmailIgnoreCase(request.getEmail())).thenReturn(Optional.of(family));
 //        when(passwordEncoder.matches("wrong_pass", "correct_encoded_pass")).thenReturn(false);
 //
 //        FamilyException exception = assertThrows(FamilyException.class, () -> {
@@ -132,7 +132,7 @@
 //        FamilyRole dbRole = new FamilyRole();
 //        dbRole.setRole("ADMIN");
 //
-//        when(familyRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(family));
+//        when(familyRepository.findByEmailIgnoreCase(request.getEmail())).thenReturn(Optional.of(family));
 //        when(passwordEncoder.matches("password", "encoded_password")).thenReturn(true);
 //        when(familyRoleRepository.findByFamilyId(familyId)).thenReturn(List.of(dbRole));
 //

@@ -26,12 +26,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserRepository userRepository;
     private final FamilyRepository familyRepository;
     private final FamilyRoleRepository familyRoleRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
-    private final UserMapper userMapper;
     private final FamilyMapper familyMapper;
     private final FamilyRoleMapper familyRoleMapper;
     private final PhoneService phoneService;
@@ -44,21 +42,26 @@ public class AuthService {
 
     @Transactional
     public void initiateRegistration(InitiateRegistrationRequest request) {
-        if (familyRepository.existsByEmail(request.getEmail())) {
-            throw FamilyException.of(FamilyErrorCode.EMAIL_ALREADY_EXISTS, request.getEmail());
+        String email = request.getEmail().trim().toLowerCase();
+
+        if (familyRepository.existsByEmail(email)) {
+            throw FamilyException.of(FamilyErrorCode.EMAIL_ALREADY_EXISTS, email);
         }
         InviteCode inviteCode = inviteCodeRepository.findByCodeAndStatus(request.getInviteCode(), InviteCodeStatus.AVAILABLE)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.INVALID_INVITE_CODE));
         String verificationCode = generateCode();
-        redisService.storeRegistrationData(request.getEmail(), inviteCode.getCode(), verificationCode);
-        emailService.sendVerificationEmail(request.getEmail(), verificationCode);
+
+        redisService.storeRegistrationData(email, inviteCode.getCode(), verificationCode);
+        emailService.sendVerificationEmail(email, verificationCode);
     }
 
     @Transactional
     public LoginResponse registerFamily(FamilyRegistrationRequest request) {
-        Map<Object, Object> regData = redisService.getRegistrationData(request.getEmail());
+        String email = request.getEmail().trim().toLowerCase();
+
+        Map<Object, Object> regData = redisService.getRegistrationData(email);
         if (regData == null || regData.isEmpty()) {
-            throw FamilyException.of(FamilyErrorCode.REGISTRATION_NOT_INITIATED, request.getEmail());
+            throw FamilyException.of(FamilyErrorCode.REGISTRATION_NOT_INITIATED, email);
         }
 
         String storedVerificationCode = (String) regData.get("verificationCode");
@@ -71,18 +74,19 @@ public class AuthService {
         InviteCode inviteCode = inviteCodeRepository.findByCodeAndStatus(storedInviteCode, InviteCodeStatus.AVAILABLE)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.INVALID_INVITE_CODE));
 
-        if (familyRepository.existsByEmail(request.getEmail())) {
-            throw FamilyException.of(FamilyErrorCode.EMAIL_ALREADY_EXISTS, request.getEmail());
+        if (familyRepository.existsByEmail(email)) {
+            throw FamilyException.of(FamilyErrorCode.EMAIL_ALREADY_EXISTS, email);
         }
         if (familyRepository.existsByAddress(request.getAddress())) {
             throw FamilyException.of(FamilyErrorCode.ADDRESS_ALREADY_EXISTS, request.getAddress());
         }
 
         inviteCode.setStatus(InviteCodeStatus.USED);
-        inviteCode.setEmail(request.getEmail());
+        inviteCode.setEmail(email);
         inviteCodeRepository.save(inviteCode);
 
         Family family = familyMapper.toEntity(request);
+        family.setEmail(email);
         family.setPassword(passwordEncoder.encode(request.getPassword()));
 
         if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
@@ -94,7 +98,7 @@ public class AuthService {
         FamilyRole familyRole = familyRoleMapper.createUserRole(savedFamily.getId());
         familyRoleRepository.save(familyRole);
 
-        redisService.deleteRegistrationData(request.getEmail());
+        redisService.deleteRegistrationData(email);
 
         List<Role> roles = List.of(Role.valueOf(familyRole.getRole()));
         String accessToken = jwtService.generateToken(savedFamily, roles);
@@ -109,8 +113,10 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
-        Family family = familyRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.WRONG_EMAIL, request.getEmail()));
+        String email = request.getEmail().trim().toLowerCase();
+
+        Family family = familyRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.WRONG_EMAIL, email));
 
         if (!passwordEncoder.matches(request.getPassword(), family.getPassword())) {
             throw FamilyException.of(FamilyErrorCode.WRONG_PASSWORD, request.getPassword());
@@ -136,7 +142,7 @@ public class AuthService {
 
         Family family = new Family();
         family.setId(securityFamily.getId());
-        family.setEmail(securityFamily.getEmail());
+        family.setEmail(securityFamily.getEmail().trim().toLowerCase());
         family.setPassword("");
 
         List<Role> roles = securityFamily.getRoles();
@@ -149,6 +155,33 @@ public class AuthService {
         response.setRefreshToken(newRefreshToken);
 
         return response;
+    }
+
+    public void initiateForgotPassword(ForgotPasswordRequest request) {
+        String email = request.getEmail().trim().toLowerCase();
+
+        Family family = familyRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.WRONG_EMAIL, email));
+
+        String resetCode = generateCode();
+        redisService.storeResetCode(family.getEmail(), resetCode);
+        emailService.sendResetPasswordEmail(family.getEmail(), resetCode);
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        String email = request.getEmail().trim().toLowerCase();
+
+        Family family = familyRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.WRONG_EMAIL, email));
+
+        String storedCode = redisService.getResetCode(email);
+        if (storedCode == null || !storedCode.equals(request.getVerificationCode())) {
+            throw FamilyException.of(FamilyErrorCode.INVALID_VERIFICATION_CODE);
+        }
+        family.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        familyRepository.save(family);
+        redisService.deleteResetCode(email);
     }
 
 

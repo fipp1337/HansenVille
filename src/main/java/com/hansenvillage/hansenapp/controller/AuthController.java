@@ -16,14 +16,31 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
-    private final FamilyMapper familyMapper;
     private final AdminService adminService;
 
 
     @PostMapping("/register/initiate")
-    public ResponseEntity<String> initiateRegistration(@Valid @RequestBody InitiateRegistrationRequest request) {
+    public ResponseEntity<RegistrationInitiateResponse> initiateRegistration(@Valid @RequestBody InitiateRegistrationRequest request) {
         authService.initiateRegistration(request);
-        return ResponseEntity.ok("Code send to mail.");
+        RegistrationInitiateResponse response = new RegistrationInitiateResponse();
+        response.setMessage("Successful initiate registration");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/password/forgot")
+    public ResponseEntity<ForgotPasswordInitiateResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.initiateForgotPassword(request);
+        ForgotPasswordInitiateResponse response = new ForgotPasswordInitiateResponse();
+        response.setMessage("Successful initiate forgot password");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/password/reset")
+    public ResponseEntity<ResetPasswordResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        ResetPasswordResponse response = new ResetPasswordResponse();
+        response.setMessage("Successful reset password");
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/register/confirm")

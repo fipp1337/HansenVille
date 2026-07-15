@@ -38,11 +38,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/auth/register/*").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/error").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/refresh", "/error").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/admin/register", "/error").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/admin/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(jsonSecurityHandlers)
