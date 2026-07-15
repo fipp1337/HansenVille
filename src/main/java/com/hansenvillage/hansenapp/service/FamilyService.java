@@ -1,10 +1,13 @@
 package com.hansenvillage.hansenapp.service;
 
+import com.hansenvillage.hansenapp.dto.FamilyInfoResponse;
 import com.hansenvillage.hansenapp.dto.FamilyUpdateRequest;
 import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.entity.User;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
+import com.hansenvillage.hansenapp.mapper.FamilyMapper;
+import com.hansenvillage.hansenapp.mapper.UserMapper;
 import com.hansenvillage.hansenapp.repository.*;
 import com.hansenvillage.hansenapp.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +28,8 @@ public class FamilyService {
     private final PoolBookingRepository poolBookingRepository;
     private final CinemaBookingRepository cinemaBookingRepository;
     private final FamilyRoleRepository familyRoleRepository;
-
+    private final FamilyMapper familyMapper;
+    private final UserMapper userMapper;
     public int getFamilySize(UUID familyId) {
         return userRepository.countByFamilyId(familyId);
     }
@@ -38,16 +42,14 @@ public class FamilyService {
     @Transactional
     public Family updateFamilyInfo(UUID id, FamilyUpdateRequest request) {
         SecurityUtils.assertOwnerOrSuperAdmin(id);
-
         Family family = familyRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, id));
-
-        if (request.getEmail() != null && !request.getEmail().isBlank()) family.setEmail(request.getEmail());
-        if (request.getPassword() != null && !request.getPassword().isBlank()) family.setPassword(passwordEncoder.encode(request.getPassword()));
-        if (request.getAddress() != null && !request.getAddress().isBlank()) family.setAddress(request.getAddress());
+        familyMapper.updateFamilyFromRequest(request, family);
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            family.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
         if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
-            String formattedPhone = phoneService.validateAndFormatPhone(request.getPhoneNumber());
-            family.setPhoneNumber(formattedPhone);
+            family.setPhoneNumber(phoneService.validateAndFormatPhone(request.getPhoneNumber()));
         }
 
         return familyRepository.save(family);
@@ -65,5 +67,17 @@ public class FamilyService {
         userRepository.deleteByFamilyId(id);
         familyRoleRepository.deleteByFamilyId(id);
         familyRepository.deleteById(id);
+    }
+
+    @Transactional
+    public FamilyInfoResponse getFamilyInfoById(UUID id) {
+        SecurityUtils.assertOwnerOrSuperAdmin(id);
+        Family family = familyRepository.findById(id)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, id));
+        List<User> members = userRepository.findByFamilyId(id);
+        FamilyInfoResponse response = familyMapper.toInfoResponse(family);
+        response.setMembers(userMapper.toResponse(members));
+
+        return response;
     }
 }

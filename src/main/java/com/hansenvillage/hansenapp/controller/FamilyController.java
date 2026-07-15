@@ -58,4 +58,10 @@ public class FamilyController {
         familyService.deleteFamily(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<FamilyInfoResponse> getFamilyInfo(@PathVariable UUID id) {
+        FamilyInfoResponse familyInfo = familyService.getFamilyInfoById(id);
+        return ResponseEntity.ok(familyInfo);
+    }
 }
