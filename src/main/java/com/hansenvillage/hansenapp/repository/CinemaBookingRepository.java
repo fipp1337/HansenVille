@@ -15,33 +15,23 @@ import java.util.UUID;
 public interface CinemaBookingRepository extends JpaRepository<CinemaBooking, UUID> {
 
     @Query("""
-                SELECT b.seatId
-                FROM CinemaBooking b
-                WHERE b.cinemaSessionId = :sessionId
+            SELECT b.seatId
+            FROM CinemaBooking b
+            WHERE b.cinemaSessionId = :sessionId
             """)
     List<UUID> findSeatIdsByCinemaSessionId(@Param("sessionId") UUID sessionId);
 
     boolean existsByCinemaSessionIdAndSeatId(UUID cinemaSessionId, UUID seatId);
 
     @Query("""
-                    FROM CinemaBooking b
-                    JOIN CinemaSession session ON b.cinemaSessionId = session.id
-                    JOIN CinemaSeat seat ON b.seatId = seat.id
-                    WHERE b.userId = :userId
-                      AND session.startAt > CURRENT_TIMESTAMP
-                    ORDER BY session.startAt
+            FROM CinemaBooking b
+            JOIN CinemaSession session ON b.cinemaSessionId = session.id
+            JOIN CinemaSeat seat ON b.seatId = seat.id
+            WHERE b.userId = :userId
+              AND session.startAt > CURRENT_TIMESTAMP
+            ORDER BY session.startAt
             """)
     List<CinemaBooking> findFutureByUserId(@Param("userId") UUID userId);
-
-    @Query("""
-                FROM CinemaBooking b
-                JOIN User u ON b.userId = u.id
-                JOIN CinemaSession session ON b.cinemaSessionId = session.id
-                JOIN CinemaSeat seat ON b.seatId = seat.id
-                WHERE u.familyId = :familyId
-                  AND session.startAt > CURRENT_TIMESTAMP
-            """)
-    List<CinemaBooking> findFutureByFamilyId(@Param("familyId") UUID familyId);
 
     long countByCinemaSessionId(UUID cinemaSessionId);
 
