@@ -57,6 +57,19 @@ public class CinemaSessionController {
         return cinemaSessionService.getPoster(id);
     }
 
+    @PutMapping("/{id}/poster")
+    public void updatePoster(@PathVariable UUID id, @RequestParam MultipartFile newFile) {
+
+        cinemaSessionService.updatePoster(id, newFile);
+    }
+
+    @DeleteMapping("/{id}/poster")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePoster(@PathVariable UUID id) {
+
+        cinemaSessionService.deletePoster(id);
+    }
+
     @GetMapping("/{id}")
     public CinemaSessionWithSeatsResponse getById(@PathVariable UUID id) {
         return cinemaSessionService.findById(id);
