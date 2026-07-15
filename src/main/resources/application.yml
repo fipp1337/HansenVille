@@ -1,17 +1,33 @@
 spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000ms
   application:
     name: hansen-village-application
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:465}
+    username: ${MAIL_USERNAME:looneyhardy@gmail.com}
+    password: ${MAIL_PASSWORD:ijmkjkfkdwgwolqy}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+#          starttls:
+#            enable: true
   datasource:
     url: jdbc:postgresql://localhost:5432/hansen-village
     username: myUser
     password: myPass
     driver-class-name: org.postgresql.Driver
-
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
     enabled: true
     default-schema: public
-
   jpa:
     hibernate:
       ddl-auto: validate

@@ -22,20 +22,9 @@ public class FamilyRegistrationRequest {
     @NotBlank
     private String address;
 
-    @NotBlank
-//    @Pattern(regexp = "^\\+380\\d{9}$", message = "Phone number format: +380XXXXXXXXX")
     private String phoneNumber;
-
-    @NotEmpty
-    @Valid
-    private List<MemberRequest> members;
 
     private List<Role> roles;
 
-    @Data
-    public static class MemberRequest {
-        @NotBlank
-        private String name;
-        private Integer age;
-    }
+    private String verificationCode;
 }

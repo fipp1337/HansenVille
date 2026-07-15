@@ -20,21 +20,28 @@ public class AuthController {
     private final AdminService adminService;
 
 
-    @PostMapping("/register")
-    @ResponseStatus(HttpStatus.CREATED)
-    public FamilyRegistrationResponse register(@Valid @RequestBody FamilyRegistrationRequest request) {
-        Family savedFamily = authService.registerFamily(request);
-        return familyMapper.toResponse(savedFamily);
+    @PostMapping("/register/initiate")
+    public ResponseEntity<String> initiateRegistration(@Valid @RequestBody InitiateRegistrationRequest request) {
+        authService.initiateRegistration(request);
+        return ResponseEntity.ok("Code send to mail.");
     }
 
+    @PostMapping("/register/confirm")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<LoginResponse> confirmRegistration(@Valid @RequestBody FamilyRegistrationRequest request) {
+        LoginResponse response = authService.registerFamily(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+
     @PostMapping("/login")
-    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
-        return authService.login(request);
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 
     @PostMapping("/refresh")
-    public LoginResponse refresh(@Valid @RequestBody RefreshRequest request) {
-        return authService.refreshToken(request);
+    public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshRequest request) {
+        return ResponseEntity.ok(authService.refreshToken(request));
     }
 
 //    @PreAuthorize("hasRole('SUPER_ADMIN')")
