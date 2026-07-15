@@ -97,6 +97,70 @@ public class CinemaSessionService {
         }
     }
 
+    public void updatePoster(UUID sessionId, MultipartFile newFile) {
+
+        deletePoster(sessionId);
+        uploadPoster(sessionId, newFile);
+
+        /*
+        CinemaSession session = cinemaSessionRepository.findById(sessionId)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND, sessionId));
+
+        if (session.getPosterImage() == null) {
+            throw FamilyException.of(FamilyErrorCode.POSTER_NOT_FOUND, sessionId);
+        }
+
+        try {
+
+            Path uploadDir = Paths.get("uploads/posters");
+            Files.createDirectories(uploadDir);
+
+            Path path = Paths.get("/uploads/posters")
+                    .resolve(session.getPosterImage());
+
+            Files.deleteIfExists(uploadDir.resolve(session.getPosterImage()));
+
+            String fileName = UUID.randomUUID() + "-" + newFile.getOriginalFilename();
+
+            Files.copy(
+                    newFile.getInputStream(),
+                    uploadDir.resolve(fileName),
+                    StandardCopyOption.REPLACE_EXISTING
+            );
+
+            session.setPosterImage(fileName);
+            return cinemaSessionRepository.save(session);
+
+        } catch (IOException e) {
+            throw FamilyException.of(FamilyErrorCode.FILE_UPDATE_FAILED);
+        }
+        */
+    }
+
+    public void deletePoster(UUID sessionId) {
+
+        CinemaSession session = cinemaSessionRepository.findById(sessionId)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND, sessionId));
+
+        if (session.getPosterImage() == null) {
+            throw FamilyException.of(FamilyErrorCode.POSTER_NOT_FOUND, sessionId);
+        }
+
+        try {
+            Path path = Paths.get("uploads/posters")
+                    .resolve(session.getPosterImage());
+
+            Files.deleteIfExists(path);
+
+            session.setPosterImage(null);
+            cinemaSessionRepository.save(session);
+
+        } catch (IOException e) {
+            throw FamilyException.of(FamilyErrorCode.FILE_DELETE_FAILED);
+        }
+
+    }
+
     public CinemaSessionWithSeatsResponse findById(UUID id) {
 
         CinemaSession session = cinemaSessionRepository.findById(id)
