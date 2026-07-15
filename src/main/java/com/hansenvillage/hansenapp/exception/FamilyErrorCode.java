@@ -54,7 +54,10 @@ public enum FamilyErrorCode {
     POOL_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Pool session not found: %s"),
 //    INVALID_TOP_UP(HttpStatus.BAD_REQUEST, "Top-up amount must be positive"),
     FAMILY_EMPTY(HttpStatus.BAD_REQUEST, "Family is empty"),
-    ROLES_EMPTY(HttpStatus.BAD_REQUEST, "Roles must not be empty");
+    ROLES_EMPTY(HttpStatus.BAD_REQUEST, "Roles must not be empty"),
+    INVALID_INVITE_CODE(HttpStatus.UNAUTHORIZED, "Invalid invite code"),
+    INVALID_VERIFICATION_CODE(HttpStatus.UNAUTHORIZED, "Invalid verification code"),
+    REGISTRATION_NOT_INITIATED (HttpStatus.UNAUTHORIZED, "Registration not initiated");
 
 
 //    INSUFFICIENT_STOCK(HttpStatus.BAD_REQUEST, "Insufficient stock for: %s"),
