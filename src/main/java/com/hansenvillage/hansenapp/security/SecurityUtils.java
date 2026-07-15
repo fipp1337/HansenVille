@@ -3,6 +3,8 @@ package com.hansenvillage.hansenapp.security;
 import com.hansenvillage.hansenapp.entity.Role;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 import java.util.UUID;

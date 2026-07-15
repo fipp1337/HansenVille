@@ -1,11 +1,14 @@
 package com.hansenvillage.hansenapp.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+//@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailService {
@@ -15,6 +18,7 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
+    @Async("mailExecutor")
     public void sendVerificationEmail(String toEmail, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
@@ -30,6 +34,7 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    @Async("mailExecutor")
     public void sendResetPasswordEmail(String toEmail, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);

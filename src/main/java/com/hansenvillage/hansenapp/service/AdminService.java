@@ -1,11 +1,9 @@
 package com.hansenvillage.hansenapp.service;
 
-import com.hansenvillage.hansenapp.dto.AdminRegistrationRequest;
-import com.hansenvillage.hansenapp.dto.FamilyInfoResponse;
-import com.hansenvillage.hansenapp.dto.LoginRequest;
-import com.hansenvillage.hansenapp.dto.LoginResponse;
+import com.hansenvillage.hansenapp.dto.*;
 import com.hansenvillage.hansenapp.entity.AdminUser;
 import com.hansenvillage.hansenapp.entity.Family;
+import com.hansenvillage.hansenapp.entity.Role;
 import com.hansenvillage.hansenapp.entity.User;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
@@ -14,6 +12,7 @@ import com.hansenvillage.hansenapp.mapper.FamilyMapper;
 import com.hansenvillage.hansenapp.mapper.UserMapper;
 import com.hansenvillage.hansenapp.repository.*;
 import com.hansenvillage.hansenapp.security.JwtService;
+import com.hansenvillage.hansenapp.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

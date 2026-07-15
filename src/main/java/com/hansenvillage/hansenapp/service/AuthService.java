@@ -57,6 +57,11 @@ public class AuthService {
 
     @Transactional
     public LoginResponse registerFamily(FamilyRegistrationRequest request) {
+
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw FamilyException.of(FamilyErrorCode.PASSWORDS_DO_NOT_MATCH);
+        }
+
         String email = request.getEmail().trim().toLowerCase();
 
         Map<Object, Object> regData = redisService.getRegistrationData(email);
@@ -170,6 +175,10 @@ public class AuthService {
 
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw FamilyException.of(FamilyErrorCode.PASSWORDS_DO_NOT_MATCH);
+        }
+
         String email = request.getEmail().trim().toLowerCase();
 
         Family family = familyRepository.findByEmailIgnoreCase(email)
