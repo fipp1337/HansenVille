@@ -9,5 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface PoolTemplateRepository extends JpaRepository<PoolTemplate, UUID> {
-    List<PoolTemplate> findAllByOrderByDayOfWeekAscStartTimeAsc();
+
 }

@@ -113,14 +113,6 @@ public class CinemaBookingService {
         return cinemaBookingRepository.findFutureByUserId(userId);
     }
 
-    public List<CinemaBooking> getBookingsByFamilyId(UUID familyId) {
-
-        if (!SecurityUtils.isSuperAdmin() && !Objects.equals(familyId, SecurityUtils.currentFamilyId())) {
-            throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
-        }
-        return cinemaBookingRepository.findFutureByFamilyId(familyId);
-    }
-
     @Retryable(
             retryFor = { ObjectOptimisticLockingFailureException.class },
             maxAttempts = 3,
