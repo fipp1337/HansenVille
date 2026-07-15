@@ -1,6 +1,7 @@
 package com.hansenvillage.hansenapp.controller;
 
 import com.hansenvillage.hansenapp.dto.FamilyAdminResponse;
+import com.hansenvillage.hansenapp.dto.FamilyInfoResponse;
 import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.mapper.FamilyMapper;
 import com.hansenvillage.hansenapp.service.AdminService;
@@ -21,9 +22,8 @@ public class AdminController {
 
     @GetMapping("/families/search")
 //    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
-    public ResponseEntity<List<FamilyAdminResponse>> findFamiliesByAddress(@RequestParam String address) {
-        List<Family> families = adminService.findFamiliesByAddress(address);
-        return ResponseEntity.ok(familyMapper.toAdminResponse(families));
+    public ResponseEntity<List<FamilyInfoResponse>> findFamiliesByAddress(@RequestParam String address) {
+        return ResponseEntity.ok(adminService.findFamiliesByAddress(address));
     }
 
     @DeleteMapping("/families")

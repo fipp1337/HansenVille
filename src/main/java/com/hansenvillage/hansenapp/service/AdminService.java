@@ -1,6 +1,7 @@
 package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.AdminRegistrationRequest;
+import com.hansenvillage.hansenapp.dto.FamilyInfoResponse;
 import com.hansenvillage.hansenapp.dto.LoginRequest;
 import com.hansenvillage.hansenapp.dto.LoginResponse;
 import com.hansenvillage.hansenapp.entity.AdminUser;
@@ -9,6 +10,8 @@ import com.hansenvillage.hansenapp.entity.User;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.mapper.AdminMapper;
+import com.hansenvillage.hansenapp.mapper.FamilyMapper;
+import com.hansenvillage.hansenapp.mapper.UserMapper;
 import com.hansenvillage.hansenapp.repository.*;
 import com.hansenvillage.hansenapp.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +34,8 @@ public class AdminService {
     private final PoolBookingRepository poolBookingRepository;
     private final CinemaBookingRepository cinemaBookingRepository;
     private final AdminMapper adminMapper;
+    private final FamilyMapper familyMapper;
+    private final UserMapper userMapper;
 
 
     @Transactional
@@ -73,8 +78,14 @@ public class AdminService {
         return response;
     }
 
-    public List<Family> findFamiliesByAddress(String address) {
-        return familyRepository.findByAddress(address);
+    public List<FamilyInfoResponse> findFamiliesByAddress(String address) {
+        return familyRepository.findByAddress(address).stream()
+                .map(family -> {
+                    FamilyInfoResponse response = familyMapper.toInfoResponse(family);
+                    response.setMembers(userMapper.toResponse(userRepository.findByFamilyId(family.getId())));
+                    return response;
+                })
+                .toList();
     }
 
     @Transactional

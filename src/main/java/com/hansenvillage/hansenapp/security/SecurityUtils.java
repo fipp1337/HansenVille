@@ -35,9 +35,9 @@ public final class SecurityUtils {
                 .orElse(false);
     }
 
-    public static boolean isAdmin() {
-        return hasRole(Role.ADMIN);
-    }
+//    public static boolean isAdmin() {
+//        return hasRole(Role.ADMIN);
+//    }
 
     public static boolean isSuperAdmin() {
         return hasRole(Role.SUPER_ADMIN);
@@ -49,9 +49,9 @@ public final class SecurityUtils {
         }
     }
 
-    public static void assertOwner(UUID targetFamilyId) {
-        if (!currentFamilyId().equals(targetFamilyId)) {
-            throw FamilyException.of(FamilyErrorCode.ACCESS_DENIED);
-        }
-    }
+//    public static void assertOwner(UUID targetFamilyId) {
+//        if (!currentFamilyId().equals(targetFamilyId)) {
+//            throw FamilyException.of(FamilyErrorCode.ACCESS_DENIED);
+//        }
+//    }
 }
