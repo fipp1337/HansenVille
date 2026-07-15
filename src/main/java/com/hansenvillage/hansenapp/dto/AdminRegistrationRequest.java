@@ -15,6 +15,6 @@ public class AdminRegistrationRequest {
     private String password;
     @NotEmpty
     private List<Role> roles;
-//    @NotBlank
+
 //    private String name;
 }
