@@ -46,8 +46,8 @@ public class PoolTemplateService {
                     .toList();
 
             for (PoolTemplate template : matchingTemplates) {
-                boolean exists = poolSessionRepository.existsBySessionDateAndStartTimeAndEndTime(
-                        currentDate, template.getStartTime(), template.getEndTime()
+                boolean exists = poolSessionRepository.existsBySessionDateAndStartTime(
+                        currentDate, template.getStartTime()
                 );
 
                 if (!exists) {

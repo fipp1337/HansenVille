@@ -13,3 +13,9 @@ CREATE TABLE pool_sessions
     booked_count INT DEFAULT 0,
     version INT DEFAULT 0 NOT NULL
 );
+
+CREATE INDEX idx_pool_sessions_session_date
+ON pool_sessions(session_date);
+
+CREATE INDEX idx_pool_sessions_session_date_start_time
+ON pool_sessions(session_date, start_time);
