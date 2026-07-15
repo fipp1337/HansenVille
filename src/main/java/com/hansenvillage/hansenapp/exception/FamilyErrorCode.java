@@ -25,7 +25,7 @@ public enum FamilyErrorCode {
     TEMPLATE_NOT_FOUND(HttpStatus.NOT_FOUND, "Template not found: %s"),
     GYM_ALREADY_BOOKED(HttpStatus.CONFLICT, "Gym already booked"),
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "Email already exists"),
-    BOOKING_NOT_FOUND(HttpStatus.NOT_FOUND,"Cinema booking not found"),
+    BOOKING_NOT_FOUND(HttpStatus.NOT_FOUND,"Booking not found"),
     INVALID_FAMILY(HttpStatus.BAD_REQUEST, "Invalid family"),
     TIME_OUT(HttpStatus.CONFLICT, "Time out"),
     BOOKING_ALREADY_CANCELLED(HttpStatus.CONFLICT, "Book already has been canceled"),
