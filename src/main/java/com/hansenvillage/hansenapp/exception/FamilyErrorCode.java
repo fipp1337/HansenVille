@@ -30,6 +30,7 @@ public enum FamilyErrorCode {
     TIME_OUT(HttpStatus.CONFLICT, "Time out"),
     BOOKING_ALREADY_CANCELLED(HttpStatus.CONFLICT, "Book already has been canceled"),
     ADDRESS_ALREADY_EXISTS(HttpStatus.CONFLICT, "Address already exists"),
+    PASSWORDS_DO_NOT_MATCH(HttpStatus.BAD_REQUEST, "Passwords do not match"),
 //    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "Comment not found: %s"),
 //    CART_NOT_FOUND(HttpStatus.NOT_FOUND, "Cart not found for user: %s"),
 //    WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "Wallet not found for user: %s"),
