@@ -33,7 +33,7 @@ public class PoolBookingController {
     @GetMapping("/sessions/{id}")
 //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
     public List<PoolBookingResponse> getBooksBySession(@PathVariable UUID id) {
-        return poolBookingService.getBookingDetailsForSession(id);
+        return poolBookingService.getBookingDetailsBySessionId(id);
     }
 
     @GetMapping("/family/{familyId}")

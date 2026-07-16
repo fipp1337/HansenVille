@@ -2,6 +2,7 @@ package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.FamilyInfoResponse;
 import com.hansenvillage.hansenapp.dto.FamilyUpdateRequest;
+import com.hansenvillage.hansenapp.dto.PoolTicketsResponse;
 import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.entity.User;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
@@ -15,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +33,8 @@ public class FamilyService {
     private final FamilyRoleRepository familyRoleRepository;
     private final FamilyMapper familyMapper;
     private final UserMapper userMapper;
+    private final PoolBookingService poolBookingService;
+
     public int getFamilySize(UUID familyId) {
         return userRepository.countByFamilyId(familyId);
     }
@@ -79,5 +84,26 @@ public class FamilyService {
         response.setMembers(userMapper.toResponse(members));
 
         return response;
+    }
+
+    public PoolTicketsResponse getFamilyTickets(LocalDate targetDate) {
+        LocalDate date = (targetDate != null) ? targetDate : LocalDate.now();
+        UUID familyId = SecurityUtils.currentFamilyId();
+        Family family = familyRepository.findById(familyId)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, familyId));
+
+        long memberCount = family.getMemberCount();
+        long maxTickets = memberCount * 2;
+
+        LocalDate monday = date.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+        LocalDate sunday = date.with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY));
+
+
+        long usedTickets = poolBookingService.countBookingsForFamilyInWeek(familyId, monday, sunday);
+        long remainingTickets = Math.max(0, maxTickets - usedTickets);
+
+        LocalDateTime resetTime = monday.plusWeeks(1).atStartOfDay();
+
+        return new PoolTicketsResponse(maxTickets, remainingTickets, resetTime);
     }
 }
