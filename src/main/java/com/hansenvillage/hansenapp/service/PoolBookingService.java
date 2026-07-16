@@ -20,8 +20,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +34,56 @@ public class PoolBookingService {
     private final UserRepository userRepository;
     private final FamilyRepository familyRepository;
     private final PoolBookingMapper poolBookingMapper;
+
+    private List<PoolBookingResponse> filterAndMapFutureBookings(List<PoolBooking> bookings, Map<UUID, User> usersMap) {
+        List<UUID> sessionIds = bookings.stream().map(PoolBooking::getPoolSessionId).distinct().toList();
+        Map<UUID, PoolSession> sessionsMap = poolSessionRepository.findAllById(sessionIds).stream()
+                .collect(Collectors.toMap(PoolSession::getId, Function.identity()));
+
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
+
+        return bookings.stream()
+                .filter(b -> {
+                    PoolSession s = sessionsMap.get(b.getPoolSessionId());
+                    if (s == null) return false;
+                    return s.getSessionDate().isAfter(today) ||
+                            (s.getSessionDate().isEqual(today) && s.getStartTime().isAfter(now));
+                })
+                .map(b -> mapToResponse(b, usersMap.get(b.getUserId()), sessionsMap.get(b.getPoolSessionId())))
+                .toList();
+    }
+
+    private PoolBookingResponse mapToResponse(PoolBooking booking, User user, PoolSession session) {
+        return new PoolBookingResponse(
+                booking.getId(),
+                booking.getPoolSessionId(),
+                booking.getUserId(),
+                user != null ? user.getName() : "Deleted User",
+                user != null ? user.getAge() : 0,
+                booking.getStatus(),
+                session != null ? session.getSessionDate() : null,
+                session != null ? session.getStartTime() : null,
+                session != null ? session.getEndTime() : null
+        );
+    }
+
+    public long countBookingsForFamilyInWeek(UUID familyId, LocalDate start, LocalDate end) {
+        List<UUID> userIds = userRepository.findByFamilyId(familyId).stream()
+                .map(User::getId)
+                .toList();
+        if (userIds.isEmpty()) {
+            return 0;
+        }
+
+        return poolBookingRepository.countByUserIdInAndSessionDateBetweenAndStatusIn(
+                userIds,
+                start,
+                end,
+                List.of(PoolBookingStatus.REGISTERED, PoolBookingStatus.CANCELED_WITHOUT_RETURN)
+        );
+    }
+
 
     @Retryable(
             retryFor = {ObjectOptimisticLockingFailureException.class},
@@ -67,7 +120,7 @@ public class PoolBookingService {
         LocalDate monday = sessionDate.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
         LocalDate sunday = sessionDate.with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY));
 
-        long usedTickets = poolBookingRepository.countBookingsForFamilyInWeek(familyId, monday, sunday);
+        long usedTickets = countBookingsForFamilyInWeek(familyId, monday, sunday);
 
         if (usedTickets >= maxAllowedTickets) {
             throw FamilyException.of(FamilyErrorCode.OUT_OF_TICKETS);
@@ -109,14 +162,26 @@ public class PoolBookingService {
     }
 
     public List<PoolBookingResponse> getBookingsByUserId(UUID userId) {
-        if (!userRepository.existsById(userId)) {
-            throw FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, userId);
-        }
-        return poolBookingRepository.findFutureRegisteredByUserId(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, userId));
+
+        List<PoolBooking> bookings = poolBookingRepository.findByUserIdAndStatus(userId, PoolBookingStatus.REGISTERED);
+        if (bookings.isEmpty()) return List.of();
+
+        return filterAndMapFutureBookings(bookings, Map.of(userId, user));
     }
 
     public List<PoolBookingResponse> getBookingsByFamilyId(UUID familyId) {
-        return poolBookingRepository.findFutureRegisteredByFamilyId(familyId);
+        List<User> members = userRepository.findByFamilyId(familyId);
+        if (members.isEmpty()) return List.of();
+
+        List<UUID> userIds = members.stream().map(User::getId).toList();
+        Map<UUID, User> usersMap = members.stream().collect(Collectors.toMap(User::getId, Function.identity()));
+
+        List<PoolBooking> bookings = poolBookingRepository.findByUserIdInAndStatus(userIds, PoolBookingStatus.REGISTERED);
+        if (bookings.isEmpty()) return List.of();
+
+        return filterAndMapFutureBookings(bookings, usersMap);
     }
 
     @Retryable(
@@ -169,18 +234,19 @@ public class PoolBookingService {
         poolBookingRepository.save(booking);
     }
 
-    public List<PoolBookingResponse> getBookingDetailsForSession(UUID sessionId) {
-        if (!poolSessionRepository.existsById(sessionId)) {
-            throw FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, sessionId);
-        }
+    public List<PoolBookingResponse> getBookingDetailsBySessionId(UUID sessionId) {
+        List<PoolBooking> bookings = poolBookingRepository.findByPoolSessionId(sessionId);
+        if (bookings.isEmpty()) return List.of();
 
-        List<PoolBookingResponse> details = poolBookingRepository.findBookingDetailsBySessionId(sessionId);
+        PoolSession session = poolSessionRepository.findById(sessionId)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, sessionId));
 
-        return details.stream()
-                .sorted(Comparator.comparing(
-                        PoolBookingResponse::getUserAge,
-                        Comparator.nullsLast(Comparator.naturalOrder())
-                ))
+        List<UUID> userIds = bookings.stream().map(PoolBooking::getUserId).distinct().toList();
+        Map<UUID, User> usersMap = userRepository.findAllById(userIds).stream()
+                .collect(Collectors.toMap(User::getId, Function.identity()));
+
+        return bookings.stream()
+                .map(b -> mapToResponse(b, usersMap.get(b.getUserId()), session))
                 .toList();
     }
 }

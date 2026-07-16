@@ -26,7 +26,6 @@ public interface CinemaBookingRepository extends JpaRepository<CinemaBooking, UU
     @Query("""
             FROM CinemaBooking b
             JOIN CinemaSession session ON b.cinemaSessionId = session.id
-            JOIN CinemaSeat seat ON b.seatId = seat.id
             WHERE b.userId = :userId
               AND session.startAt > CURRENT_TIMESTAMP
             ORDER BY session.startAt

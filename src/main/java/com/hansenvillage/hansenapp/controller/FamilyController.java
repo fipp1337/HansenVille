@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
@@ -63,5 +64,11 @@ public class FamilyController {
     public ResponseEntity<FamilyInfoResponse> getFamilyInfo(@PathVariable UUID id) {
         FamilyInfoResponse familyInfo = familyService.getFamilyInfoById(id);
         return ResponseEntity.ok(familyInfo);
+    }
+
+    @GetMapping("/tickets/pool")
+    public PoolTicketsResponse getPoolTickets(
+            @RequestParam(required = false) LocalDate date) {
+        return familyService.getFamilyTickets(date);
     }
 }
