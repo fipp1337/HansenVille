@@ -14,5 +14,6 @@ public class ResetPasswordRequest {
     private String newPassword;
 
     @NotBlank
+    @Size(min = 6, max = 25)
     private String confirmPassword;
 }
