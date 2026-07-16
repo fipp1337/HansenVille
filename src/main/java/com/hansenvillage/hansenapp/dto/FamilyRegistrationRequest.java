@@ -18,6 +18,7 @@ public class FamilyRegistrationRequest {
     private String password;
 
     @NotBlank
+    @Size(min = 6, max = 25)
     private String confirmPassword;
 
     @NotBlank
