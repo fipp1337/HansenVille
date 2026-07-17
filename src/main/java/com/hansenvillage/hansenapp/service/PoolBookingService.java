@@ -106,13 +106,13 @@ public class PoolBookingService {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, request.getUserId()));
 
-        UUID familyId = SecurityUtils.currentFamilyId();
-        if (!Objects.equals(user.getFamilyId(), familyId)) {
-            throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY, request.getUserId());
-        }
+//        UUID familyId = SecurityUtils.currentFamilyId();
+//        if (!Objects.equals(user.getFamilyId(), familyId)) {
+//            throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY, request.getUserId());
+//        }
 
-        Family family = familyRepository.findById(familyId)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, familyId));
+        Family family = familyRepository.findById(user.getFamilyId()) //!
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, user.getFamilyId())); //!!
         long memberCount = family.getMemberCount();
         long maxAllowedTickets = memberCount * 2;
 
@@ -120,7 +120,7 @@ public class PoolBookingService {
         LocalDate monday = sessionDate.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
         LocalDate sunday = sessionDate.with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY));
 
-        long usedTickets = countBookingsForFamilyInWeek(familyId, monday, sunday);
+        long usedTickets = countBookingsForFamilyInWeek(user.getFamilyId(), monday, sunday); //!!!
 
         if (usedTickets >= maxAllowedTickets) {
             throw FamilyException.of(FamilyErrorCode.OUT_OF_TICKETS);
@@ -184,10 +184,6 @@ public class PoolBookingService {
         return filterAndMapFutureBookings(bookings, usersMap);
     }
 
-    @Retryable(
-            retryFor = {ObjectOptimisticLockingFailureException.class},
-            maxAttempts = 3,
-            backoff = @Backoff(delay = 100))
     @Transactional
     public void deleteBooking(UUID id) {
         PoolBooking booking = poolBookingRepository.findById(id)

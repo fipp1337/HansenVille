@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,6 +41,10 @@ public class CinemaSessionService {
     private final CinemaBookingRepository cinemaBookingRepository;
 
     public List<CinemaSession> create(CinemaPublishWeekScheduleRequest request) {
+        CinemaSessionSlotRequest cinemaSessionSlotRequest = new CinemaSessionSlotRequest();
+        if (cinemaSessionSlotRequest.getHallId() == null) {
+            throw FamilyException.of(FamilyErrorCode.HALL_NOT_FOUND);
+        }
         List<CinemaSession> sessions = cinemaSessionMapper.toEntityList(request);
         return cinemaSessionRepository.saveAll(sessions);
     }

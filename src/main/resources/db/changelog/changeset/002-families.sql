@@ -5,10 +5,10 @@
 CREATE TABLE families (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     password VARCHAR(255) NOT NULL,
-    email    VARCHAR(255) NOT NULL unique,
-    address  VARCHAR(255) NOT NULL unique,
+    email    VARCHAR(255) NOT NULL,
+    address  VARCHAR(255) NOT NULL,
     member_count INT NOT NULL,
-    phone_number VARCHAR,
+    phone_number VARCHAR(60),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

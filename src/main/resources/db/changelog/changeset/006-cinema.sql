@@ -29,11 +29,12 @@ CREATE TABLE cinema_seats (
 );
 
 CREATE TABLE cinema_bookings (
-       id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-       cinema_session_id UUID      NOT NULL REFERENCES cinema_sessions(id),
-       seat_id    UUID      NOT NULL REFERENCES cinema_seats(id),
-       user_id    UUID      NOT NULL REFERENCES users(id),
-       created_at TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP
+   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   cinema_session_id UUID      NOT NULL REFERENCES cinema_sessions(id),
+   seat_id    UUID      NOT NULL REFERENCES cinema_seats(id),
+   user_id    UUID      NOT NULL REFERENCES users(id),
+   created_at TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   UNIQUE (cinema_session_id, seat_id)
 );
 
 CREATE INDEX idx_cinema_sessions_start_at
@@ -42,8 +43,11 @@ ON cinema_sessions(start_at);
 CREATE INDEX idx_cinema_seats_hall_id
 ON cinema_seats(hall_id);
 
-CREATE INDEX idx_cinema_bookings_cinema_session_id
-ON cinema_bookings(cinema_session_id);
+-- CREATE INDEX idx_cinema_bookings_cinema_session_id
+-- ON cinema_bookings(cinema_session_id);
+--
+-- CREATE INDEX idx_cinema_bookings_seat_id
+--  ON cinema_bookings(seat_id);
 
 CREATE INDEX idx_cinema_bookings_user_id
 ON cinema_bookings(user_id);
