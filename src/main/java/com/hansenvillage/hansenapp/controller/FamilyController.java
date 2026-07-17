@@ -9,6 +9,7 @@ import com.hansenvillage.hansenapp.service.FamilyService;
 import com.hansenvillage.hansenapp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,5 +71,26 @@ public class FamilyController {
     public PoolTicketsResponse getPoolTickets(
             @RequestParam(required = false) LocalDate date) {
         return familyService.getFamilyTickets(date);
+    }
+
+    @PutMapping("/me")
+    public Family updateMyFamily(@RequestBody FamilyUpdateRequest request) {
+        return familyService.updateFamilyInfoByJwt(request);
+    }
+
+    @DeleteMapping("/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteMyFamily() {
+        familyService.deleteFamilyByJwt();
+    }
+
+    @GetMapping("/me")
+    public FamilyInfoResponse getMyFamilyInfo() {
+        return familyService.getFamilyInfoByJwt();
+    }
+
+    @GetMapping("/me/bookings/history")
+    public FamilyBookingHistoryResponse getMyBookingHistory() {
+        return familyService.getFamilyBookingHistoryByJwt();
     }
 }

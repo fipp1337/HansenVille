@@ -1,6 +1,7 @@
 package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.CinemaBookingRequest;
+import com.hansenvillage.hansenapp.dto.CinemaBookingResponse;
 import com.hansenvillage.hansenapp.entity.*;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
@@ -15,9 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -121,5 +123,35 @@ public class CinemaBookingService {
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND, booking.getCinemaSessionId()));
 
         cinemaBookingRepository.deleteById(id);
+    }
+
+    public List<CinemaBookingResponse> getCinemaBookingHistory(UUID familyId) {
+        List<User> members = userRepository.findByFamilyId(familyId);
+        if (members.isEmpty()) return List.of();
+
+        List<UUID> userIds = members.stream().map(User::getId).toList();
+
+        List<CinemaBooking> bookings = cinemaBookingRepository.findByUserIdIn(userIds);
+        if (bookings.isEmpty()) return List.of();
+
+        List<UUID> sessionIds = bookings.stream().map(CinemaBooking::getCinemaSessionId).distinct().toList();
+        Map<UUID, CinemaSession> sessionsMap = cinemaSessionRepository.findAllById(sessionIds).stream()
+                .collect(Collectors.toMap(CinemaSession::getId, Function.identity()));
+
+        return bookings.stream()
+                .sorted((b1, b2) -> {
+                    CinemaSession s1 = sessionsMap.get(b1.getCinemaSessionId());
+                    CinemaSession s2 = sessionsMap.get(b2.getCinemaSessionId());
+                    LocalDateTime t1 = s1 != null ? s1.getStartAt() : LocalDateTime.MIN;
+                    LocalDateTime t2 = s2 != null ? s2.getStartAt() : LocalDateTime.MIN;
+                    return t2.compareTo(t1);
+                })
+                .map(b -> new CinemaBookingResponse(
+                        b.getId(),
+                        b.getCinemaSessionId(),
+                        b.getUserId(),
+                        b.getSeatId()
+                ))
+                .toList();
     }
 }
