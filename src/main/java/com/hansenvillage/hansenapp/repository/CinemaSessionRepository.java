@@ -16,4 +16,6 @@ import java.util.UUID;
 public interface CinemaSessionRepository extends JpaRepository<CinemaSession, UUID> {
 
     List<CinemaSession> findByStartAtBetween(LocalDateTime from, LocalDateTime to);
+
+    long countByHallId(UUID hallID);
 }

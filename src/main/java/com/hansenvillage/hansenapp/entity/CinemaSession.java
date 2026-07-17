@@ -30,7 +30,7 @@ public class CinemaSession {
     private int duration;
 
     private UUID hallId;
-    
+
     @Enumerated(EnumType.STRING)
     private SessionStatus status;
 

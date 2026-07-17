@@ -27,53 +27,52 @@ public class CinemaBookingService {
     private final CinemaSessionRepository cinemaSessionRepository;
     private final UserRepository userRepository;
     private final FamilyRepository familyRepository;
-    private final CinemaBookingMapper cinemaBookingMapper;
     private final CinemaSeatRepository cinemaSeatRepository;
 
     @Retryable(
-            retryFor = {
-                    ObjectOptimisticLockingFailureException.class
-            },
-            maxAttempts = 3,
-            backoff = @Backoff(delay = 100))
-    @Transactional
-    public List<CinemaBooking> book(CinemaBookingRequest request) {
+                retryFor = {
+                        ObjectOptimisticLockingFailureException.class
+                },
+                maxAttempts = 3,
+                backoff = @Backoff(delay = 100))
+        @Transactional
+        public List<CinemaBooking> book(CinemaBookingRequest request) {
 
-        CinemaSession session = cinemaSessionRepository.findById(request.getCinemaSessionId())
-                .orElseThrow(() ->
-                        FamilyException.of(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND, request.getCinemaSessionId()));
+            CinemaSession session = cinemaSessionRepository.findById(request.getCinemaSessionId())
+                    .orElseThrow(() ->
+                            FamilyException.of(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND, request.getCinemaSessionId()));
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, request.getUserId()));
+            User user = userRepository.findById(request.getUserId())
+                    .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, request.getUserId()));
 
-        if (!Objects.equals(user.getFamilyId(), SecurityUtils.currentFamilyId())) {
-            throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
-        }
+//        if (!Objects.equals(user.getFamilyId(), SecurityUtils.currentFamilyId())) {
+//            throw FamilyException.of(FamilyErrorCode.INVALID_FAMILY);
+//        }
 
-        UUID familyId = SecurityUtils.currentFamilyId();
-        Family family = familyRepository.findById(familyId)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, familyId));
+//        UUID familyId = SecurityUtils.currentFamilyId();
+            Family family = familyRepository.findById(user.getFamilyId()) //!
+                    .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, user.getFamilyId())); //!
 
-        long bookedSeats = cinemaBookingRepository.countByCinemaSessionId(session.getId());
+            long bookedSeats = cinemaBookingRepository.countByCinemaSessionId(session.getId());
 
-//        if (bookedSeats + request.getSeatIds().size() > session.getMaxCapacity()) {
+//        if (bookedSeats + request.getSeatIds().size() > cinemaSeatRepository.findByHallId(session.getHallId()).size()) {
 //            throw FamilyException.of(FamilyErrorCode.CINEMA_SESSION_IS_FULL);
 //        }
 
-        for (UUID seatId : request.getSeatIds()) {
+            for (UUID seatId : request.getSeatIds()) {
 
-            cinemaSeatRepository.findById(seatId)
-                    .orElseThrow(() ->
-                            FamilyException.of(FamilyErrorCode.SEAT_NOT_FOUND, seatId));
+                cinemaSeatRepository.findById(seatId)
+                        .orElseThrow(() ->
+                                FamilyException.of(FamilyErrorCode.SEAT_NOT_FOUND, seatId));
 
-            if (cinemaBookingRepository.existsByCinemaSessionIdAndSeatId(session.getId(), seatId)) {
-                throw FamilyException.of(FamilyErrorCode.SEAT_ALREADY_BOOKED, seatId);
+                if (cinemaBookingRepository.existsByCinemaSessionIdAndSeatId(session.getId(), seatId)) {
+                    throw FamilyException.of(FamilyErrorCode.SEAT_ALREADY_BOOKED, seatId);
+                }
             }
-        }
 
-        if (request.getSeatIds().size() > family.getMemberCount()) {
-            throw FamilyException.of(FamilyErrorCode.TOO_MANY_SEATS);
-        }
+            if (request.getSeatIds().size() > family.getMemberCount()) {
+                throw FamilyException.of(FamilyErrorCode.TOO_MANY_SEATS);
+            }
 
         List<CinemaBooking> bookings = request.getSeatIds().stream()
                 .map(seatId -> {
@@ -84,7 +83,6 @@ public class CinemaBookingService {
                     return booking;
                 })
                 .toList();
-
         return cinemaBookingRepository.saveAll(bookings);
     }
 
@@ -108,10 +106,6 @@ public class CinemaBookingService {
         return cinemaBookingRepository.findFutureByUserId(userId);
     }
 
-    @Retryable(
-            retryFor = { ObjectOptimisticLockingFailureException.class },
-            maxAttempts = 3,
-            backoff = @Backoff(delay = 100))
     @Transactional
     public void deleteBooking(UUID id) {
         CinemaBooking booking = cinemaBookingRepository.findById(id)
