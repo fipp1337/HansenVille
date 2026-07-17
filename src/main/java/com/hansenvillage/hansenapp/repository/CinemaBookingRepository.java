@@ -14,6 +14,8 @@ import java.util.UUID;
 @Repository
 public interface CinemaBookingRepository extends JpaRepository<CinemaBooking, UUID> {
 
+    List<CinemaBooking> findByUserIdIn(List<UUID> userIds);
+
     @Query("""
             SELECT b.seatId
             FROM CinemaBooking b
