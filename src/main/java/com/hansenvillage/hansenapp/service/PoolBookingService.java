@@ -249,4 +249,28 @@ public class PoolBookingService {
                 .map(b -> mapToResponse(b, usersMap.get(b.getUserId()), session))
                 .toList();
     }
+
+    public List<PoolBookingResponse> getActiveBookingsByJwt() {
+        return getBookingsByFamilyId(SecurityUtils.currentFamilyId());
+    }
+
+    public List<PoolBookingResponse> getPoolBookingHistory(UUID familyId) {
+        List<User> members = userRepository.findByFamilyId(familyId);
+        if (members.isEmpty()) return List.of();
+
+        List<UUID> userIds = members.stream().map(User::getId).toList();
+        Map<UUID, User> usersMap = members.stream().collect(Collectors.toMap(User::getId, Function.identity()));
+
+        List<PoolBooking> bookings = poolBookingRepository.findByUserIdIn(userIds);
+        if (bookings.isEmpty()) return List.of();
+
+        List<UUID> sessionIds = bookings.stream().map(PoolBooking::getPoolSessionId).distinct().toList();
+        Map<UUID, PoolSession> sessionsMap = poolSessionRepository.findAllById(sessionIds).stream()
+                .collect(Collectors.toMap(PoolSession::getId, Function.identity()));
+
+        return bookings.stream()
+                .map(b -> mapToResponse(b, usersMap.get(b.getUserId()), sessionsMap.get(b.getPoolSessionId())))
+                .sorted(Comparator.comparing(PoolBookingResponse::getSessionDate, Comparator.nullsLast(Comparator.reverseOrder())))
+                .toList();
+    }
 }

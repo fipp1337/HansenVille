@@ -1,8 +1,6 @@
 package com.hansenvillage.hansenapp.service;
 
-import com.hansenvillage.hansenapp.dto.FamilyInfoResponse;
-import com.hansenvillage.hansenapp.dto.FamilyUpdateRequest;
-import com.hansenvillage.hansenapp.dto.PoolTicketsResponse;
+import com.hansenvillage.hansenapp.dto.*;
 import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.entity.User;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
@@ -34,6 +32,7 @@ public class FamilyService {
     private final FamilyMapper familyMapper;
     private final UserMapper userMapper;
     private final PoolBookingService poolBookingService;
+    private final CinemaBookingService cinemaBookingService;
 
     public int getFamilySize(UUID familyId) {
         return userRepository.countByFamilyId(familyId);
@@ -44,15 +43,45 @@ public class FamilyService {
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, id));
     }
 
+
     @Transactional
     public Family updateFamilyInfo(UUID id, FamilyUpdateRequest request) {
         SecurityUtils.assertOwnerOrSuperAdmin(id);
         Family family = familyRepository.findById(id)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, id));
+
         familyMapper.updateFamilyFromRequest(request, family);
-        if (request.getPassword() != null && !request.getPassword().isBlank()) {
-            family.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        boolean isPasswordUpdateAttempt =
+                (request.getOldPassword() != null && !request.getOldPassword().isBlank()) ||
+                        (request.getNewPassword() != null && !request.getNewPassword().isBlank()) ||
+                        (request.getConfirmNewPassword() != null && !request.getConfirmNewPassword().isBlank());
+
+        if (isPasswordUpdateAttempt) {
+
+            if (request.getOldPassword() == null || request.getOldPassword().isBlank()) {
+                throw FamilyException.of(FamilyErrorCode.OLD_PASSWORD_REQUIRED);
+            }
+
+            if (request.getNewPassword() == null || request.getNewPassword().isBlank()) {
+                throw FamilyException.of(FamilyErrorCode.NEW_PASSWORD_REQUIRED);
+            }
+
+            if (request.getNewPassword().equals(request.getOldPassword())) {
+                throw FamilyException.of(FamilyErrorCode.NEW_PASSWORD_MATCH_WITH_OLD);
+            }
+
+            if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
+                throw FamilyException.of(FamilyErrorCode.PASSWORDS_DO_NOT_MATCH);
+            }
+
+            if (!passwordEncoder.matches(request.getOldPassword(), family.getPassword())) {
+                throw FamilyException.of(FamilyErrorCode.INVALID_OLD_PASSWORD);
+            }
+
+            family.setPassword(passwordEncoder.encode(request.getNewPassword()));
         }
+
         if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
             family.setPhoneNumber(phoneService.validateAndFormatPhone(request.getPhoneNumber()));
         }
@@ -105,5 +134,31 @@ public class FamilyService {
         LocalDateTime resetTime = monday.plusWeeks(1).atStartOfDay();
 
         return new PoolTicketsResponse(maxTickets, remainingTickets, resetTime);
+    }
+
+    @Transactional
+    public Family updateFamilyInfoByJwt(FamilyUpdateRequest request) {
+        UUID familyId = SecurityUtils.currentFamilyId();
+        return updateFamilyInfo(familyId, request);
+    }
+
+    @Transactional
+    public void deleteFamilyByJwt() {
+        UUID familyId = SecurityUtils.currentFamilyId();
+        deleteFamily(familyId);
+    }
+
+    @Transactional
+    public FamilyInfoResponse getFamilyInfoByJwt() {
+        UUID familyId = SecurityUtils.currentFamilyId();
+        return getFamilyInfoById(familyId);
+    }
+
+    public FamilyBookingHistoryResponse getFamilyBookingHistoryByJwt() {
+        UUID familyId = SecurityUtils.currentFamilyId();
+
+        List<PoolBookingResponse> poolHistory = poolBookingService.getPoolBookingHistory(familyId);
+        List<CinemaBookingResponse> cinemaHistory = cinemaBookingService.getCinemaBookingHistory(familyId);
+        return new FamilyBookingHistoryResponse(poolHistory, cinemaHistory);
     }
 }

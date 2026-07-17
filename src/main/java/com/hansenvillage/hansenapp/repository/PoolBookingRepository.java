@@ -24,6 +24,8 @@ public interface PoolBookingRepository extends JpaRepository<PoolBooking, UUID> 
             List<PoolBookingStatus> statuses
     );
 
+    List<PoolBooking> findByUserIdIn(List<UUID> userIds);
+
     Optional<PoolBooking> findByUserIdAndPoolSessionId(UUID userId, UUID poolSessionId);
 
     List<PoolBooking> findByPoolSessionId(UUID poolSessionId);

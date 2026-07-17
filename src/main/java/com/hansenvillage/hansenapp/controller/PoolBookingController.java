@@ -56,4 +56,9 @@ public class PoolBookingController {
     public void deleteBooking(@PathVariable UUID id) {
         poolBookingService.deleteBooking(id);
     }
+
+    @GetMapping("/me/active")
+    public List<PoolBookingResponse> getFamilyActivePoolBookings() {
+        return poolBookingService.getActiveBookingsByJwt();
+    }
 }
