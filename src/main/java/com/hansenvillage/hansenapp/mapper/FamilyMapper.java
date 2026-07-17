@@ -20,5 +20,6 @@ public interface FamilyMapper {
     )
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "memberCount", ignore = true)
+    @Mapping(target = "password", ignore = true)
     void updateFamilyFromRequest(FamilyUpdateRequest request, @MappingTarget Family family);
 }
