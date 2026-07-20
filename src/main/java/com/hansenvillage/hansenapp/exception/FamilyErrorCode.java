@@ -24,6 +24,8 @@ public enum FamilyErrorCode {
     BOOKING_FAILED(HttpStatus.CONFLICT, "Booking failed"),
     FACILITY_NOT_FOUND(HttpStatus.NOT_FOUND, "Facility not found: %s"),
     FACILITY_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "Facility image not found"),
+    ACTIVITY_NOT_FOUND(HttpStatus.NOT_FOUND, "Activity not found: %s"),
+    ACTIVITY_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "Activity image not found"),
 //    PRODUCT_QUANTITY_EMPTY(HttpStatus.NOT_FOUND, "StockQuantity is empty or not enough: %s"),
 //    SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Session not found: %s"),
     OUT_OF_TICKETS(HttpStatus.NOT_ACCEPTABLE, "Not enough tickets"),
