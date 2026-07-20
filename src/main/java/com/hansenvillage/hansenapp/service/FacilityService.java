@@ -80,6 +80,9 @@ public class FacilityService {
             Resource resource = new UrlResource(path.toUri());
 
             String contentType = Files.probeContentType(path);
+            if (contentType == null) {
+                contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+            }
 
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
