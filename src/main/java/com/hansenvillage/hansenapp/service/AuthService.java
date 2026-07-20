@@ -58,10 +58,6 @@ public class AuthService {
     @Transactional
     public LoginResponse registerFamily(FamilyRegistrationRequest request) {
 
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw FamilyException.of(FamilyErrorCode.PASSWORDS_DO_NOT_MATCH);
-        }
-
         String email = request.getEmail().trim().toLowerCase();
 
         Map<Object, Object> regData = redisService.getRegistrationData(email);
@@ -92,7 +88,8 @@ public class AuthService {
 
         Family family = familyMapper.toEntity(request);
         family.setEmail(email);
-        family.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        family.setPassword(passwordEncoder.encode(storedInviteCode));
 
         if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
             family.setPhoneNumber(phoneService.validateAndFormatPhone(request.getPhoneNumber()));
