@@ -12,15 +12,6 @@ import java.util.List;
 
 @Data
 public class FamilyRegistrationRequest {
-
-//    @NotBlank
-//    @Size(min = 6, max = 25)
-//    private String password;
-//
-//    @NotBlank
-//    @Size(min = 6, max = 25)
-//    private String confirmPassword;
-
     @NotBlank
     @Email
     private String email;
