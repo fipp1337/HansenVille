@@ -3,7 +3,6 @@ package com.hansenvillage.hansenapp;
 import com.hansenvillage.hansenapp.dto.PoolBookingRequest;
 import com.hansenvillage.hansenapp.entity.PoolSession;
 import com.hansenvillage.hansenapp.entity.User;
-import com.hansenvillage.hansenapp.repository.FamilyRepository;
 import com.hansenvillage.hansenapp.repository.PoolBookingRepository;
 import com.hansenvillage.hansenapp.repository.PoolSessionRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
@@ -12,6 +11,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,7 +24,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @SpringBootTest
+@Testcontainers
+@ActiveProfiles("test")
 class PoolBookingStressTest {
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres =
+            new PostgreSQLContainer<>("postgres:16-alpine");
 
     @Autowired
     private PoolBookingService poolBookingService;
@@ -28,8 +39,6 @@ class PoolBookingStressTest {
     private UserRepository userRepository;
     @Autowired
     private PoolSessionRepository poolSessionRepository;
-    @Autowired
-    private FamilyRepository familyRepository;
     @Autowired
     private PoolBookingRepository poolBookingRepository;
 
@@ -47,7 +56,7 @@ class PoolBookingStressTest {
                 .toList();
 
         if (userIds.isEmpty()) {
-            throw new IllegalStateException("No users in DB!");
+            throw new IllegalStateException("No users in DB.");
         }
 
         List<PoolSession> sessions = poolSessionRepository.findAll();

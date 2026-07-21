@@ -1,0 +1,200 @@
+CREATE OR REPLACE FUNCTION generate_families(records_count INT)
+RETURNS VOID AS
+$$
+BEGIN
+INSERT INTO families (
+    password,
+    email,
+    address,
+    member_count,
+    phone_number
+)
+SELECT
+    md5(random()::text),
+    'family' || i || '@gmail.com',                               -- унікальний email
+    'Будинок ' || i || ', квартира ' || i,
+    i,                                                   -- member_count: 1,2,3,...
+    CASE
+        WHEN random() < 0.2 THEN NULL                                 -- ~20% без телефону
+        ELSE '+380' ||
+             (ARRAY['50','63','66','67','68','73','91','92','93','95','96','97','98','99'])
+            [floor(random()*13 + 1)] ||
+                 lpad((floor(random()*10000000))::text, 7, '0')
+        END
+FROM generate_series(1, records_count) AS s(i);
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT generate_families(1000);
+
+
+
+CREATE OR REPLACE FUNCTION generate_users(records_count INT)
+RETURNS VOID AS
+$$
+DECLARE
+names TEXT[] := ARRAY[
+        'Олександр', 'Марія', 'Андрій', 'Олена', 'Сергій', 'Анна', 'Дмитро', 'Наталія',
+        'Іван', 'Ольга', 'Володимир', 'Тетяна', 'Максим', 'Юлія', 'Артем', 'Ірина',
+        'Ярослав', 'Оксана', 'Богдан', 'Вікторія', 'Євген', 'Світлана', 'Роман'
+    ];
+BEGIN
+INSERT INTO users (
+    family_id,
+    name,
+    age
+)
+SELECT
+    -- Беремо випадковий UUID родини, яка вже існує в таблиці families
+    (SELECT id FROM families ORDER BY random() LIMIT 1),
+
+        -- Вибираємо випадкове ім'я з масиву
+        names[floor(random() * array_length(names, 1) + 1)],
+
+        -- Генеруємо випадковий вік від 1 до 80 років
+        floor(random() * 80 + 1)::INT
+
+FROM generate_series(1, records_count) AS s(i);
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT generate_users(1000);
+
+
+
+CREATE OR REPLACE FUNCTION generate_pool_sessions(days_ahead INT)
+RETURNS VOID AS
+$$
+DECLARE
+current_day DATE;
+    -- Задаємо фіксовані 2-годинні інтервали для сесій протягом дня
+    session_slots TIME[][] := ARRAY[
+        ARRAY['08:00:00'::TIME, '10:00:00'::TIME],
+        ARRAY['10:15:00'::TIME, '12:15:00'::TIME],
+        ARRAY['13:00:00'::TIME, '15:00:00'::TIME],
+        ARRAY['15:15:00'::TIME, '17:15:00'::TIME],
+        ARRAY['17:30:00'::TIME, '19:30:00'::TIME],
+        ARRAY['19:45:00'::TIME, '21:45:00'::TIME]
+    ];
+    slot TIME[];
+BEGIN
+    -- Цикл по днях (починаючи від сьогодні і на days_ahead днів вперед)
+FOR d IN 0..days_ahead LOOP
+        current_day := CURRENT_DATE + d;
+
+        FOREACH slot SLICE 1 IN ARRAY session_slots LOOP
+            INSERT INTO pool_sessions (
+                start_time,
+                end_time,
+                max_capacity,
+                status,
+                session_date,
+                booked_count,
+                version
+            ) VALUES (
+                slot[1],                            -- start_time
+                slot[2],                            -- end_time
+                40,                                 -- max_capacity (за замовчуванням)
+                'ACTIVE',                           -- статус сесії
+                current_day,                        -- дата сесії
+                0,                                  -- booked_count починається з нуля
+                0                                   -- version для Optimistic Locking
+            );
+END LOOP;
+END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT generate_pool_sessions(30);
+
+
+
+CREATE OR REPLACE FUNCTION generate_cinema_infrastructure()
+RETURNS VOID AS
+$$
+DECLARE
+hall_names TEXT[] := ARRAY['IMAX'];
+    current_hall_id UUID;
+    row_char CHAR;
+    seat_num INT;
+BEGIN
+FOR i IN 1..array_length(hall_names, 1) LOOP
+        INSERT INTO cinema_halls (name)
+        VALUES (hall_names[i])
+        RETURNING id INTO current_hall_id;
+
+FOR row_index IN 65..68 LOOP -- ASCII коди для літер A-D
+            row_char := chr(row_index);
+
+FOR seat_num IN 1..9 LOOP
+                INSERT INTO cinema_seats (hall_id, seat_number)
+                VALUES (current_hall_id, row_char || seat_num::TEXT);
+END LOOP;
+END LOOP;
+END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT generate_cinema_infrastructure();
+
+
+
+CREATE OR REPLACE FUNCTION generate_cinema_sessions(days_ahead INT)
+RETURNS VOID AS
+$$
+DECLARE
+movies TEXT[] := ARRAY[
+        'Інтерстеллар', 'Початок', 'Дюна: Частина Друга', 'Темний лицар',
+        'Матриця', 'Аватар: Шлях води', 'Оппенгеймер', 'Гладіатор'
+    ];
+    posters TEXT[] := ARRAY[
+        'http://example.com/interstellar.jpg', 'http://example.com/inception.jpg',
+        'http://example.com/dune2.jpg', 'http://example.com/dark_knight.jpg',
+        'http://example.com/matrix.jpg', 'http://example.com/avatar2.jpg',
+        'http://example.com/oppenheimer.jpg', 'http://example.com/gladiator.jpg'
+    ];
+    movie_index INT;
+    current_day DATE;
+    session_start TIMESTAMP;
+    hall_record RECORD;
+    slots_array INT[] := ARRAY[10, 13, 17, 20];
+    slot_hour INT;
+BEGIN
+FOR d IN 0..days_ahead LOOP
+        current_day := CURRENT_DATE + d;
+
+FOR hall_record IN SELECT id FROM cinema_halls LOOP
+
+    FOREACH slot_hour IN ARRAY slots_array LOOP
+
+                movie_index := floor(random() * array_length(movies, 1) + 1);
+
+session_start := current_day::TIMESTAMP
+                                 + (slot_hour || ' hours')::INTERVAL
+                                 + (CASE WHEN random() < 0.5 THEN '0 minutes' ELSE '30 minutes' END)::INTERVAL;
+
+INSERT INTO cinema_sessions (
+    movie_name,
+    poster_image,
+    start_at,
+    duration,
+    hall_id,
+    status,
+    version
+) VALUES (
+             movies[movie_index],
+             posters[movie_index],
+             session_start,
+             floor(random() * 60 + 90)::INT, -- тривалість від 90 до 150 хвилин
+             hall_record.id,
+             'ACTIVE',
+             0
+         );
+END LOOP;
+
+END LOOP;
+END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT generate_cinema_sessions(14);
