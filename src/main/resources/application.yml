@@ -17,8 +17,8 @@ spring:
           auth: true
           ssl:
             enable: true
-#          starttls:
-#            enable: true
+  #          starttls:
+  #            enable: true
   datasource:
     url: jdbc:postgresql://localhost:5432/hansen-village
     username: myUser
@@ -36,11 +36,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-  store:
-    jwt:
-      secret: "hansen-village-academy-hebron-jwt-secret-key-min-32-characters-long"
-      expiration-ms: 86400000
-      refresh-expiration-ms: 2592000000
+store:
+  jwt:
+    secret: "hansen-village-academy-hebron-jwt-secret-key-min-32-characters-long"
+    expiration-ms: 86400000
+    refresh-expiration-ms: 2592000000
 
 server:
   port: 8080
