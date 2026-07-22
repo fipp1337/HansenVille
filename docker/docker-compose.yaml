@@ -1,27 +1,76 @@
+#services:
+#  postgres:
+#    image: postgres:16-alpine
+#    container_name: postgres-hansen
+#    restart: unless-stopped
+#    environment:
+#      POSTGRES_USER: myUser
+#      POSTGRES_PASSWORD: myPass
+#      POSTGRES_DB: hansen-village
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - postgres_hansen_data:/var/lib/postgresql/data
+#
+#  redis:
+#      image: redis:7-alpine
+#      container_name: redis-hansen
+#      restart: unless-stopped
+#      ports:
+#        - "6379:6379"
+#      command: redis-server --timeout 2000
+#
+#volumes:
+#  postgres_hansen_data:
+#    name: postgres_hansen_data
+#  redis_hansen_data:
+#      name: redis_hansen_data
+
 services:
+  app:
+    build: ..
+    container_name: hansen-app
+
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      - postgres
+      - redis
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hansen-village
+      SPRING_DATASOURCE_USERNAME: myUser
+      SPRING_DATASOURCE_PASSWORD: myPass
+
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+
   postgres:
     image: postgres:16-alpine
     container_name: postgres-hansen
+
     restart: unless-stopped
+
     environment:
       POSTGRES_USER: myUser
       POSTGRES_PASSWORD: myPass
       POSTGRES_DB: hansen-village
+
     ports:
       - "5432:5432"
+
     volumes:
       - postgres_hansen_data:/var/lib/postgresql/data
 
   redis:
-      image: redis:7-alpine
-      container_name: redis-hansen
-      restart: unless-stopped
-      ports:
-        - "6379:6379"
-      command: redis-server --timeout 2000
+    image: redis:7-alpine
+    container_name: redis-hansen
+
+    restart: unless-stopped
+
+    ports:
+      - "6379:6379"
 
 volumes:
   postgres_hansen_data:
-    name: postgres_hansen_data
-  redis_hansen_data:
-      name: redis_hansen_data

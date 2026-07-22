@@ -1,0 +1,24 @@
+# IDE та Git
+.idea/
+.git/
+.gitignore
+.gitattributes
+
+# Maven обгортки та вихідний код
+.mvn/
+mvnw
+mvnw.cmd
+src/
+
+# Вміст target (окрім самого JAR-файла)
+target/*
+!target/HansenApp_2-1.0.0-SNAPSHOT.jar
+
+# Динамічні файли завантажень
+uploads/
+
+# Docker & тимчасові файли
+docker/
+Dockerfile
+*.log
+.DS_Store
