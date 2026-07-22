@@ -3,9 +3,7 @@ package com.hansenvillage.hansenapp.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "admin_users")
@@ -15,9 +13,14 @@ public class AdminUser {
     @GeneratedValue
     private UUID id;
     private String email;
-    private String password;
     private String name;
-    @Convert(converter = RoleListConverter.class)
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "admin_roles",
+            joinColumns = @JoinColumn(name = "admin_id")
+    )
     @Column(name = "role")
-    private List<Role> roles = new ArrayList<>();
+    @Enumerated(EnumType.STRING)
+    private Set<Role> roles = new HashSet<>();
 }

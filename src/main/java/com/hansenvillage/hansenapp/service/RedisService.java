@@ -12,6 +12,7 @@ public class RedisService {
     private final StringRedisTemplate redisTemplate;
     private static final String REG_CODE_PREFIX = "reg:code:";
     private static final String LOGIN_CODE_PREFIX = "login:code:";
+    private static final String ADMIN_LOGIN_PREFIX = "admin:login:";
     private static final String LINK_STATE_PREFIX = "link:state:";
     private static final String RESET_CODE_PREFIX = "reset:code:";
     private static final Duration CODE_TTL = Duration.ofMinutes(10);
@@ -19,6 +20,28 @@ public class RedisService {
     public RedisService(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
+
+    public void storeLoginAdminData(String email, String verificationCode) {
+        String key = ADMIN_LOGIN_PREFIX + email;
+        Map<String, String> data = Map.of(
+                "verificationCode", verificationCode != null ? verificationCode : ""
+        );
+
+        redisTemplate.opsForHash().putAll(key, data);
+        redisTemplate.expire(key, CODE_TTL);
+    }
+
+    public String getLoginAdminCode(String email) {
+        String key = ADMIN_LOGIN_PREFIX + email;
+        Object code = redisTemplate.opsForHash().get(key, "verificationCode");
+        return code != null ? code.toString() : null;
+    }
+
+    public void deleteLoginAdminData(String email) {
+        String key = ADMIN_LOGIN_PREFIX + email;
+        redisTemplate.delete(key);
+    }
+
 
     public void storeRegistrationData(String email, String inviteCode, String verificationCode) {
         String key = REG_CODE_PREFIX + email;
@@ -41,9 +64,11 @@ public class RedisService {
         redisTemplate.delete(key);
     }
 
+    // --- RESET PASSWORD ---
+
     public void storeResetCode(String email, String code) {
         String key = RESET_CODE_PREFIX + email;
-        redisTemplate.opsForValue().set(key, code, CODE_TTL.toMinutes(), java.util.concurrent.TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(key, code, CODE_TTL.toMinutes(), TimeUnit.MINUTES);
     }
 
     public String getResetCode(String email) {

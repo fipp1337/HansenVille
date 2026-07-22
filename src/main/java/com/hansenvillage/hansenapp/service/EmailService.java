@@ -35,6 +35,22 @@ public class EmailService {
     }
 
     @Async("mailExecutor")
+    public void sendVerificationAdminEmail(String toEmail, String code) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("Admin code login confirm | Hansen Village");
+        message.setText(String.format(
+                "Hi!\n\n" +
+                        "Your admin login confirmation code for Hansen Village Application: %s\n" +
+                        "This code is valid for 10 minutes.\n\n" +
+                        "If you did not make this request, simply ignore this email.",
+                code
+        ));
+        mailSender.send(message);
+    }
+
+    @Async("mailExecutor")
     public void sendResetPasswordEmail(String toEmail, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);

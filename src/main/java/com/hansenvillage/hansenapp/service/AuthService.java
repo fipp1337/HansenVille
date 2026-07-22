@@ -7,10 +7,7 @@ import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.mapper.FamilyMapper;
 import com.hansenvillage.hansenapp.mapper.FamilyRoleMapper;
 import com.hansenvillage.hansenapp.mapper.UserMapper;
-import com.hansenvillage.hansenapp.repository.FamilyRepository;
-import com.hansenvillage.hansenapp.repository.FamilyRoleRepository;
-import com.hansenvillage.hansenapp.repository.InviteCodeRepository;
-import com.hansenvillage.hansenapp.repository.UserRepository;
+import com.hansenvillage.hansenapp.repository.*;
 import com.hansenvillage.hansenapp.security.JwtService;
 import com.hansenvillage.hansenapp.security.SecurityFamily;
 import lombok.RequiredArgsConstructor;
@@ -36,12 +33,13 @@ public class AuthService {
     private final RedisService redisService;
     private final InviteCodeRepository inviteCodeRepository;
     private final EmailService emailService;
+    private final AdminUserRepository adminUserRepository;
 
     private static final int CODE_LENGTH = 6;
     private static final int CODE_MAX_VALUE = 1000000;
 
     @Transactional
-    public void initiateRegistration(InitiateRegistrationRequest request) {
+    public void initiateRegistration(RegistrationInitiateRequest request) {
         String email = request.getEmail().trim().toLowerCase();
 
         if (familyRepository.existsByEmail(email)) {
@@ -190,6 +188,42 @@ public class AuthService {
         redisService.deleteResetCode(email);
     }
 
+    @Transactional
+    public void loginAdminInitiate(AdminLoginInitiateRequest request) {
+        String email = request.getEmail().trim().toLowerCase();
+
+        if (!adminUserRepository.existsByEmailIgnoreCase(email)) {
+            throw FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, email);
+        }
+
+        String verificationCode = generateCode();
+
+        redisService.storeLoginAdminData(email, verificationCode);
+        emailService.sendVerificationAdminEmail(email, verificationCode);
+    }
+
+    @Transactional
+    public LoginResponse loginAdminConfirm(AdminLoginConfirmRequest request) {
+        String email = request.getEmail().trim().toLowerCase();
+
+        AdminUser admin = adminUserRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, email));
+
+        String storedCode = redisService.getLoginAdminCode(email);
+        if (storedCode == null || storedCode.isBlank() || !storedCode.equals(request.getVerificationCode())) {
+            throw FamilyException.of(FamilyErrorCode.INVALID_VERIFICATION_CODE);
+        }
+
+        String accessToken = jwtService.generateAdminToken(admin);
+        String refreshToken = jwtService.generateAdminRefreshToken(admin);
+
+        redisService.deleteLoginAdminData(email);
+
+        LoginResponse response = new LoginResponse();
+        response.setAccessToken(accessToken);
+        response.setRefreshToken(refreshToken);
+        return response;
+    }
 
     private final SecureRandom random = new SecureRandom();
     private String generateCode() {
