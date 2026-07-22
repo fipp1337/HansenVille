@@ -1,15 +1,16 @@
 package com.hansenvillage.hansenapp.controller;
 
 import com.hansenvillage.hansenapp.dto.*;
-import com.hansenvillage.hansenapp.entity.Family;
-import com.hansenvillage.hansenapp.mapper.FamilyMapper;
 import com.hansenvillage.hansenapp.service.AdminService;
 import com.hansenvillage.hansenapp.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -20,7 +21,7 @@ public class AuthController {
 
 
     @PostMapping("/register/initiate")
-    public ResponseEntity<RegistrationInitiateResponse> initiateRegistration(@Valid @RequestBody InitiateRegistrationRequest request) {
+    public ResponseEntity<RegistrationInitiateResponse> initiateRegistration(@Valid @RequestBody RegistrationInitiateRequest request) {
         authService.initiateRegistration(request);
         RegistrationInitiateResponse response = new RegistrationInitiateResponse();
         response.setMessage("Successful initiate registration");
@@ -61,15 +62,18 @@ public class AuthController {
         return ResponseEntity.ok(authService.refreshToken(request));
     }
 
-//    @PreAuthorize("hasRole('SUPER_ADMIN')")
-    @PostMapping("/admin/register")
-    public ResponseEntity<String> registerAdmin(@Valid @RequestBody AdminRegistrationRequest request) {
-        adminService.registerAdmin(request);
-        return ResponseEntity.ok("Admin registered successfully");
-}
 
-    @PostMapping("/admin/login")
-    public LoginResponse adminLogin(@Valid @RequestBody LoginRequest request) {
-        return adminService.loginAdmin(request);
+
+    @PostMapping("/admin/login/initiate")
+    public ResponseEntity<AdminLoginInitiateResponse> adminLoginInitiate(@Valid @RequestBody AdminLoginInitiateRequest request) {
+        authService.loginAdminInitiate(request);
+        AdminLoginInitiateResponse response = new AdminLoginInitiateResponse();
+        response.setMessage("Admin Login Initiate successful");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/admin/login/confirm")
+    public ResponseEntity<LoginResponse> adminLoginConfirm(@Valid @RequestBody AdminLoginConfirmRequest request) {
+        return ResponseEntity.ok(authService.loginAdminConfirm(request));
     }
 }

@@ -24,7 +24,6 @@ public class Family {
     @Email
     private String email;
 
-//    @Pattern(regexp = "^\\+380\\d{9}$", message = "Phone number format: +380XXXXXXXXX")
     private String phoneNumber;
 
     @JsonIgnore

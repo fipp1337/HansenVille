@@ -11,7 +11,6 @@ public interface AdminMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "email", ignore = true)
-    @Mapping(target = "password", ignore = true)
     @Mapping(target = "roles", ignore = true)
     void updateAdminFromRequest(AdminUpdateRequest request, @MappingTarget AdminUser admin);
 }

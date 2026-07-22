@@ -9,6 +9,6 @@ import java.util.UUID;
 public interface AdminUserRepository extends JpaRepository<AdminUser, UUID> {
     boolean existsByEmail(String email);
     Optional<AdminUser> findByEmailIgnoreCase(String email);
-
+    boolean existsByEmailIgnoreCase(String email);
 
 }

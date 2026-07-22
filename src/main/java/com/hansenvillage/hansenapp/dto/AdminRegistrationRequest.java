@@ -6,15 +6,14 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class AdminRegistrationRequest {
     @NotBlank
     private String email;
-    @NotBlank
-    private String password;
     @NotEmpty
-    private List<Role> roles;
-
-//    private String name;
+    private Set<Role> roles;
+    @NotBlank
+    private String name;
 }
