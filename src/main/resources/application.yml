@@ -37,11 +37,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-  store:
-    jwt:
-      secret: ${STORE_JWT_SECRET}
-      expiration-ms: ${STORE_JWT_EXPIRATION_MS}
-      refresh-expiration-ms: ${STORE_JWT_REFRESH_EXPIRATION_MS}
+store:
+  jwt:
+    secret: ${STORE_JWT_SECRET}
+    expiration-ms: ${STORE_JWT_EXPIRATION_MS}
+    refresh-expiration-ms: ${STORE_JWT_REFRESH_EXPIRATION_MS}
 
 server:
   port: 8080
