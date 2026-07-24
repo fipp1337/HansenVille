@@ -9,6 +9,7 @@
 mvnw
 mvnw.cmd
 src/
+.env
 
 # Вміст target (окрім самого JAR-файла)
 target/*

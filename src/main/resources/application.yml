@@ -1,8 +1,8 @@
 spring:
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      host: ${SPRING_DATA_REDIS_HOST}
+      port: ${SPRING_DATA_REDIS_PORT}
       timeout: 2000ms
   application:
     name: hansen-village-application
@@ -17,11 +17,14 @@ spring:
           auth: true
           ssl:
             enable: true
+#          starttls:
+#            enable: true
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${POSTGRES_DB:hansen-village}
-    username: ${POSTGRES_USER:myUser}
-    password: ${POSTGRES_PASSWORD:myPass}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
+
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
     enabled: true
@@ -34,14 +37,14 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-store:
-  jwt:
-    secret: ${JWT_SECRET:hansen-village-academy-hebron-jwt-secret-key-min-32-characters-long}
-    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
-    refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:2592000000}
+  store:
+    jwt:
+      secret: ${STORE_JWT_SECRET}
+      expiration-ms: ${STORE_JWT_EXPIRATION_MS}
+      refresh-expiration-ms: ${STORE_JWT_REFRESH_EXPIRATION_MS}
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: 8080
 
 logging:
   level:
