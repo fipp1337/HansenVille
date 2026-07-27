@@ -1,8 +1,7 @@
 package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.*;
-import com.hansenvillage.hansenapp.entity.CinemaSeat;
-import com.hansenvillage.hansenapp.entity.CinemaSession;
+import com.hansenvillage.hansenapp.entity.*;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.mapper.CinemaSeatMapper;
@@ -207,9 +206,20 @@ public class CinemaSessionService {
         if (!cinemaSessionRepository.existsById(id)) {
             throw FamilyException.of(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND, id);
         }
+        List<CinemaBooking> bookings = cinemaBookingRepository.findByCinemaSessionId(id);
+        cinemaBookingRepository.deleteAll(bookings);
         cinemaSessionRepository.deleteById(id);
     }
 
+//    @Transactional
+//    public void cancel(UUID id) {
+//
+//    }
+//
+//    @Transactional
+//    public void cancelSessionsForDay(LocalDate date) {
+//
+//    }
 
     public List<CinemaSession> getWeekSchedule(LocalDate weekStart) {
 

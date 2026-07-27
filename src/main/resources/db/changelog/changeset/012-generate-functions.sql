@@ -1,3 +1,7 @@
+--liquibase formatted sql
+
+--changeset strioffy:12
+
 -- CREATE OR REPLACE FUNCTION generate_families(records_count INT)
 -- RETURNS VOID AS
 -- $$
@@ -10,15 +14,15 @@
 --     phone_number
 -- )
 -- SELECT
---     md5(random()::text),
---     'family' || i || '@gmail.com',                               -- унікальний email
---     'Будинок ' || i || ', квартира ' || i,
---     i,                                                   -- member_count: 1,2,3,...
+--     md5(random()::text),                                        -- псевдо пароль
+--     'family' || i || '@gmail.com',                              -- унікальний email
+--     'Будинок ' || i || ', квартира ' || i,                      -- адреса
+--     i,                                                          -- member_count: 1,2,3,...
 --     CASE
---         WHEN random() < 0.2 THEN NULL                                 -- ~20% без телефону
+--         WHEN random() < 0.2 THEN NULL                           -- ~20% без телефону
 --         ELSE '+380' ||
 --              (ARRAY['50','63','66','67','68','73','91','92','93','95','96','97','98','99'])
---             [floor(random()*13 + 1)] ||
+--             [floor(random()*14 + 1)] ||
 --                  lpad((floor(random()*10000000))::text, 7, '0')
 --         END
 -- FROM generate_series(1, records_count) AS s(i);
@@ -82,6 +86,7 @@
 -- FOR d IN 0..days_ahead LOOP
 --         current_day := CURRENT_DATE + d;
 --
+--         -- Для кожного дня створюємо сесії за нашими слотами
 --         FOREACH slot SLICE 1 IN ARRAY session_slots LOOP
 --             INSERT INTO pool_sessions (
 --                 start_time,

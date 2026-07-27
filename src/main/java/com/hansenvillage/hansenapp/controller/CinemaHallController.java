@@ -21,6 +21,7 @@ public class CinemaHallController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public CinemaHallResponse createHall(@Valid @RequestBody CinemaHallRequest request) {
         return cinemaHallService.create(request.getName());
     }

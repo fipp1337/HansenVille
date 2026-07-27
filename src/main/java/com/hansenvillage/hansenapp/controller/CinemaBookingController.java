@@ -29,11 +29,10 @@ public class CinemaBookingController {
     }
 
     @GetMapping("/{id}")
-    public CinemaBookingResponse getBookings(@PathVariable UUID id) {
+    public CinemaBookingResponse getBooking(@PathVariable UUID id) {
         CinemaBooking booking = cinemaBookingService.getBookingById(id);
         return cinemaBookingMapper.toResponse(booking);
     }
-
 
     @GetMapping("/user/{userId}")
     public List<CinemaBookingResponse> getBookingsByUser(@PathVariable UUID userId) {
@@ -42,6 +41,7 @@ public class CinemaBookingController {
     }
 
     @GetMapping("/session/{sessionId}")
+    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public List<CinemaBookingResponse> getBookingsBySessionId(@PathVariable UUID sessionId) {
 
         List<CinemaBooking> bookings = cinemaBookingService.getBookingsBySessionId(sessionId);

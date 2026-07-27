@@ -5,6 +5,7 @@ import com.hansenvillage.hansenapp.dto.PoolSessionRequest;
 import com.hansenvillage.hansenapp.entity.PoolBooking;
 import com.hansenvillage.hansenapp.entity.PoolBookingStatus;
 import com.hansenvillage.hansenapp.entity.PoolSession;
+import com.hansenvillage.hansenapp.entity.SessionStatus;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.mapper.PoolSessionMapper;
@@ -68,6 +69,24 @@ public class PoolSessionService {
         poolSessionRepository.deleteById(id);
     }
 
+    @Transactional
+    public void cancel(UUID id) {
+        PoolSession session = poolSessionRepository.findById(id)
+                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, id));
+
+        poolBookingRepository.deleteByPoolSessionId(id);
+        session.setStatus(SessionStatus.CANCELLED);
+        poolSessionRepository.save(session);
+    }
+
+    @Transactional
+    public void cancelSessionsForDay(LocalDate date) {
+        List<UUID> sessionIds = poolSessionRepository.findIdsByDate(date);
+
+        for (UUID id : sessionIds) {
+            cancel(id);
+        }
+    }
 
     public List<PoolSession> getWeekSchedule(LocalDate weekStart) {
         LocalDate weekEnd = weekStart.plusDays(6);
