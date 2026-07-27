@@ -74,7 +74,7 @@ public class FamilyController {
     }
 
     @PutMapping("/me")
-    public Family updateMyFamily(@RequestBody FamilyUpdateRequest request) {
+    public Family updateMyFamily(@RequestBody @Valid FamilyUpdateRequest request) {
         return familyService.updateFamilyInfoByJwt(request);
     }
 
