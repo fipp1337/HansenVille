@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.UUID;
 
@@ -124,8 +125,8 @@ public class FamilyService {
         long memberCount = family.getMemberCount();
         long maxTickets = memberCount * 2;
 
-        LocalDate monday = date.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
-        LocalDate sunday = date.with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY));
+        LocalDate monday = date.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+        LocalDate sunday = date.with(TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY));
 
 
         long usedTickets = poolBookingService.countBookingsForFamilyInWeek(familyId, monday, sunday);
