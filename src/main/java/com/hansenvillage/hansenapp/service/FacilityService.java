@@ -4,6 +4,7 @@ import com.hansenvillage.hansenapp.dto.FacilityResponse;
 import com.hansenvillage.hansenapp.entity.Facility;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
+import com.hansenvillage.hansenapp.mapper.FacilityMapper;
 import com.hansenvillage.hansenapp.repository.FacilityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -27,24 +28,23 @@ import java.util.UUID;
 public class FacilityService {
 
     private final FacilityRepository facilityRepository;
+    private final FacilityMapper facilityMapper;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<FacilityResponse> getAllActiveFacilities() {
         return facilityRepository.findAll().stream()
                 .filter(Facility::isActive)
-                .map(this::mapToResponse)
+                .map(facilityMapper::toResponse)
                 .toList();
     }
 
     @Transactional
     public void uploadImage(UUID facilityId, MultipartFile file) {
-
         try {
             Facility facility = facilityRepository.findById(facilityId)
                     .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FACILITY_NOT_FOUND, facilityId));
 
             String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
-
             Path uploadDir = Paths.get("uploads/facilities");
 
             Files.createDirectories(uploadDir);
@@ -56,15 +56,14 @@ public class FacilityService {
             );
 
             facility.setImage(fileName);
-
             facilityRepository.save(facility);
         } catch (IOException e) {
             throw FamilyException.of(FamilyErrorCode.FILE_UPLOAD_FAILED);
         }
     }
 
+    @Transactional(readOnly = true)
     public ResponseEntity<Resource> getImage(UUID facilityId) {
-
         Facility facility = facilityRepository.findById(facilityId)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FACILITY_NOT_FOUND, facilityId));
 
@@ -76,7 +75,6 @@ public class FacilityService {
                 .resolve(facility.getImage());
 
         try {
-
             Resource resource = new UrlResource(path.toUri());
 
             String contentType = Files.probeContentType(path);
@@ -89,18 +87,18 @@ public class FacilityService {
                     .body(resource);
 
         } catch (IOException e) {
-
             throw FamilyException.of(FamilyErrorCode.FACILITY_IMAGE_NOT_FOUND);
         }
     }
 
+    @Transactional
     public void updateImage(UUID facilityId, MultipartFile newFile) {
         deleteImage(facilityId);
         uploadImage(facilityId, newFile);
     }
 
+    @Transactional
     public void deleteImage(UUID facilityId) {
-
         Facility facility = facilityRepository.findById(facilityId)
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FACILITY_NOT_FOUND, facilityId));
 
@@ -120,20 +118,5 @@ public class FacilityService {
         } catch (IOException e) {
             throw FamilyException.of(FamilyErrorCode.FILE_DELETE_FAILED);
         }
-    }
-
-    private FacilityResponse mapToResponse(Facility facility) {
-        FacilityResponse response = new FacilityResponse();
-        response.setId(facility.getId());
-        response.setCode(facility.getCode());
-        response.setName(facility.getName());
-        response.setDescription(facility.getDescription());
-        response.setTargetRoute(facility.getTargetRoute());
-        response.setActive(facility.isActive());
-
-        if (facility.getImage() != null) {
-            response.setImageUrl("/api/facilities/image/" + facility.getId());
-        }
-        return response;
     }
 }
