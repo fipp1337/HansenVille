@@ -2,10 +2,7 @@ package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.PoolPublishWeekScheduleRequest;
 import com.hansenvillage.hansenapp.dto.PoolSessionRequest;
-import com.hansenvillage.hansenapp.entity.PoolBooking;
-import com.hansenvillage.hansenapp.entity.PoolBookingStatus;
-import com.hansenvillage.hansenapp.entity.PoolSession;
-import com.hansenvillage.hansenapp.entity.SessionStatus;
+import com.hansenvillage.hansenapp.entity.*;
 import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
 import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.mapper.PoolSessionMapper;
@@ -32,7 +29,12 @@ public class PoolSessionService {
     @Transactional
     public List<PoolSession> getAvailableSessionsForNextWeek(LocalDate fromDate) {
         LocalDate toDate = fromDate.plusDays(7);
-        return new ArrayList<>();
+        return poolSessionRepository.findBySessionDateBetween(fromDate, toDate).stream()
+                .filter(s -> s.getStatus() != SessionStatus.CANCELLED)
+                .filter(s -> s.getBookedCount() < s.getMaxCapacity())
+                .sorted(Comparator.comparing(PoolSession::getSessionDate)
+                        .thenComparing(PoolSession::getStartTime))
+                .toList();
     }
 
     public List<PoolSession> create(PoolPublishWeekScheduleRequest request) {
@@ -45,46 +47,70 @@ public class PoolSessionService {
                 .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, id));
     }
 
-        public PoolSession update(UUID id, PoolSessionRequest request) {
-
-            PoolSession session = poolSessionRepository.findById(id)
-                    .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, id));
-
-            poolSessionMapper.updateEntity(request, session);
-
-            return poolSessionRepository.save(session);
-        }
+    @Transactional
+    public PoolSession update(UUID id, PoolSessionRequest request) {
+        PoolSession session = findById(id);
+        poolSessionMapper.updateEntity(request, session);
+        return poolSessionRepository.save(session);
+    }
 
     @Transactional
     public void delete(UUID id) {
-        if (!poolSessionRepository.existsById(id)) {
-            throw FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, id);
-        }
+        PoolSession session = findById(id);
         List<PoolBooking> bookings = poolBookingRepository.findByPoolSessionId(id);
         for (PoolBooking booking : bookings) {
             booking.setStatus(PoolBookingStatus.CANCELED_WITH_RETURN);
         }
         poolBookingRepository.saveAll(bookings);
-        poolBookingRepository.deleteByPoolSessionId(id);
-        poolSessionRepository.deleteById(id);
+        poolSessionRepository.delete(session);
     }
 
     @Transactional
     public void cancel(UUID id) {
-        PoolSession session = poolSessionRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.POOL_SESSION_NOT_FOUND, id));
+        PoolSession session = findById(id);
 
-        poolBookingRepository.deleteByPoolSessionId(id);
+        if (session.getStatus() == SessionStatus.CANCELLED) {
+            return;
+        }
+
+        List<PoolBooking> bookings = poolBookingRepository.findByPoolSessionId(id);
+
+        for (PoolBooking booking : bookings) {
+            if (booking.getStatus() == PoolBookingStatus.REGISTERED) {
+                booking.setStatus(PoolBookingStatus.CANCELED_WITH_RETURN);
+            }
+        }
+
         session.setStatus(SessionStatus.CANCELLED);
+        session.setBookedCount(0);
         poolSessionRepository.save(session);
     }
+
+
 
     @Transactional
     public void cancelSessionsForDay(LocalDate date) {
         List<UUID> sessionIds = poolSessionRepository.findIdsByDate(date);
-
         for (UUID id : sessionIds) {
             cancel(id);
+        }
+    }
+
+    @Transactional
+    public void unCancelSession(UUID id) {
+        PoolSession session = findById(id);
+
+        if (session.getStatus() == SessionStatus.CANCELLED) {
+            session.setStatus(SessionStatus.ACTIVE);
+            poolSessionRepository.save(session);
+        }
+    }
+
+    @Transactional
+    public void unCancelSessionsForDay(LocalDate date) {
+        List<UUID> sessionIds = poolSessionRepository.findIdsByDate(date);
+        for (UUID id : sessionIds) {
+            unCancelSession(id);
         }
     }
 

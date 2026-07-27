@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -57,15 +59,33 @@ public class PoolSessionController {
         poolSessionService.delete(id);
     }
 
-    @PutMapping("/cancel/{id}")
-    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
-    public void cancel(@PathVariable UUID id) {
+    @PutMapping("/{id}/cancel")
+//    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> cancelSession(@PathVariable UUID id) {
         poolSessionService.cancel(id);
+        return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/cancel/date/{date}")
-    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
-    public void cancelFullDay(@PathVariable LocalDate date) {
+    @PutMapping("/cancel-by-day")
+//    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> cancelSessionsForDay(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         poolSessionService.cancelSessionsForDay(date);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/uncancel")
+//    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> unCancelSession(@PathVariable UUID id) {
+        poolSessionService.unCancelSession(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/uncancel-by-day")
+//    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> unCancelSessionsForDay(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        poolSessionService.unCancelSessionsForDay(date);
+        return ResponseEntity.ok().build();
     }
 }

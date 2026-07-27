@@ -16,6 +16,7 @@ public enum FamilyErrorCode {
     TOO_MANY_SEATS(HttpStatus.CONFLICT, "You can't book more seats, than there are members in your family"),
     POSTER_NOT_FOUND(HttpStatus.NOT_FOUND, "Poster not found for session: %s"),
     FILE_UPLOAD_FAILED(HttpStatus.CONFLICT, "File upload failed"),
+    POOL_SESSION_NOT_AVAILABLE(HttpStatus.CONFLICT, "Pool session not available: %s"),
     FILE_DELETE_FAILED(HttpStatus.CONFLICT, "File delete failed"),
     OLD_PASSWORD_REQUIRED(HttpStatus.CONFLICT, "Old password required"),
     INVALID_OLD_PASSWORD(HttpStatus.CONFLICT, "Invalid old password"),
