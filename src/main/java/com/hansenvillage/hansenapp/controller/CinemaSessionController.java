@@ -14,6 +14,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
@@ -44,8 +45,8 @@ public class CinemaSessionController {
         return cinemaSessionMapper.toResponseList(sessions);
     }
 
-    @PostMapping(value = "/{id}/poster", consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PostMapping(value = "/{id}/poster", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void uploadPoster(@PathVariable UUID id, @RequestParam MultipartFile file) {
 
         cinemaSessionService.uploadPoster(id, file);
@@ -58,6 +59,7 @@ public class CinemaSessionController {
     }
 
     @PutMapping("/{id}/poster")
+//    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void updatePoster(@PathVariable UUID id, @RequestParam MultipartFile newFile) {
 
         cinemaSessionService.updatePoster(id, newFile);
@@ -65,6 +67,7 @@ public class CinemaSessionController {
 
     @DeleteMapping("/{id}/poster")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+//          @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void deletePoster(@PathVariable UUID id) {
 
         cinemaSessionService.deletePoster(id);
@@ -76,6 +79,7 @@ public class CinemaSessionController {
     }
 
     @PutMapping("/{id}")
+//    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public CinemaSessionResponse update(@PathVariable UUID id, @Valid @RequestBody CinemaSessionRequest request) {
         CinemaSession updated = cinemaSessionService.update(id, request);
         return cinemaSessionMapper.toResponse(updated);
@@ -83,6 +87,7 @@ public class CinemaSessionController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+//    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void delete(@PathVariable UUID id) {
         cinemaSessionService.delete(id);
     }

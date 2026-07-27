@@ -56,4 +56,16 @@ public class PoolSessionController {
     public void delete(@PathVariable UUID id) {
         poolSessionService.delete(id);
     }
+
+    @PutMapping("/cancel/{id}")
+    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
+    public void cancel(@PathVariable UUID id) {
+        poolSessionService.cancel(id);
+    }
+
+    @PutMapping("/cancel/date/{date}")
+    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
+    public void cancelFullDay(@PathVariable LocalDate date) {
+        poolSessionService.cancelSessionsForDay(date);
+    }
 }

@@ -16,14 +16,6 @@ import java.util.UUID;
 @Repository
 public interface PoolBookingRepository extends JpaRepository<PoolBooking, UUID> {
 
-    boolean existsByUserIdAndPoolSessionId(UUID userId, UUID poolSessionId);
-
-    long countByUserIdInAndPoolSessionIdInAndStatusIn(
-            List<UUID> userIds,
-            List<UUID> poolSessionIds,
-            List<PoolBookingStatus> statuses
-    );
-
     List<PoolBooking> findByUserIdIn(List<UUID> userIds);
 
     Optional<PoolBooking> findByUserIdAndPoolSessionId(UUID userId, UUID poolSessionId);
