@@ -5,8 +5,8 @@
 //import com.hansenvillage.hansenapp.entity.CinemaSeat;
 //import com.hansenvillage.hansenapp.entity.CinemaSession;
 //import com.hansenvillage.hansenapp.entity.User;
-//import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
-//import com.hansenvillage.hansenapp.exception.FamilyException;
+//import com.hansenvillage.hansenapp.exception.AppErrorCode;
+//import com.hansenvillage.hansenapp.exception.AppException;
 //import com.hansenvillage.hansenapp.mapper.CinemaBookingMapper;
 //import com.hansenvillage.hansenapp.repository.CinemaBookingRepository;
 //import com.hansenvillage.hansenapp.repository.CinemaSeatRepository;
@@ -122,12 +122,12 @@
 //
 //        when(cinemaSessionRepository.findById(request.getCinemaSessionId())).thenReturn(Optional.of(session));
 //
-//        FamilyException exception = assertThrows(
-//                FamilyException.class,
+//        AppException exception = assertThrows(
+//                AppException.class,
 //                () -> cinemaBookingService.book(request)
 //        );
 //
-//        assertEquals(FamilyErrorCode.CINEMA_SESSION_IS_FULL, exception.getErrorCode());
+//        assertEquals(AppErrorCode.CINEMA_SESSION_IS_FULL, exception.getErrorCode());
 //    }
 //
 //    @Test
@@ -166,12 +166,12 @@
 //                .existsByCinemaSessionIdAndSeatId(request.getCinemaSessionId(), request.getSeatId()))
 //                .thenReturn(true);
 //
-//        FamilyException exception = assertThrows(
-//                FamilyException.class,
+//        AppException exception = assertThrows(
+//                AppException.class,
 //                () -> cinemaBookingService.book(request)
 //        );
 //
-//        assertEquals(FamilyErrorCode.SEAT_ALREADY_BOOKED, exception.getErrorCode());
+//        assertEquals(AppErrorCode.SEAT_ALREADY_BOOKED, exception.getErrorCode());
 //    }
 //
 //    @Test
@@ -293,13 +293,13 @@
 //
 //        when(cinemaBookingRepository.findById(id)).thenReturn(Optional.empty());
 //
-//        FamilyException exception = assertThrows(
-//                FamilyException.class,
+//        AppException exception = assertThrows(
+//                AppException.class,
 //                () -> cinemaBookingService.deleteBooking(id)
 //        );
 //
 //        assertEquals(
-//                FamilyErrorCode.BOOKING_NOT_FOUND,
+//                AppErrorCode.BOOKING_NOT_FOUND,
 //                exception.getErrorCode()
 //        );
 //    }
@@ -316,12 +316,12 @@
 //        when(cinemaBookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
 //        when(cinemaSessionRepository.findById(sessionId)).thenReturn(Optional.empty());
 //
-//        FamilyException exception = assertThrows(
-//                FamilyException.class,
+//        AppException exception = assertThrows(
+//                AppException.class,
 //                () -> cinemaBookingService.deleteBooking(bookingId)
 //        );
 //
-//        assertEquals(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND, exception.getErrorCode());
+//        assertEquals(AppErrorCode.CINEMA_SESSION_NOT_FOUND, exception.getErrorCode());
 //    }
 //
 ////    @Test
@@ -343,12 +343,12 @@
 ////
 ////        when(cinemaSessionRepository.findById(sessionId)).thenReturn(Optional.of(session));
 ////
-////        FamilyException exception = assertThrows(
-////                FamilyException.class,
+////        AppException exception = assertThrows(
+////                AppException.class,
 ////                () -> cinemaBookingService.deleteBooking(bookingId)
 ////        );
 ////
-////        assertEquals(FamilyErrorCode.TIME_OUT, exception.getErrorCode());
+////        assertEquals(AppErrorCode.TIME_OUT, exception.getErrorCode());
 ////    }
 //
 ////    @Test

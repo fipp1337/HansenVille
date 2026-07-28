@@ -14,21 +14,20 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CinemaSeatService {
 
+    private static final List<String> ROWS = List.of("A", "B", "C", "D");
+    private static final int SEATS_PER_ROW = 9;
+
     private final CinemaSeatRepository cinemaSeatRepository;
 
     @Transactional
     public List<CinemaSeat> generateSeats(UUID hallId) {
-
         List<CinemaSeat> seats = new ArrayList<>();
-        List<String> rows = List.of("A", "B", "C", "D");
 
-        for (String row : rows) {
-            for (int sofa = 1; sofa <= 9; sofa++) {
-
+        for (String row : ROWS) {
+            for (int number = 1; number <= SEATS_PER_ROW; number++) {
                 CinemaSeat seat = new CinemaSeat();
                 seat.setHallId(hallId);
-                seat.setSeatNumber(row + sofa);
-
+                seat.setSeatNumber(row + number);
                 seats.add(seat);
             }
         }

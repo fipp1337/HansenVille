@@ -7,7 +7,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
@@ -32,7 +39,7 @@ public class PoolBookingController {
 
     @GetMapping("/sessions/{id}")
 //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
-    public List<PoolBookingResponse> getBooksBySession(@PathVariable UUID id) {
+    public List<PoolBookingResponse> getBookingsBySession(@PathVariable UUID id) {
         return poolBookingService.getBookingDetailsBySessionId(id);
     }
 
@@ -45,11 +52,6 @@ public class PoolBookingController {
     public List<PoolBookingResponse> getBookingsByUser(@PathVariable UUID userId) {
         return poolBookingService.getBookingsByUserId(userId);
     }
-
-//    @GetMapping
-//    public List<PoolBookingResponse> getAllBookings() {
-//        return poolBookingService.getAllBookings();
-//    }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
