@@ -2,9 +2,10 @@ package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.AddMemberRequest;
 import com.hansenvillage.hansenapp.dto.UserResponse;
+import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.entity.User;
-import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
-import com.hansenvillage.hansenapp.exception.FamilyException;
+import com.hansenvillage.hansenapp.exception.AppErrorCode;
+import com.hansenvillage.hansenapp.exception.AppException;
 import com.hansenvillage.hansenapp.mapper.UserMapper;
 import com.hansenvillage.hansenapp.repository.FamilyRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
@@ -35,29 +36,31 @@ class UserServiceTest {
 
     @Test
     void addNewMember_ShouldSaveMemberWithCurrentFamilyId() {
-
         AddMemberRequest request = new AddMemberRequest();
         User mappedUser = new User();
         User savedUser = new User();
         UUID mockFamilyId = UUID.randomUUID();
+        Family family = new Family();
+        family.setId(mockFamilyId);
+        family.setMemberCount(2);
 
         mappedUser.setFamilyId(mockFamilyId);
 
         when(userMapper.toEntity(request)).thenReturn(mappedUser);
-
-        when(familyRepository.incrementMemberCount(mockFamilyId)).thenReturn(1);
         when(userRepository.save(mappedUser)).thenReturn(savedUser);
+        when(familyRepository.findById(mockFamilyId)).thenReturn(Optional.of(family));
+        when(familyRepository.save(family)).thenReturn(family);
 
         try (MockedStatic<SecurityUtils> mockedSecurity = mockStatic(SecurityUtils.class)) {
             mockedSecurity.when(SecurityUtils::currentFamilyId).thenReturn(mockFamilyId);
 
-
             User result = userService.addNewMember(request);
-
 
             assertNotNull(result);
             assertEquals(mockFamilyId, mappedUser.getFamilyId());
+            assertEquals(3, family.getMemberCount());
             verify(userRepository, times(1)).save(mappedUser);
+            verify(familyRepository).save(family);
         }
     }
 //
@@ -89,10 +92,10 @@ class UserServiceTest {
 //        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 //
 //
-//        FamilyException exception = assertThrows(FamilyException.class, () -> {
+//        AppException exception = assertThrows(AppException.class, () -> {
 //            userService.updateUser(userId, "name", 15);
 //        });
-//        assertEquals(FamilyErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+//        assertEquals(AppErrorCode.USER_NOT_FOUND, exception.getErrorCode());
 //    }
 
     @Test
@@ -122,32 +125,36 @@ class UserServiceTest {
         when(familyRepository.existsById(familyId)).thenReturn(false);
 
 
-        FamilyException exception = assertThrows(FamilyException.class, () -> {
+        AppException exception = assertThrows(AppException.class, () -> {
             userService.getFamilyMembers(familyId);
         });
-        assertEquals(FamilyErrorCode.FAMILY_NOT_FOUND, exception.getErrorCode());
+        assertEquals(AppErrorCode.FAMILY_NOT_FOUND, exception.getErrorCode());
         verify(userRepository, never()).findByFamilyId(any());
     }
 
     @Test
     void removeMember_ShouldDeleteUser_WhenUserExists() {
-
         UUID userId = UUID.randomUUID();
-        User user = new User();
         UUID mockFamilyId = UUID.randomUUID();
+        User user = new User();
+        user.setFamilyId(mockFamilyId);
+
+        Family family = new Family();
+        family.setId(mockFamilyId);
+        family.setMemberCount(2);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-        when(familyRepository.decrementMemberCount(mockFamilyId)).thenReturn(1);
+        when(familyRepository.findById(mockFamilyId)).thenReturn(Optional.of(family));
+        when(familyRepository.save(family)).thenReturn(family);
 
         try (MockedStatic<SecurityUtils> mockedSecurity = mockStatic(SecurityUtils.class)) {
-            mockedSecurity.when(SecurityUtils::currentFamilyId).thenReturn(mockFamilyId);
-
+            mockedSecurity.when(() -> SecurityUtils.assertOwnerOrSuperAdmin(mockFamilyId)).thenAnswer(invocation -> null);
 
             userService.removeMember(userId);
 
-
             verify(userRepository, times(1)).delete(user);
+            assertEquals(1, family.getMemberCount());
+            verify(familyRepository).save(family);
         }
     }
 
@@ -158,10 +165,10 @@ class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
 
-        FamilyException exception = assertThrows(FamilyException.class, () -> {
+        AppException exception = assertThrows(AppException.class, () -> {
             userService.removeMember(userId);
         });
-        assertEquals(FamilyErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+        assertEquals(AppErrorCode.USER_NOT_FOUND, exception.getErrorCode());
         verify(userRepository, never()).delete(any());
     }
 }

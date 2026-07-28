@@ -4,8 +4,8 @@
 //import com.hansenvillage.hansenapp.entity.PoolSession;
 //import com.hansenvillage.hansenapp.entity.SessionStatus;
 //import com.hansenvillage.hansenapp.entity.PoolTemplate;
-//import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
-//import com.hansenvillage.hansenapp.exception.FamilyException;
+//import com.hansenvillage.hansenapp.exception.AppErrorCode;
+//import com.hansenvillage.hansenapp.exception.AppException;
 //import com.hansenvillage.hansenapp.repository.PoolSessionRepository;
 //import com.hansenvillage.hansenapp.repository.PoolTemplateRepository;
 //import org.junit.jupiter.api.Test;
@@ -42,10 +42,10 @@
 //        LocalDate start = LocalDate.of(2026, 7, 10);
 //        LocalDate end = LocalDate.of(2026, 7, 9);
 //
-//        FamilyException exception = assertThrows(FamilyException.class, () -> {
+//        AppException exception = assertThrows(AppException.class, () -> {
 //            poolTemplateService.generate(start, end);
 //        });
-//        assertEquals(FamilyErrorCode.INVALID_DATES, exception.getErrorCode());
+//        assertEquals(AppErrorCode.INVALID_DATES, exception.getErrorCode());
 //    }
 //
 //    @Test
@@ -55,10 +55,10 @@
 //
 //        when(poolTemplateRepository.findAll()).thenReturn(Collections.emptyList());
 //
-//        FamilyException exception = assertThrows(FamilyException.class, () -> {
+//        AppException exception = assertThrows(AppException.class, () -> {
 //            poolTemplateService.generate(start, end);
 //        });
-//        assertEquals(FamilyErrorCode.NO_POOL_TEMPLATES_FOUND, exception.getErrorCode());
+//        assertEquals(AppErrorCode.NO_POOL_TEMPLATES_FOUND, exception.getErrorCode());
 //    }
 //
 //    @Test

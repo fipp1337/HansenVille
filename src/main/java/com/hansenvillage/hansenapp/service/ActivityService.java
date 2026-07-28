@@ -1,138 +1,79 @@
 package com.hansenvillage.hansenapp.service;
 
+import com.hansenvillage.hansenapp.constant.AppConstant;
 import com.hansenvillage.hansenapp.dto.ActivityRequest;
 import com.hansenvillage.hansenapp.dto.ActivityResponse;
 import com.hansenvillage.hansenapp.entity.Activity;
-import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
-import com.hansenvillage.hansenapp.exception.FamilyException;
+import com.hansenvillage.hansenapp.exception.AppErrorCode;
+import com.hansenvillage.hansenapp.exception.AppException;
+import com.hansenvillage.hansenapp.mapper.ActivityMapper;
 import com.hansenvillage.hansenapp.repository.ActivityRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ActivityService {
 
     private final ActivityRepository activityRepository;
-    private static final Path UPLOAD_DIR = Paths.get("uploads/activities");
+    private final ActivityMapper activityMapper;
+    private final FileStorageService fileStorageService;
 
     @Transactional(readOnly = true)
     public List<ActivityResponse> getAllActivities() {
         return activityRepository.findAll().stream()
-                .map(this::mapToResponse)
+                .map(activityMapper::toResponse)
                 .toList();
     }
 
     @Transactional
     public ActivityResponse createActivity(ActivityRequest request) {
-        Activity activity = new Activity();
-        activity.setTitle(request.getTitle());
-
-        Activity saved = activityRepository.save(activity);
-        return mapToResponse(saved);
+        Activity saved = activityRepository.save(activityMapper.toEntity(request));
+        log.info("Activity created: id={}, title={}", saved.getId(), saved.getTitle());
+        return activityMapper.toResponse(saved);
     }
 
     @Transactional
     public ActivityResponse updateActivity(UUID id, ActivityRequest request) {
-        Activity activity = activityRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.ACTIVITY_NOT_FOUND, id));
-
+        Activity activity = findActivity(id);
         activity.setTitle(request.getTitle());
-
-        return mapToResponse(activityRepository.save(activity));
+        return activityMapper.toResponse(activityRepository.save(activity));
     }
 
     @Transactional
     public void deleteActivity(UUID id) {
-        Activity activity = activityRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.ACTIVITY_NOT_FOUND, id));
-
-        deleteImageFileSilently(activity.getImage());
+        Activity activity = findActivity(id);
+        fileStorageService.deleteQuietly(AppConstant.Upload.ACTIVITIES_DIR, activity.getImage());
         activityRepository.delete(activity);
+        log.info("Activity deleted: {}", id);
     }
 
     @Transactional
     public void uploadImage(UUID id, MultipartFile file) {
-        try {
-            Activity activity = activityRepository.findById(id)
-                    .orElseThrow(() -> FamilyException.of(FamilyErrorCode.ACTIVITY_NOT_FOUND, id));
-
-            String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
-            Files.createDirectories(UPLOAD_DIR);
-
-            Files.copy(
-                    file.getInputStream(),
-                    UPLOAD_DIR.resolve(fileName),
-                    StandardCopyOption.REPLACE_EXISTING
-            );
-
-            deleteImageFileSilently(activity.getImage());
-
-            activity.setImage(fileName);
-            activityRepository.save(activity);
-        } catch (IOException e) {
-            throw FamilyException.of(FamilyErrorCode.FILE_UPLOAD_FAILED);
-        }
+        Activity activity = findActivity(id);
+        String fileName = fileStorageService.store(file, AppConstant.Upload.ACTIVITIES_DIR);
+        fileStorageService.deleteQuietly(AppConstant.Upload.ACTIVITIES_DIR, activity.getImage());
+        activity.setImage(fileName);
+        activityRepository.save(activity);
     }
 
+    @Transactional(readOnly = true)
     public ResponseEntity<Resource> getImage(UUID id) {
-        Activity activity = activityRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.ACTIVITY_NOT_FOUND, id));
-
-        if (activity.getImage() == null) {
-            throw FamilyException.of(FamilyErrorCode.ACTIVITY_IMAGE_NOT_FOUND);
-        }
-
-        Path path = UPLOAD_DIR.resolve(activity.getImage());
-
-        try {
-            Resource resource = new UrlResource(path.toUri());
-            String contentType = Files.probeContentType(path);
-
-            if (contentType == null) {
-                contentType = "application/octet-stream";
-            }
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(contentType))
-                    .body(resource);
-        } catch (IOException e) {
-            throw FamilyException.of(FamilyErrorCode.ACTIVITY_IMAGE_NOT_FOUND);
-        }
-    }
-
-    private void deleteImageFileSilently(String fileName) {
-        if (fileName != null) {
-            try {
-                Files.deleteIfExists(UPLOAD_DIR.resolve(fileName));
-            } catch (IOException ignored) {
-            }
-        }
-    }
-
-    private ActivityResponse mapToResponse(Activity activity) {
-        ActivityResponse response = new ActivityResponse();
-        response.setId(activity.getId());
-        response.setTitle(activity.getTitle());
-
-        if (activity.getImage() != null) {
-            response.setImageUrl("/api/activities/image/" + activity.getId());
-        }
-        return response;
+        Activity activity = findActivity(id);
+        return fileStorageService.loadAsResource(
+                AppConstant.Upload.ACTIVITIES_DIR,
+                activity.getImage(),
+                AppErrorCode.ACTIVITY_IMAGE_NOT_FOUND
+        );
     }
 
     @Transactional
@@ -142,15 +83,18 @@ public class ActivityService {
 
     @Transactional
     public void deleteImage(UUID id) {
-        Activity activity = activityRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.ACTIVITY_NOT_FOUND, id));
-
+        Activity activity = findActivity(id);
         if (activity.getImage() == null) {
-            throw FamilyException.of(FamilyErrorCode.ACTIVITY_IMAGE_NOT_FOUND);
+            throw AppException.of(AppErrorCode.ACTIVITY_IMAGE_NOT_FOUND);
         }
 
-        deleteImageFileSilently(activity.getImage());
+        fileStorageService.deleteQuietly(AppConstant.Upload.ACTIVITIES_DIR, activity.getImage());
         activity.setImage(null);
         activityRepository.save(activity);
+    }
+
+    private Activity findActivity(UUID id) {
+        return activityRepository.findById(id)
+                .orElseThrow(() -> AppException.of(AppErrorCode.ACTIVITY_NOT_FOUND, id));
     }
 }

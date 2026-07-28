@@ -1,6 +1,7 @@
 package com.hansenvillage.hansenapp.exception;
 
 import com.hansenvillage.hansenapp.dto.ResponseError;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -15,19 +16,14 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ResponseError> handleStore(Exception ex) {
-        return ResponseEntity
-                .status(400)
-                .body(new ResponseError(400, ex.getMessage()));
-    }
-
-    @ExceptionHandler(FamilyException.class)
-    public ResponseEntity<ResponseError> handleStore(FamilyException ex) {
-        FamilyErrorCode errorCode = ex.getErrorCode();
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ResponseError> handleAppException(AppException ex) {
+        AppErrorCode errorCode = ex.getErrorCode();
+        log.warn("{}: {}", errorCode.name(), ex.getMessage());
         return ResponseEntity
                 .status(errorCode.getStatus())
                 .body(new ResponseError(errorCode.getStatus().value(), ex.getMessage()));
@@ -38,6 +34,7 @@ public class GlobalExceptionHandler {
         String message = ex.getBindingResult().getFieldErrors().stream()
                 .map(this::formatFieldError)
                 .collect(Collectors.joining("; "));
+        log.warn("Validation failed: {}", message);
         return badRequest(message);
     }
 
@@ -69,6 +66,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(new ResponseError(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ResponseError> handleUnexpected(Exception ex) {
+        log.error("Unexpected error", ex);
+        String message = ex.getMessage() != null && !ex.getMessage().isBlank()
+                ? ex.getMessage()
+                : ex.getClass().getSimpleName();
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ResponseError(HttpStatus.INTERNAL_SERVER_ERROR.value(), message));
     }
 
     private String formatFieldError(FieldError fieldError) {

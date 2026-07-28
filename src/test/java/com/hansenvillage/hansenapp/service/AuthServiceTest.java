@@ -2,8 +2,8 @@
 //
 //import com.hansenvillage.hansenapp.dto.*;
 //import com.hansenvillage.hansenapp.entity.*;
-//import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
-//import com.hansenvillage.hansenapp.exception.FamilyException;
+//import com.hansenvillage.hansenapp.exception.AppErrorCode;
+//import com.hansenvillage.hansenapp.exception.AppException;
 //import com.hansenvillage.hansenapp.mapper.*;
 //import com.hansenvillage.hansenapp.repository.*;
 //import com.hansenvillage.hansenapp.security.JwtService;
@@ -44,11 +44,11 @@
 //
 //        when(familyRepository.existsByEmail(request.getEmail())).thenReturn(true);
 //
-//        FamilyException exception = assertThrows(FamilyException.class, () -> {
+//        AppException exception = assertThrows(AppException.class, () -> {
 //            authService.registerFamily(request);
 //        });
 //
-//        assertEquals(FamilyErrorCode.EMAIL_ALREADY_EXISTS, exception.getErrorCode());
+//        assertEquals(AppErrorCode.EMAIL_ALREADY_EXISTS, exception.getErrorCode());
 //        verify(familyRepository, never()).save(any());
 //    }
 //
@@ -92,11 +92,11 @@
 //
 //        when(familyRepository.findByEmailIgnoreCase(request.getEmail())).thenReturn(Optional.empty());
 //
-//        FamilyException exception = assertThrows(FamilyException.class, () -> {
+//        AppException exception = assertThrows(AppException.class, () -> {
 //            authService.login(request);
 //        });
 //
-//        assertEquals(FamilyErrorCode.WRONG_EMAIL, exception.getErrorCode());
+//        assertEquals(AppErrorCode.WRONG_EMAIL, exception.getErrorCode());
 //    }
 //
 //    @Test
@@ -111,11 +111,11 @@
 //        when(familyRepository.findByEmailIgnoreCase(request.getEmail())).thenReturn(Optional.of(family));
 //        when(passwordEncoder.matches("wrong_pass", "correct_encoded_pass")).thenReturn(false);
 //
-//        FamilyException exception = assertThrows(FamilyException.class, () -> {
+//        AppException exception = assertThrows(AppException.class, () -> {
 //            authService.login(request);
 //        });
 //
-//        assertEquals(FamilyErrorCode.WRONG_PASSWORD, exception.getErrorCode());
+//        assertEquals(AppErrorCode.WRONG_PASSWORD, exception.getErrorCode());
 //    }
 //
 //    @Test
