@@ -1,16 +1,25 @@
 package com.hansenvillage.hansenapp.controller;
 
-import com.hansenvillage.hansenapp.dto.*;
-import com.hansenvillage.hansenapp.entity.Family;
-import com.hansenvillage.hansenapp.mapper.FamilyMapper;
+import com.hansenvillage.hansenapp.dto.AdminRegistrationRequest;
+import com.hansenvillage.hansenapp.dto.AdminUpdateRequest;
+import com.hansenvillage.hansenapp.dto.AdminUpdateResponse;
+import com.hansenvillage.hansenapp.dto.FamilyInfoResponse;
+import com.hansenvillage.hansenapp.dto.GroupedAdminsResponse;
 import com.hansenvillage.hansenapp.service.AdminService;
-import com.hansenvillage.hansenapp.service.FamilyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
@@ -46,8 +55,7 @@ public class AdminController {
     public ResponseEntity<AdminUpdateResponse> updateAdmin(
             @PathVariable UUID id,
             @Valid @RequestBody AdminUpdateRequest request) {
-        AdminUpdateResponse response = adminService.updateAdmin(id, request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(adminService.updateAdmin(id, request));
     }
 
     @DeleteMapping("/{id}")

@@ -2,13 +2,20 @@ package com.hansenvillage.hansenapp.controller;
 
 import com.hansenvillage.hansenapp.dto.CinemaBookingRequest;
 import com.hansenvillage.hansenapp.dto.CinemaBookingResponse;
-import com.hansenvillage.hansenapp.entity.CinemaBooking;
 import com.hansenvillage.hansenapp.mapper.CinemaBookingMapper;
 import com.hansenvillage.hansenapp.service.CinemaBookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,35 +31,24 @@ public class CinemaBookingController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public List<CinemaBookingResponse> createBooking(@Valid @RequestBody CinemaBookingRequest request) {
-        List<CinemaBooking> bookings = cinemaBookingService.book(request);
-        return cinemaBookingMapper.toResponse(bookings);
+        return cinemaBookingMapper.toResponse(cinemaBookingService.book(request));
     }
 
     @GetMapping("/{id}")
     public CinemaBookingResponse getBooking(@PathVariable UUID id) {
-        CinemaBooking booking = cinemaBookingService.getBookingById(id);
-        return cinemaBookingMapper.toResponse(booking);
+        return cinemaBookingMapper.toResponse(cinemaBookingService.getBookingById(id));
     }
 
     @GetMapping("/user/{userId}")
     public List<CinemaBookingResponse> getBookingsByUser(@PathVariable UUID userId) {
-        List<CinemaBooking> bookings = cinemaBookingService.getAllUpcomingBookingsForUser(userId);
-        return cinemaBookingMapper.toResponseList(bookings);
+        return cinemaBookingMapper.toResponseList(cinemaBookingService.getAllUpcomingBookingsForUser(userId));
     }
 
     @GetMapping("/session/{sessionId}")
     //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public List<CinemaBookingResponse> getBookingsBySessionId(@PathVariable UUID sessionId) {
-
-        List<CinemaBooking> bookings = cinemaBookingService.getBookingsBySessionId(sessionId);
-        return cinemaBookingMapper.toResponseList(bookings);
+        return cinemaBookingMapper.toResponseList(cinemaBookingService.getBookingsBySessionId(sessionId));
     }
-
-//    @GetMapping
-//    public List<CinemaBookingResponse> getAllBookings() {
-//        List<CinemaBooking> bookings = cinemaBookingService.getAllBookings();
-//        return cinemaBookingMapper.toResponseList(bookings);
-//    }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

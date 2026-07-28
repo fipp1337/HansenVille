@@ -13,12 +13,14 @@ public interface PoolBookingMapper {
 
     PoolBooking toEntity(PoolBookingRequest request);
 
-    @Mapping(source = "booking.id", target = "bookingId")
-    @Mapping(source = "user.name", target = "userName")
-    @Mapping(source = "user.age", target = "userAge")
-    @Mapping(source = "session.sessionDate", target = "sessionDate")
-    @Mapping(source = "session.startTime", target = "startTime")
-    @Mapping(source = "session.endTime", target = "endTime")
-    @Mapping(source = "booking.status", target = "status")
+    @Mapping(target = "bookingId", source = "booking.id")
+    @Mapping(target = "poolSessionId", source = "booking.poolSessionId")
+    @Mapping(target = "userId", source = "booking.userId")
+    @Mapping(target = "status", source = "booking.status")
+    @Mapping(target = "userName", expression = "java(user != null ? user.getName() : \"Deleted User\")")
+    @Mapping(target = "userAge", expression = "java(user != null ? user.getAge() : 0)")
+    @Mapping(target = "sessionDate", source = "session.sessionDate")
+    @Mapping(target = "startTime", source = "session.startTime")
+    @Mapping(target = "endTime", source = "session.endTime")
     PoolBookingResponse toResponse(PoolBooking booking, User user, PoolSession session);
 }

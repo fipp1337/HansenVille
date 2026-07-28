@@ -1,29 +1,28 @@
 package com.hansenvillage.hansenapp.service;
 
-import com.hansenvillage.hansenapp.dto.*;
-import com.hansenvillage.hansenapp.entity.*;
-import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
-import com.hansenvillage.hansenapp.exception.FamilyException;
+import com.hansenvillage.hansenapp.constant.AppConstant;
+import com.hansenvillage.hansenapp.dto.CinemaPublishWeekScheduleRequest;
+import com.hansenvillage.hansenapp.dto.CinemaSessionRequest;
+import com.hansenvillage.hansenapp.dto.CinemaSessionWithSeatsResponse;
+import com.hansenvillage.hansenapp.dto.CinemaSeatWithAvailableResponse;
+import com.hansenvillage.hansenapp.entity.CinemaBooking;
+import com.hansenvillage.hansenapp.entity.CinemaSeat;
+import com.hansenvillage.hansenapp.entity.CinemaSession;
+import com.hansenvillage.hansenapp.exception.AppErrorCode;
+import com.hansenvillage.hansenapp.exception.AppException;
 import com.hansenvillage.hansenapp.mapper.CinemaSeatMapper;
 import com.hansenvillage.hansenapp.mapper.CinemaSessionMapper;
 import com.hansenvillage.hansenapp.repository.CinemaBookingRepository;
-import com.hansenvillage.hansenapp.repository.CinemaHallRepository;
 import com.hansenvillage.hansenapp.repository.CinemaSeatRepository;
 import com.hansenvillage.hansenapp.repository.CinemaSessionRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.UrlResource;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.MediaType;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.core.io.Resource;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -31,6 +30,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CinemaSessionService {
@@ -40,203 +40,101 @@ public class CinemaSessionService {
     private final CinemaSeatRepository cinemaSeatRepository;
     private final CinemaSeatMapper cinemaSeatMapper;
     private final CinemaBookingRepository cinemaBookingRepository;
-    private final CinemaHallRepository cinemaHallRepository;
+    private final FileStorageService fileStorageService;
 
+    @Transactional
     public List<CinemaSession> create(CinemaPublishWeekScheduleRequest request) {
-
         List<CinemaSession> sessions = cinemaSessionMapper.toEntityList(request);
-
-        sessions.stream()
-                .map(CinemaSession::getHallId)
-                .forEach(hallId -> {
-                    if (!cinemaHallRepository.existsById(hallId)) {
-                        throw FamilyException.of(FamilyErrorCode.HALL_NOT_FOUND, hallId);
-                    }
-                });
-        return cinemaSessionRepository.saveAll(sessions);
+        List<CinemaSession> saved = cinemaSessionRepository.saveAll(sessions);
+        log.info("Cinema schedule published: sessions={}", saved.size());
+        return saved;
     }
 
     @Transactional
     public void uploadPoster(UUID sessionId, MultipartFile file) {
-
-        try {
-            CinemaSession session = cinemaSessionRepository.findById(sessionId)
-                    .orElseThrow(() -> FamilyException.of(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND, sessionId));
-
-            String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
-
-            Path uploadDir = Paths.get("uploads/posters");
-
-            Files.createDirectories(uploadDir);
-
-            Files.copy(
-                    file.getInputStream(),
-                    uploadDir.resolve(fileName),
-                    StandardCopyOption.REPLACE_EXISTING
-            );
-
-            session.setPosterImage(fileName);
-
-            cinemaSessionRepository.save(session);
-        } catch (IOException e) {
-            throw FamilyException.of(FamilyErrorCode.FILE_UPLOAD_FAILED);
-        }
+        CinemaSession session = findSession(sessionId);
+        session.setPosterImage(fileStorageService.store(file, AppConstant.Upload.POSTERS_DIR));
+        cinemaSessionRepository.save(session);
+        log.info("Cinema poster uploaded: session={}", sessionId);
     }
 
+    @Transactional(readOnly = true)
     public ResponseEntity<Resource> getPoster(UUID sessionId) {
-
-        CinemaSession session = cinemaSessionRepository.findById(sessionId)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND, sessionId));
-
-        Path path = Paths.get("uploads/posters")
-                .resolve(session.getPosterImage());
-
-        try {
-
-            Resource resource = new UrlResource(path.toUri());
-
-            String contentType = Files.probeContentType(path);
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(contentType))
-                    .body(resource);
-
-        } catch (IOException e) {
-
-            throw FamilyException.of(FamilyErrorCode.POSTER_NOT_FOUND);
-        }
+        CinemaSession session = findSession(sessionId);
+        return fileStorageService.loadAsResource(
+                AppConstant.Upload.POSTERS_DIR,
+                session.getPosterImage(),
+                AppErrorCode.POSTER_NOT_FOUND
+        );
     }
 
+    @Transactional
     public void updatePoster(UUID sessionId, MultipartFile newFile) {
-
         deletePoster(sessionId);
         uploadPoster(sessionId, newFile);
-
-        /*
-        CinemaSession session = cinemaSessionRepository.findById(sessionId)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND, sessionId));
-
-        if (session.getPosterImage() == null) {
-            throw FamilyException.of(FamilyErrorCode.POSTER_NOT_FOUND, sessionId);
-        }
-
-        try {
-
-            Path uploadDir = Paths.get("uploads/posters");
-            Files.createDirectories(uploadDir);
-
-            Path path = Paths.get("/uploads/posters")
-                    .resolve(session.getPosterImage());
-
-            Files.deleteIfExists(uploadDir.resolve(session.getPosterImage()));
-
-            String fileName = UUID.randomUUID() + "-" + newFile.getOriginalFilename();
-
-            Files.copy(
-                    newFile.getInputStream(),
-                    uploadDir.resolve(fileName),
-                    StandardCopyOption.REPLACE_EXISTING
-            );
-
-            session.setPosterImage(fileName);
-            return cinemaSessionRepository.save(session);
-
-        } catch (IOException e) {
-            throw FamilyException.of(FamilyErrorCode.FILE_UPDATE_FAILED);
-        }
-        */
     }
 
+    @Transactional
     public void deletePoster(UUID sessionId) {
-
-        CinemaSession session = cinemaSessionRepository.findById(sessionId)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND, sessionId));
-
+        CinemaSession session = findSession(sessionId);
         if (session.getPosterImage() == null) {
-            throw FamilyException.of(FamilyErrorCode.POSTER_NOT_FOUND, sessionId);
+            throw AppException.of(AppErrorCode.POSTER_NOT_FOUND, sessionId);
         }
 
-        try {
-            Path path = Paths.get("uploads/posters")
-                    .resolve(session.getPosterImage());
-
-            Files.deleteIfExists(path);
-
-            session.setPosterImage(null);
-            cinemaSessionRepository.save(session);
-
-        } catch (IOException e) {
-            throw FamilyException.of(FamilyErrorCode.FILE_DELETE_FAILED);
-        }
-
+        fileStorageService.delete(AppConstant.Upload.POSTERS_DIR, session.getPosterImage());
+        session.setPosterImage(null);
+        cinemaSessionRepository.save(session);
     }
 
+    @Transactional(readOnly = true)
     public CinemaSessionWithSeatsResponse findById(UUID id) {
-
-        CinemaSession session = cinemaSessionRepository.findById(id)
-                .orElseThrow(() ->
-                        FamilyException.of(
-                                FamilyErrorCode.CINEMA_SESSION_NOT_FOUND, id));
-
+        CinemaSession session = findSession(id);
         CinemaSessionWithSeatsResponse response = cinemaSessionMapper.toResponseWithSeats(session);
 
         List<CinemaSeat> seats = cinemaSeatRepository.findByHallId(session.getHallId());
-
-        List<UUID> bookedSeatIds = cinemaBookingRepository
-                .findSeatIdsByCinemaSessionId(session.getId());
+        List<UUID> bookedSeatIds = cinemaBookingRepository.findSeatIdsByCinemaSessionId(session.getId());
 
         List<CinemaSeatWithAvailableResponse> seatResponses = seats.stream()
                 .map(seat -> {
                     CinemaSeatWithAvailableResponse seatResponse = cinemaSeatMapper.toResponseWithAvailable(seat);
                     seatResponse.setAvailable(!bookedSeatIds.contains(seat.getId()));
-
                     return seatResponse;
                 })
                 .toList();
 
         response.setSeats(seatResponses);
-
         return response;
     }
 
+    @Transactional
     public CinemaSession update(UUID id, CinemaSessionRequest request) {
-
-        CinemaSession session = cinemaSessionRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND, id));
-
+        CinemaSession session = findSession(id);
         cinemaSessionMapper.updateEntity(request, session);
-
         return cinemaSessionRepository.save(session);
     }
 
     @Transactional
     public void delete(UUID id) {
         if (!cinemaSessionRepository.existsById(id)) {
-            throw FamilyException.of(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND, id);
+            throw AppException.of(AppErrorCode.CINEMA_SESSION_NOT_FOUND, id);
         }
-        List<CinemaBooking> bookings = cinemaBookingRepository.findByCinemaSessionId(id);
-        cinemaBookingRepository.deleteAll(bookings);
+        cinemaBookingRepository.deleteAll(cinemaBookingRepository.findByCinemaSessionId(id));
         cinemaSessionRepository.deleteById(id);
+        log.info("Cinema session deleted: {}", id);
     }
 
-//    @Transactional
-//    public void cancel(UUID id) {
-//
-//    }
-//
-//    @Transactional
-//    public void cancelSessionsForDay(LocalDate date) {
-//
-//    }
-
+    @Transactional(readOnly = true)
     public List<CinemaSession> getWeekSchedule(LocalDate weekStart) {
-
         LocalDateTime weekStartDateTime = weekStart.atStartOfDay();
         LocalDateTime weekEndDateTime = weekStart.plusDays(6).atTime(LocalTime.MAX);
 
-        return cinemaSessionRepository.findByStartAtBetween(weekStartDateTime, weekEndDateTime)
-                    .stream()
-                    .sorted(Comparator.comparing(CinemaSession::getStartAt))
-                    .toList();
+        return cinemaSessionRepository.findByStartAtBetween(weekStartDateTime, weekEndDateTime).stream()
+                .sorted(Comparator.comparing(CinemaSession::getStartAt))
+                .toList();
+    }
+
+    private CinemaSession findSession(UUID id) {
+        return cinemaSessionRepository.findById(id)
+                .orElseThrow(() -> AppException.of(AppErrorCode.CINEMA_SESSION_NOT_FOUND, id));
     }
 }

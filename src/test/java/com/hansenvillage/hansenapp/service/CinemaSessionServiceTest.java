@@ -3,8 +3,8 @@ package com.hansenvillage.hansenapp.service;
 import com.hansenvillage.hansenapp.dto.*;
 import com.hansenvillage.hansenapp.entity.CinemaSeat;
 import com.hansenvillage.hansenapp.entity.CinemaSession;
-import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
-import com.hansenvillage.hansenapp.exception.FamilyException;
+import com.hansenvillage.hansenapp.exception.AppErrorCode;
+import com.hansenvillage.hansenapp.exception.AppException;
 import com.hansenvillage.hansenapp.mapper.CinemaSeatMapper;
 import com.hansenvillage.hansenapp.mapper.CinemaSessionMapper;
 import com.hansenvillage.hansenapp.repository.CinemaBookingRepository;
@@ -90,45 +90,38 @@ class CinemaSessionServiceTest {
         seat3.setHallId(session.getHallId());
         seat3.setSeatNumber("B3");
 
-        CinemaSeatResponse response1 = new CinemaSeatResponse();
+        CinemaSeatWithAvailableResponse response1 = new CinemaSeatWithAvailableResponse();
         response1.setId(seatId1);
-
-        CinemaSeatResponse response2 = new CinemaSeatResponse();
+        CinemaSeatWithAvailableResponse response2 = new CinemaSeatWithAvailableResponse();
         response2.setId(seatId2);
-
-        CinemaSeatResponse response3 = new CinemaSeatResponse();
+        CinemaSeatWithAvailableResponse response3 = new CinemaSeatWithAvailableResponse();
         response3.setId(seatId3);
 
         List<CinemaSeat> seats = List.of(seat1, seat2, seat3);
-
         List<UUID> bookedSeatIds = List.of(seatId1, seatId2);
 
-        CinemaSessionResponse sessionResponse = new CinemaSessionResponse();
+        CinemaSessionWithSeatsResponse sessionResponse = new CinemaSessionWithSeatsResponse();
         sessionResponse.setId(sessionId);
 
         when(cinemaSessionRepository.findById(sessionId)).thenReturn(Optional.of(session));
-        when(cinemaSessionMapper.toResponse(session)).thenReturn(sessionResponse);
+        when(cinemaSessionMapper.toResponseWithSeats(session)).thenReturn(sessionResponse);
         when(cinemaSeatRepository.findByHallId(session.getHallId())).thenReturn(seats);
         when(cinemaBookingRepository.findSeatIdsByCinemaSessionId(session.getId())).thenReturn(bookedSeatIds);
-        when(cinemaSeatMapper.toResponse(seat1)).thenReturn(response1);
-        when(cinemaSeatMapper.toResponse(seat2)).thenReturn(response2);
-        when(cinemaSeatMapper.toResponse(seat3)).thenReturn(response3);
+        when(cinemaSeatMapper.toResponseWithAvailable(seat1)).thenReturn(response1);
+        when(cinemaSeatMapper.toResponseWithAvailable(seat2)).thenReturn(response2);
+        when(cinemaSeatMapper.toResponseWithAvailable(seat3)).thenReturn(response3);
 
         CinemaSessionWithSeatsResponse result = cinemaSessionService.findById(sessionId);
 
         assertEquals(3, result.getSeats().size());
-
         assertFalse(result.getSeats().get(0).isAvailable());
         assertFalse(result.getSeats().get(1).isAvailable());
         assertTrue(result.getSeats().get(2).isAvailable());
 
         verify(cinemaSessionRepository).findById(sessionId);
-        verify(cinemaSessionMapper).toResponse(session);
+        verify(cinemaSessionMapper).toResponseWithSeats(session);
         verify(cinemaSeatRepository).findByHallId(session.getHallId());
         verify(cinemaBookingRepository).findSeatIdsByCinemaSessionId(session.getId());
-        verify(cinemaSeatMapper).toResponse(seat1);
-        verify(cinemaSeatMapper).toResponse(seat2);
-        verify(cinemaSeatMapper).toResponse(seat3);
     }
 
     @Test
@@ -138,10 +131,10 @@ class CinemaSessionServiceTest {
 
         when(cinemaSessionRepository.findById(id)).thenReturn(Optional.empty());
 
-        FamilyException exception = assertThrows(FamilyException.class,
+        AppException exception = assertThrows(AppException.class,
                 () -> cinemaSessionService.findById(id));
 
-        assertEquals(FamilyErrorCode.CINEMA_SESSION_NOT_FOUND, exception.getErrorCode());
+        assertEquals(AppErrorCode.CINEMA_SESSION_NOT_FOUND, exception.getErrorCode());
 
         verify(cinemaSessionRepository).findById(id);
     }

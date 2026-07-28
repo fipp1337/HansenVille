@@ -1,8 +1,8 @@
 package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.entity.Family;
-import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
-import com.hansenvillage.hansenapp.exception.FamilyException;
+import com.hansenvillage.hansenapp.exception.AppErrorCode;
+import com.hansenvillage.hansenapp.exception.AppException;
 import com.hansenvillage.hansenapp.repository.FamilyRepository;
 import com.hansenvillage.hansenapp.repository.UserRepository;
 import com.hansenvillage.hansenapp.mapper.UserMapper;
@@ -65,16 +65,16 @@ class FamilyServiceTest {
 
 
     @Test
-    void findById_ShouldThrowFamilyException_WhenFamilyDoesNotExist() {
+    void findById_ShouldThrowAppException_WhenFamilyDoesNotExist() {
         UUID familyId = UUID.randomUUID();
 
         when(familyRepository.findById(familyId)).thenReturn(Optional.empty());
 
-        FamilyException exception = assertThrows(FamilyException.class, () -> {
+        AppException exception = assertThrows(AppException.class, () -> {
             familyService.findById(familyId);
         });
 
-        assertEquals(FamilyErrorCode.FAMILY_NOT_FOUND, exception.getErrorCode());
+        assertEquals(AppErrorCode.FAMILY_NOT_FOUND, exception.getErrorCode());
 
         verify(familyRepository, times(1)).findById(familyId);
     }

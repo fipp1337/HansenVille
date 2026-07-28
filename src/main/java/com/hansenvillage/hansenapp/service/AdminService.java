@@ -1,14 +1,24 @@
 package com.hansenvillage.hansenapp.service;
 
-import com.hansenvillage.hansenapp.dto.*;
-import com.hansenvillage.hansenapp.entity.*;
-import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
-import com.hansenvillage.hansenapp.exception.FamilyException;
+import com.hansenvillage.hansenapp.dto.AdminRegistrationRequest;
+import com.hansenvillage.hansenapp.dto.AdminResponse;
+import com.hansenvillage.hansenapp.dto.AdminUpdateRequest;
+import com.hansenvillage.hansenapp.dto.AdminUpdateResponse;
+import com.hansenvillage.hansenapp.dto.FamilyInfoResponse;
+import com.hansenvillage.hansenapp.dto.GroupedAdminsResponse;
+import com.hansenvillage.hansenapp.entity.AdminUser;
+import com.hansenvillage.hansenapp.entity.Family;
+import com.hansenvillage.hansenapp.entity.Role;
+import com.hansenvillage.hansenapp.exception.AppErrorCode;
+import com.hansenvillage.hansenapp.exception.AppException;
 import com.hansenvillage.hansenapp.mapper.AdminMapper;
 import com.hansenvillage.hansenapp.mapper.FamilyMapper;
 import com.hansenvillage.hansenapp.mapper.UserMapper;
-import com.hansenvillage.hansenapp.repository.*;
+import com.hansenvillage.hansenapp.repository.AdminUserRepository;
+import com.hansenvillage.hansenapp.repository.FamilyRepository;
+import com.hansenvillage.hansenapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,50 +26,49 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminService {
+
     private final AdminUserRepository adminUserRepository;
     private final FamilyRepository familyRepository;
     private final UserRepository userRepository;
-    private final FamilyRoleRepository familyRoleRepository;
-    private final PoolBookingRepository poolBookingRepository;
-    private final CinemaBookingRepository cinemaBookingRepository;
     private final AdminMapper adminMapper;
     private final FamilyMapper familyMapper;
     private final UserMapper userMapper;
-
+    private final FamilyService familyService;
 
     @Transactional
     public void addAdmin(AdminRegistrationRequest request) {
         String email = request.getEmail().trim().toLowerCase();
 
         if (email.isBlank()) {
-            throw FamilyException.of(FamilyErrorCode.WRONG_EMAIL);
+            throw AppException.of(AppErrorCode.WRONG_EMAIL);
         }
         if (request.getRoles() == null || request.getRoles().isEmpty()) {
-            throw FamilyException.of(FamilyErrorCode.ROLES_EMPTY);
+            throw AppException.of(AppErrorCode.ROLES_EMPTY);
         }
         if (adminUserRepository.existsByEmail(email)) {
-            throw FamilyException.of(FamilyErrorCode.EMAIL_ALREADY_EXISTS, email);
+            throw AppException.of(AppErrorCode.EMAIL_ALREADY_EXISTS, email);
         }
 
         AdminUser admin = adminMapper.toEntity(request);
         admin.setEmail(email);
         adminUserRepository.save(admin);
+        log.info("Admin created: email={}, roles={}", email, request.getRoles());
     }
 
     @Transactional
     public AdminUpdateResponse updateAdmin(UUID adminId, AdminUpdateRequest request) {
         AdminUser admin = adminUserRepository.findById(adminId)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, adminId));
+                .orElseThrow(() -> AppException.of(AppErrorCode.USER_NOT_FOUND, adminId));
 
         if (request.getEmail() != null && !request.getEmail().isBlank()) {
             String newEmail = request.getEmail().trim().toLowerCase();
-
             if (!newEmail.equals(admin.getEmail())) {
                 if (adminUserRepository.existsByEmail(newEmail)) {
-                    throw FamilyException.of(FamilyErrorCode.EMAIL_ALREADY_EXISTS, newEmail);
+                    throw AppException.of(AppErrorCode.EMAIL_ALREADY_EXISTS, newEmail);
                 }
                 admin.setEmail(newEmail);
             }
@@ -68,7 +77,6 @@ public class AdminService {
         if (request.getName() != null && !request.getName().isBlank()) {
             admin.setName(request.getName());
         }
-
         if (request.getRoles() != null && !request.getRoles().isEmpty()) {
             admin.setRoles(request.getRoles());
         }
@@ -78,19 +86,18 @@ public class AdminService {
         response.setName(savedAdmin.getName());
         response.setEmail(savedAdmin.getEmail());
         response.setRoles(savedAdmin.getRoles());
-
         return response;
     }
+
     @Transactional
     public void deleteAdmin(UUID adminId) {
         AdminUser admin = adminUserRepository.findById(adminId)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND));
-
+                .orElseThrow(() -> AppException.of(AppErrorCode.USER_NOT_FOUND));
         adminUserRepository.delete(admin);
+        log.info("Admin deleted: {}", adminId);
     }
 
-
-
+    @Transactional(readOnly = true)
     public List<FamilyInfoResponse> findFamiliesByAddress(String address) {
         return familyRepository.findByAddress(address).stream()
                 .map(family -> {
@@ -104,51 +111,31 @@ public class AdminService {
     @Transactional
     public void deleteFamilyByAddress(String address) {
         List<Family> families = familyRepository.findByAddress(address);
-
         if (families.isEmpty()) {
-            throw FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, address);
+            throw AppException.of(AppErrorCode.FAMILY_NOT_FOUND, address);
         }
-
-        for (Family family : families) {
-            UUID familyId = family.getId();
-
-            List<User> familyMembers = userRepository.findByFamilyId(familyId);
-            List<UUID> userIds = familyMembers.stream().map(User::getId).toList();
-
-            if (!userIds.isEmpty()) {
-                poolBookingRepository.deleteByUserIdIn(userIds);
-                cinemaBookingRepository.deleteByUserIdIn(userIds);
-            }
-
-            userRepository.deleteByFamilyId(familyId);
-
-            familyRoleRepository.deleteByFamilyId(familyId);
-
-            familyRepository.delete(family);
-        }
+        families.forEach(family -> familyService.deleteFamilyData(family.getId()));
+        log.info("Families deleted by address: address={}, count={}", address, families.size());
     }
 
     @Transactional(readOnly = true)
     public GroupedAdminsResponse getAllAdminsGrouped() {
-        List<AdminUser> allUsers = adminUserRepository.findAll();
-
         List<AdminResponse> admins = new ArrayList<>();
         List<AdminResponse> managers = new ArrayList<>();
 
-        for (AdminUser user : allUsers) {
-            AdminResponse dto = mapToResponse(user);
-
+        for (AdminUser user : adminUserRepository.findAll()) {
+            AdminResponse response = toAdminResponse(user);
             if (user.getRoles() != null && user.getRoles().contains(Role.SUPER_ADMIN)) {
-                admins.add(dto);
+                admins.add(response);
             } else {
-                managers.add(dto);
+                managers.add(response);
             }
         }
 
         return new GroupedAdminsResponse(admins, managers);
     }
 
-    private AdminResponse mapToResponse(AdminUser user) {
+    private AdminResponse toAdminResponse(AdminUser user) {
         AdminResponse response = new AdminResponse();
         response.setId(user.getId());
         response.setName(user.getName());
