@@ -36,6 +36,7 @@ public interface CinemaSessionMapper {
     @Mapping(target = "movieName", source = "slot.movieName")
     @Mapping(target = "startAt", source = "slot.startAt")
     @Mapping(target = "duration", source = "slot.duration")
+    @Mapping(target = "description", source = "slot.description")
     @Mapping(target = "hallId", source = "slot.hallId")
     CinemaSession toEntity(CinemaSessionSlotRequest slot, LocalDate date);
 }

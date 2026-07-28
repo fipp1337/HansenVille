@@ -19,6 +19,6 @@ public class CinemaSessionResponse {
     private String movieName;
     private LocalDateTime startAt;
     private Integer duration;
-
+    private String description;
     private String posterUrl;
 }
