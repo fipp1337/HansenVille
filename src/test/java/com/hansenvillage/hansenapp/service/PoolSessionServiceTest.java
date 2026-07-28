@@ -3,13 +3,11 @@ package com.hansenvillage.hansenapp.service;
 import com.hansenvillage.hansenapp.dto.PoolPublishWeekScheduleRequest;
 import com.hansenvillage.hansenapp.dto.PoolSessionRequest;
 import com.hansenvillage.hansenapp.entity.PoolSession;
-import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
-import com.hansenvillage.hansenapp.exception.FamilyException;
+import com.hansenvillage.hansenapp.exception.AppErrorCode;
+import com.hansenvillage.hansenapp.exception.AppException;
 import com.hansenvillage.hansenapp.mapper.PoolSessionMapper;
-import com.hansenvillage.hansenapp.mapper.PoolTemplateMapper;
 import com.hansenvillage.hansenapp.repository.PoolBookingRepository;
 import com.hansenvillage.hansenapp.repository.PoolSessionRepository;
-import com.hansenvillage.hansenapp.repository.PoolTemplateRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,8 +28,6 @@ import static org.mockito.Mockito.*;
 class PoolSessionServiceTest {
 
     @Mock private PoolSessionRepository poolSessionRepository;
-    @Mock private PoolTemplateRepository poolTemplateRepository;
-    @Mock private PoolTemplateMapper poolTemplateMapper;
     @Mock private PoolSessionMapper poolSessionMapper;
     @Mock private PoolBookingRepository poolBookingRepository;
 
@@ -77,8 +73,8 @@ class PoolSessionServiceTest {
         UUID id = UUID.randomUUID();
         when(poolSessionRepository.findById(id)).thenReturn(Optional.empty());
 
-        FamilyException exception = assertThrows(FamilyException.class, () -> poolSessionService.findById(id));
-        assertEquals(FamilyErrorCode.POOL_SESSION_NOT_FOUND, exception.getErrorCode());
+        AppException exception = assertThrows(AppException.class, () -> poolSessionService.findById(id));
+        assertEquals(AppErrorCode.POOL_SESSION_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -100,26 +96,31 @@ class PoolSessionServiceTest {
 
 
     @Test
-    void delete_ShouldDeleteBookingsAndSession_WhenExists() {
+    void delete_ShouldCancelBookingsAndDeleteSession_WhenExists() {
         UUID id = UUID.randomUUID();
-        when(poolSessionRepository.existsById(id)).thenReturn(true);
+        PoolSession session = new PoolSession();
+        session.setId(id);
+
+        when(poolSessionRepository.findById(id)).thenReturn(Optional.of(session));
+        when(poolBookingRepository.findByPoolSessionId(id)).thenReturn(Collections.emptyList());
 
         poolSessionService.delete(id);
 
-        verify(poolBookingRepository, times(1)).deleteByPoolSessionId(id);
-        verify(poolSessionRepository, times(1)).deleteById(id);
+        verify(poolBookingRepository).findByPoolSessionId(id);
+        verify(poolBookingRepository).saveAll(Collections.emptyList());
+        verify(poolSessionRepository).delete(session);
     }
 
     @Test
     void delete_ShouldThrowException_WhenSessionDoesNotExist() {
         UUID id = UUID.randomUUID();
-        when(poolSessionRepository.existsById(id)).thenReturn(false);
+        when(poolSessionRepository.findById(id)).thenReturn(Optional.empty());
 
-        FamilyException exception = assertThrows(FamilyException.class, () -> poolSessionService.delete(id));
-        assertEquals(FamilyErrorCode.POOL_SESSION_NOT_FOUND, exception.getErrorCode());
+        AppException exception = assertThrows(AppException.class, () -> poolSessionService.delete(id));
+        assertEquals(AppErrorCode.POOL_SESSION_NOT_FOUND, exception.getErrorCode());
 
-        verify(poolBookingRepository, never()).deleteByPoolSessionId(any());
-        verify(poolSessionRepository, never()).deleteById(any());
+        verify(poolBookingRepository, never()).findByPoolSessionId(any());
+        verify(poolSessionRepository, never()).delete(any());
     }
 
 

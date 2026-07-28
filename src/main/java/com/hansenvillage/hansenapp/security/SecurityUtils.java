@@ -1,9 +1,8 @@
 package com.hansenvillage.hansenapp.security;
 
 import com.hansenvillage.hansenapp.entity.Role;
-import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
-import com.hansenvillage.hansenapp.exception.FamilyException;
-import org.springframework.security.core.Authentication;
+import com.hansenvillage.hansenapp.exception.AppErrorCode;
+import com.hansenvillage.hansenapp.exception.AppException;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
@@ -15,7 +14,7 @@ public final class SecurityUtils {
     }
 
     public static Optional<SecurityFamily> optionalCurrentFamily() {
-        var authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof SecurityFamily securityFamily) {
             return Optional.of(securityFamily);
         }
@@ -24,7 +23,7 @@ public final class SecurityUtils {
 
     public static SecurityFamily currentFamily() {
         return optionalCurrentFamily()
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.INVALID_CREDENTIALS));
+                .orElseThrow(() -> AppException.of(AppErrorCode.INVALID_CREDENTIALS));
     }
 
     public static UUID currentFamilyId() {
@@ -37,23 +36,13 @@ public final class SecurityUtils {
                 .orElse(false);
     }
 
-//    public static boolean isAdmin() {
-//        return hasRole(Role.ADMIN);
-//    }
-
     public static boolean isSuperAdmin() {
         return hasRole(Role.SUPER_ADMIN);
     }
 
     public static void assertOwnerOrSuperAdmin(UUID familyId) {
         if (!isSuperAdmin() && !currentFamilyId().equals(familyId)) {
-            throw FamilyException.of(FamilyErrorCode.ACCESS_DENIED);
+            throw AppException.of(AppErrorCode.ACCESS_DENIED);
         }
     }
-
-//    public static void assertOwner(UUID targetFamilyId) {
-//        if (!currentFamilyId().equals(targetFamilyId)) {
-//            throw FamilyException.of(FamilyErrorCode.ACCESS_DENIED);
-//        }
-//    }
 }

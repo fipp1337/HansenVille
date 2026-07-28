@@ -1,5 +1,6 @@
 package com.hansenvillage.hansenapp.service;
 
+import com.hansenvillage.hansenapp.constant.AppConstant;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -9,105 +10,62 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class RedisService {
+
     private final StringRedisTemplate redisTemplate;
-    private static final String REG_CODE_PREFIX = "reg:code:";
-    private static final String LOGIN_CODE_PREFIX = "login:code:";
-    private static final String ADMIN_LOGIN_PREFIX = "admin:login:";
-    private static final String LINK_STATE_PREFIX = "link:state:";
-    private static final String RESET_CODE_PREFIX = "reset:code:";
-    private static final Duration CODE_TTL = Duration.ofMinutes(10);
+    private static final Duration CODE_TTL = Duration.ofMinutes(AppConstant.Redis.OTP_EXPIRATION_MINUTES);
 
     public RedisService(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
     public void storeLoginAdminData(String email, String verificationCode) {
-        String key = ADMIN_LOGIN_PREFIX + email;
-        Map<String, String> data = Map.of(
+        String key = AppConstant.Redis.ADMIN_LOGIN_PREFIX + email;
+        redisTemplate.opsForHash().putAll(key, Map.of(
                 "verificationCode", verificationCode != null ? verificationCode : ""
-        );
-
-        redisTemplate.opsForHash().putAll(key, data);
+        ));
         redisTemplate.expire(key, CODE_TTL);
     }
 
     public String getLoginAdminCode(String email) {
-        String key = ADMIN_LOGIN_PREFIX + email;
-        Object code = redisTemplate.opsForHash().get(key, "verificationCode");
+        Object code = redisTemplate.opsForHash().get(AppConstant.Redis.ADMIN_LOGIN_PREFIX + email, "verificationCode");
         return code != null ? code.toString() : null;
     }
 
     public void deleteLoginAdminData(String email) {
-        String key = ADMIN_LOGIN_PREFIX + email;
-        redisTemplate.delete(key);
+        redisTemplate.delete(AppConstant.Redis.ADMIN_LOGIN_PREFIX + email);
     }
 
-
     public void storeRegistrationData(String email, String inviteCode, String verificationCode) {
-        String key = REG_CODE_PREFIX + email;
-        Map<String, String> data = Map.of(
+        String key = AppConstant.Redis.REG_CODE_PREFIX + email;
+        redisTemplate.opsForHash().putAll(key, Map.of(
                 "inviteCode", inviteCode != null ? inviteCode : "",
                 "verificationCode", verificationCode != null ? verificationCode : ""
-        );
-
-        redisTemplate.opsForHash().putAll(key, data);
+        ));
         redisTemplate.expire(key, CODE_TTL);
     }
 
     public Map<Object, Object> getRegistrationData(String email) {
-        String key = REG_CODE_PREFIX + email;
-        return redisTemplate.opsForHash().entries(key);
+        return redisTemplate.opsForHash().entries(AppConstant.Redis.REG_CODE_PREFIX + email);
     }
 
     public void deleteRegistrationData(String email) {
-        String key = REG_CODE_PREFIX + email;
-        redisTemplate.delete(key);
+        redisTemplate.delete(AppConstant.Redis.REG_CODE_PREFIX + email);
     }
 
-    // --- RESET PASSWORD ---
-
     public void storeResetCode(String email, String code) {
-        String key = RESET_CODE_PREFIX + email;
-        redisTemplate.opsForValue().set(key, code, CODE_TTL.toMinutes(), TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(
+                AppConstant.Redis.RESET_PASSWORD_PREFIX + email,
+                code,
+                CODE_TTL.toMinutes(),
+                TimeUnit.MINUTES
+        );
     }
 
     public String getResetCode(String email) {
-        String key = RESET_CODE_PREFIX + email;
-        return redisTemplate.opsForValue().get(key);
+        return redisTemplate.opsForValue().get(AppConstant.Redis.RESET_PASSWORD_PREFIX + email);
     }
 
     public void deleteResetCode(String email) {
-        String key = RESET_CODE_PREFIX + email;
-        redisTemplate.delete(key);
-    }
-
-    public void preSeedInviteCode(String email, String inviteCode) {
-        storeRegistrationData(email, inviteCode, "");
-    }
-
-    public void storeLoginCode(String email, String code) {
-        String key = LOGIN_CODE_PREFIX + email;
-        redisTemplate.opsForValue().set(key, code, CODE_TTL.toMinutes(), TimeUnit.MINUTES);
-    }
-
-    public String getLoginCode(String email) {
-        return redisTemplate.opsForValue().get(LOGIN_CODE_PREFIX + email);
-    }
-
-    public void deleteLoginCode(String email) {
-        redisTemplate.delete(LOGIN_CODE_PREFIX + email);
-    }
-
-    public void storeLinkState(String token, long userId) {
-        String key = LINK_STATE_PREFIX + token;
-        redisTemplate.opsForValue().set(key, String.valueOf(userId), CODE_TTL.toMinutes(), TimeUnit.MINUTES);
-    }
-
-    public String getLinkState(String token) {
-        return redisTemplate.opsForValue().get(LINK_STATE_PREFIX + token);
-    }
-
-    public void deleteLinkState(String token) {
-        redisTemplate.delete(LINK_STATE_PREFIX + token);
+        redisTemplate.delete(AppConstant.Redis.RESET_PASSWORD_PREFIX + email);
     }
 }

@@ -70,7 +70,7 @@ public class FamilyController {
     @GetMapping("/tickets/pool")
     public PoolTicketsResponse getPoolTickets(
             @RequestParam(required = false) LocalDate date) {
-        return familyService.getFamilyTickets(date);
+        return familyService.getPoolTickets(date);
     }
 
     @PutMapping("/me")
