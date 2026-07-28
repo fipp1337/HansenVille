@@ -8,17 +8,15 @@ public class AppConstant {
     @UtilityClass
     public class Redis {
         public final String REG_CODE_PREFIX = "reg:code:";
+        public final String ADMIN_LOGIN_PREFIX = "admin:login:";
         public final String RESET_PASSWORD_PREFIX = "reset:code:";
-        public final long OTP_EXPIRATION_MINUTES = 5;
+        public final long OTP_EXPIRATION_MINUTES = 10;
     }
 
     @UtilityClass
-    public class Security {
-        public final String AUTHORIZATION_HEADER = "Authorization";
-        public final String BEARER_PREFIX = "Bearer ";
-        public final String ROLE_SUPER_ADMIN = "SUPER_ADMIN";
-        public final String ROLE_POOL_MANAGER = "POOL_MANAGER";
-        public final String ROLE_GYM_MANAGER = "GYM_MANAGER";
-        public final String ROLE_CINEMA_MANAGER = "CINEMA_MANAGER";
+    public class Upload {
+        public final String FACILITIES_DIR = "uploads/facilities";
+        public final String ACTIVITIES_DIR = "uploads/activities";
+        public final String POSTERS_DIR = "uploads/posters";
     }
 }

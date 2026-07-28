@@ -1,32 +1,43 @@
 package com.hansenvillage.hansenapp.service;
 
-import com.hansenvillage.hansenapp.dto.*;
+import com.hansenvillage.hansenapp.dto.FamilyBookingHistoryResponse;
+import com.hansenvillage.hansenapp.dto.FamilyInfoResponse;
+import com.hansenvillage.hansenapp.dto.FamilyUpdateRequest;
+import com.hansenvillage.hansenapp.dto.PoolTicketsResponse;
 import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.entity.User;
-import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
-import com.hansenvillage.hansenapp.exception.FamilyException;
+import com.hansenvillage.hansenapp.exception.AppErrorCode;
+import com.hansenvillage.hansenapp.exception.AppException;
 import com.hansenvillage.hansenapp.mapper.FamilyMapper;
 import com.hansenvillage.hansenapp.mapper.UserMapper;
-import com.hansenvillage.hansenapp.repository.*;
+import com.hansenvillage.hansenapp.repository.CinemaBookingRepository;
+import com.hansenvillage.hansenapp.repository.FamilyRepository;
+import com.hansenvillage.hansenapp.repository.FamilyRoleRepository;
+import com.hansenvillage.hansenapp.repository.PoolBookingRepository;
+import com.hansenvillage.hansenapp.repository.UserRepository;
 import com.hansenvillage.hansenapp.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FamilyService {
-   private final FamilyRepository familyRepository;
-   private final UserRepository userRepository;
-   private final PasswordEncoder passwordEncoder;
-   private final PhoneService phoneService;
+
+    private final FamilyRepository familyRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final PhoneService phoneService;
     private final PoolBookingRepository poolBookingRepository;
     private final CinemaBookingRepository cinemaBookingRepository;
     private final FamilyRoleRepository familyRoleRepository;
@@ -41,58 +52,34 @@ public class FamilyService {
 
     public Family findById(UUID id) {
         return familyRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, id));
+                .orElseThrow(() -> AppException.of(AppErrorCode.FAMILY_NOT_FOUND, id));
     }
-
 
     @Transactional
     public Family updateFamilyInfo(UUID id, FamilyUpdateRequest request) {
         SecurityUtils.assertOwnerOrSuperAdmin(id);
-        Family family = familyRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, id));
+        Family family = findById(id);
 
         familyMapper.updateFamilyFromRequest(request, family);
-
-        boolean isPasswordUpdateAttempt =
-                (request.getOldPassword() != null && !request.getOldPassword().isBlank()) ||
-                        (request.getNewPassword() != null && !request.getNewPassword().isBlank()) ||
-                        (request.getConfirmNewPassword() != null && !request.getConfirmNewPassword().isBlank());
-
-        if (isPasswordUpdateAttempt) {
-
-            if (request.getOldPassword() == null || request.getOldPassword().isBlank()) {
-                throw FamilyException.of(FamilyErrorCode.OLD_PASSWORD_REQUIRED);
-            }
-
-            if (request.getNewPassword() == null || request.getNewPassword().isBlank()) {
-                throw FamilyException.of(FamilyErrorCode.NEW_PASSWORD_REQUIRED);
-            }
-
-            if (request.getNewPassword().equals(request.getOldPassword())) {
-                throw FamilyException.of(FamilyErrorCode.NEW_PASSWORD_MATCH_WITH_OLD);
-            }
-
-            if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
-                throw FamilyException.of(FamilyErrorCode.PASSWORDS_DO_NOT_MATCH);
-            }
-
-            if (!passwordEncoder.matches(request.getOldPassword(), family.getPassword())) {
-                throw FamilyException.of(FamilyErrorCode.INVALID_OLD_PASSWORD);
-            }
-
-            family.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        }
+        applyPasswordUpdateIfRequested(family, request);
 
         if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
             family.setPhoneNumber(phoneService.validateAndFormatPhone(request.getPhoneNumber()));
         }
 
-        return familyRepository.save(family);
+        Family saved = familyRepository.save(family);
+        log.info("Family updated: {}", id);
+        return saved;
     }
 
     @Transactional
     public void deleteFamily(UUID id) {
         SecurityUtils.assertOwnerOrSuperAdmin(id);
+        deleteFamilyData(id);
+    }
+
+    @Transactional
+    public void deleteFamilyData(UUID id) {
         List<User> familyMembers = userRepository.findByFamilyId(id);
         List<UUID> userIds = familyMembers.stream().map(User::getId).toList();
         if (!userIds.isEmpty()) {
@@ -102,36 +89,30 @@ public class FamilyService {
         userRepository.deleteByFamilyId(id);
         familyRoleRepository.deleteByFamilyId(id);
         familyRepository.deleteById(id);
+        log.info("Family deleted: {}", id);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public FamilyInfoResponse getFamilyInfoById(UUID id) {
         SecurityUtils.assertOwnerOrSuperAdmin(id);
-        Family family = familyRepository.findById(id)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, id));
-        List<User> members = userRepository.findByFamilyId(id);
+        Family family = findById(id);
         FamilyInfoResponse response = familyMapper.toInfoResponse(family);
-        response.setMembers(userMapper.toResponse(members));
-
+        response.setMembers(userMapper.toResponse(userRepository.findByFamilyId(id)));
         return response;
     }
 
-    public PoolTicketsResponse getFamilyTickets(LocalDate targetDate) {
-        LocalDate date = (targetDate != null) ? targetDate : LocalDate.now();
+    @Transactional(readOnly = true)
+    public PoolTicketsResponse getPoolTickets(LocalDate targetDate) {
+        LocalDate date = targetDate != null ? targetDate : LocalDate.now();
         UUID familyId = SecurityUtils.currentFamilyId();
-        Family family = familyRepository.findById(familyId)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.FAMILY_NOT_FOUND, familyId));
+        Family family = findById(familyId);
 
-        long memberCount = family.getMemberCount();
-        long maxTickets = memberCount * 2;
-
-        LocalDate monday = date.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
-        LocalDate sunday = date.with(TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY));
-
+        long maxTickets = family.getMemberCount() * 2L;
+        LocalDate monday = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate sunday = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 
         long usedTickets = poolBookingService.countBookingsForFamilyInWeek(familyId, monday, sunday);
         long remainingTickets = Math.max(0, maxTickets - usedTickets);
-
         LocalDateTime resetTime = monday.plusWeeks(1).atStartOfDay();
 
         return new PoolTicketsResponse(maxTickets, remainingTickets, resetTime);
@@ -139,27 +120,54 @@ public class FamilyService {
 
     @Transactional
     public Family updateFamilyInfoByJwt(FamilyUpdateRequest request) {
-        UUID familyId = SecurityUtils.currentFamilyId();
-        return updateFamilyInfo(familyId, request);
+        return updateFamilyInfo(SecurityUtils.currentFamilyId(), request);
     }
 
     @Transactional
     public void deleteFamilyByJwt() {
-        UUID familyId = SecurityUtils.currentFamilyId();
-        deleteFamily(familyId);
+        deleteFamily(SecurityUtils.currentFamilyId());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public FamilyInfoResponse getFamilyInfoByJwt() {
-        UUID familyId = SecurityUtils.currentFamilyId();
-        return getFamilyInfoById(familyId);
+        return getFamilyInfoById(SecurityUtils.currentFamilyId());
     }
 
+    @Transactional(readOnly = true)
     public FamilyBookingHistoryResponse getFamilyBookingHistoryByJwt() {
         UUID familyId = SecurityUtils.currentFamilyId();
+        return new FamilyBookingHistoryResponse(
+                poolBookingService.getPoolBookingHistory(familyId),
+                cinemaBookingService.getCinemaBookingHistory(familyId)
+        );
+    }
 
-        List<PoolBookingResponse> poolHistory = poolBookingService.getPoolBookingHistory(familyId);
-        List<CinemaBookingResponse> cinemaHistory = cinemaBookingService.getCinemaBookingHistory(familyId);
-        return new FamilyBookingHistoryResponse(poolHistory, cinemaHistory);
+    private void applyPasswordUpdateIfRequested(Family family, FamilyUpdateRequest request) {
+        boolean passwordUpdateAttempted =
+                (request.getOldPassword() != null && !request.getOldPassword().isBlank())
+                        || (request.getNewPassword() != null && !request.getNewPassword().isBlank())
+                        || (request.getConfirmNewPassword() != null && !request.getConfirmNewPassword().isBlank());
+
+        if (!passwordUpdateAttempted) {
+            return;
+        }
+
+        if (request.getOldPassword() == null || request.getOldPassword().isBlank()) {
+            throw AppException.of(AppErrorCode.OLD_PASSWORD_REQUIRED);
+        }
+        if (request.getNewPassword() == null || request.getNewPassword().isBlank()) {
+            throw AppException.of(AppErrorCode.NEW_PASSWORD_REQUIRED);
+        }
+        if (request.getNewPassword().equals(request.getOldPassword())) {
+            throw AppException.of(AppErrorCode.NEW_PASSWORD_MATCH_WITH_OLD);
+        }
+        if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
+            throw AppException.of(AppErrorCode.PASSWORDS_DO_NOT_MATCH);
+        }
+        if (!passwordEncoder.matches(request.getOldPassword(), family.getPassword())) {
+            throw AppException.of(AppErrorCode.INVALID_OLD_PASSWORD);
+        }
+
+        family.setPassword(passwordEncoder.encode(request.getNewPassword()));
     }
 }

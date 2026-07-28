@@ -12,7 +12,16 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,34 +31,32 @@ import java.util.UUID;
 @RequestMapping("/api/pool/session")
 @RequiredArgsConstructor
 public class PoolSessionController {
+
     private final PoolSessionService poolSessionService;
     private final PoolSessionMapper poolSessionMapper;
 
     @GetMapping("/week")
-    public List<PoolSessionResponse> getWeekSchedule(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStart) {
-        List<PoolSession> schedule = poolSessionService.getWeekSchedule(weekStart);
-        return poolSessionMapper.toResponseList(schedule);
+    public List<PoolSessionResponse> getWeekSchedule(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStart) {
+        return poolSessionMapper.toResponseList(poolSessionService.getWeekSchedule(weekStart));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
 //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
     public List<PoolSessionResponse> create(@Valid @RequestBody PoolPublishWeekScheduleRequest request) {
-        List<PoolSession> sessions = poolSessionService.create(request);
-        return poolSessionMapper.toResponseList(sessions);
+        return poolSessionMapper.toResponseList(poolSessionService.create(request));
     }
 
     @GetMapping("/{id}")
     public PoolSessionResponse getSessionInfoById(@PathVariable UUID id) {
-        PoolSession session = poolSessionService.findById(id);
-        return poolSessionMapper.toResponse(session);
+        return poolSessionMapper.toResponse(poolSessionService.findById(id));
     }
 
     @PutMapping("/{id}")
 //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
     public PoolSessionResponse update(@PathVariable UUID id, @Valid @RequestBody PoolSessionRequest request) {
-        PoolSession updated = poolSessionService.update(id, request);
-        return poolSessionMapper.toResponse(updated);
+        return poolSessionMapper.toResponse(poolSessionService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
@@ -76,16 +83,16 @@ public class PoolSessionController {
 
     @PutMapping("/{id}/uncancel")
 //    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> unCancelSession(@PathVariable UUID id) {
-        poolSessionService.unCancelSession(id);
+    public ResponseEntity<Void> uncancelSession(@PathVariable UUID id) {
+        poolSessionService.uncancelSession(id);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/uncancel-by-day")
 //    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> unCancelSessionsForDay(
+    public ResponseEntity<Void> uncancelSessionsForDay(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        poolSessionService.unCancelSessionsForDay(date);
+        poolSessionService.uncancelSessionsForDay(date);
         return ResponseEntity.ok().build();
     }
 }

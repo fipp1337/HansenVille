@@ -2,7 +2,6 @@ package com.hansenvillage.hansenapp.controller;
 
 import com.hansenvillage.hansenapp.dto.ActivityRequest;
 import com.hansenvillage.hansenapp.dto.ActivityResponse;
-import com.hansenvillage.hansenapp.entity.Activity;
 import com.hansenvillage.hansenapp.service.ActivityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;

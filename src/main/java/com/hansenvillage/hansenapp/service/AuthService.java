@@ -2,15 +2,18 @@ package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.*;
 import com.hansenvillage.hansenapp.entity.*;
-import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
-import com.hansenvillage.hansenapp.exception.FamilyException;
+import com.hansenvillage.hansenapp.exception.AppErrorCode;
+import com.hansenvillage.hansenapp.exception.AppException;
 import com.hansenvillage.hansenapp.mapper.FamilyMapper;
 import com.hansenvillage.hansenapp.mapper.FamilyRoleMapper;
-import com.hansenvillage.hansenapp.mapper.UserMapper;
-import com.hansenvillage.hansenapp.repository.*;
+import com.hansenvillage.hansenapp.repository.AdminUserRepository;
+import com.hansenvillage.hansenapp.repository.FamilyRepository;
+import com.hansenvillage.hansenapp.repository.FamilyRoleRepository;
+import com.hansenvillage.hansenapp.repository.InviteCodeRepository;
 import com.hansenvillage.hansenapp.security.JwtService;
 import com.hansenvillage.hansenapp.security.SecurityFamily;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,9 +22,13 @@ import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
+    private static final int CODE_LENGTH = 6;
+    private static final int CODE_BOUND = 1_000_000;
 
     private final FamilyRepository familyRepository;
     private final FamilyRoleRepository familyRoleRepository;
@@ -34,50 +41,51 @@ public class AuthService {
     private final InviteCodeRepository inviteCodeRepository;
     private final EmailService emailService;
     private final AdminUserRepository adminUserRepository;
-
-    private static final int CODE_LENGTH = 6;
-    private static final int CODE_MAX_VALUE = 1000000;
+    private final SecureRandom random = new SecureRandom();
 
     @Transactional
     public void initiateRegistration(RegistrationInitiateRequest request) {
-        String email = request.getEmail().trim().toLowerCase();
+        String email = normalizeEmail(request.getEmail());
 
         if (familyRepository.existsByEmail(email)) {
-            throw FamilyException.of(FamilyErrorCode.EMAIL_ALREADY_EXISTS, email);
+            throw AppException.of(AppErrorCode.EMAIL_ALREADY_EXISTS, email);
         }
-        InviteCode inviteCode = inviteCodeRepository.findByCodeAndStatus(request.getInviteCode(), InviteCodeStatus.AVAILABLE)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.INVALID_INVITE_CODE));
-        String verificationCode = generateCode();
 
+        InviteCode inviteCode = inviteCodeRepository
+                .findByCodeAndStatus(request.getInviteCode(), InviteCodeStatus.AVAILABLE)
+                .orElseThrow(() -> AppException.of(AppErrorCode.INVALID_INVITE_CODE));
+
+        String verificationCode = generateVerificationCode();
         redisService.storeRegistrationData(email, inviteCode.getCode(), verificationCode);
         emailService.sendVerificationEmail(email, verificationCode);
+        log.info("Registration initiated: {}", email);
     }
 
     @Transactional
     public LoginResponse registerFamily(FamilyRegistrationRequest request) {
+        String email = normalizeEmail(request.getEmail());
 
-        String email = request.getEmail().trim().toLowerCase();
-
-        Map<Object, Object> regData = redisService.getRegistrationData(email);
-        if (regData == null || regData.isEmpty()) {
-            throw FamilyException.of(FamilyErrorCode.REGISTRATION_NOT_INITIATED, email);
+        Map<Object, Object> registrationData = redisService.getRegistrationData(email);
+        if (registrationData == null || registrationData.isEmpty()) {
+            throw AppException.of(AppErrorCode.REGISTRATION_NOT_INITIATED, email);
         }
 
-        String storedVerificationCode = (String) regData.get("verificationCode");
+        String storedVerificationCode = (String) registrationData.get("verificationCode");
         if (storedVerificationCode == null || storedVerificationCode.isBlank()
                 || !storedVerificationCode.equals(request.getVerificationCode())) {
-            throw FamilyException.of(FamilyErrorCode.INVALID_VERIFICATION_CODE);
+            throw AppException.of(AppErrorCode.INVALID_VERIFICATION_CODE);
         }
 
-        String storedInviteCode = (String) regData.get("inviteCode");
-        InviteCode inviteCode = inviteCodeRepository.findByCodeAndStatus(storedInviteCode, InviteCodeStatus.AVAILABLE)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.INVALID_INVITE_CODE));
+        String storedInviteCode = (String) registrationData.get("inviteCode");
+        InviteCode inviteCode = inviteCodeRepository
+                .findByCodeAndStatus(storedInviteCode, InviteCodeStatus.AVAILABLE)
+                .orElseThrow(() -> AppException.of(AppErrorCode.INVALID_INVITE_CODE));
 
         if (familyRepository.existsByEmail(email)) {
-            throw FamilyException.of(FamilyErrorCode.EMAIL_ALREADY_EXISTS, email);
+            throw AppException.of(AppErrorCode.EMAIL_ALREADY_EXISTS, email);
         }
         if (familyRepository.existsByAddress(request.getAddress())) {
-            throw FamilyException.of(FamilyErrorCode.ADDRESS_ALREADY_EXISTS, request.getAddress());
+            throw AppException.of(AppErrorCode.ADDRESS_ALREADY_EXISTS, request.getAddress());
         }
 
         inviteCode.setStatus(InviteCodeStatus.USED);
@@ -86,7 +94,6 @@ public class AuthService {
 
         Family family = familyMapper.toEntity(request);
         family.setEmail(email);
-
         family.setPassword(passwordEncoder.encode(storedInviteCode));
 
         if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
@@ -94,46 +101,38 @@ public class AuthService {
         }
 
         Family savedFamily = familyRepository.save(family);
-
         FamilyRole familyRole = familyRoleMapper.createUserRole(savedFamily.getId());
         familyRoleRepository.save(familyRole);
-
         redisService.deleteRegistrationData(email);
 
         List<Role> roles = List.of(Role.valueOf(familyRole.getRole()));
-        String accessToken = jwtService.generateToken(savedFamily, roles);
-        String refreshToken = jwtService.generateRefreshToken(savedFamily, roles);
-
-        LoginResponse response = new LoginResponse();
-        response.setAccessToken(accessToken);
-        response.setRefreshToken(refreshToken);
-
-        return response;
+        log.info("Family registered: id={}, email={}", savedFamily.getId(), email);
+        return buildLoginResponse(
+                jwtService.generateToken(savedFamily, roles),
+                jwtService.generateRefreshToken(savedFamily, roles)
+        );
     }
 
     @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
-        String email = request.getEmail().trim().toLowerCase();
+        String email = normalizeEmail(request.getEmail());
 
         Family family = familyRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.WRONG_EMAIL, email));
+                .orElseThrow(() -> AppException.of(AppErrorCode.WRONG_EMAIL, email));
 
         if (!passwordEncoder.matches(request.getPassword(), family.getPassword())) {
-            throw FamilyException.of(FamilyErrorCode.WRONG_PASSWORD, request.getPassword());
+            throw AppException.of(AppErrorCode.WRONG_PASSWORD, request.getPassword());
         }
 
         List<Role> roles = familyRoleRepository.findByFamilyId(family.getId()).stream()
                 .map(familyRole -> Role.valueOf(familyRole.getRole()))
                 .toList();
 
-        String accessToken = jwtService.generateToken(family, roles);
-        String refreshToken = jwtService.generateRefreshToken(family, roles);
-
-        LoginResponse response = new LoginResponse();
-        response.setAccessToken(accessToken);
-        response.setRefreshToken(refreshToken);
-
-        return response;
+        log.info("Family login: id={}, email={}", family.getId(), email);
+        return buildLoginResponse(
+                jwtService.generateToken(family, roles),
+                jwtService.generateRefreshToken(family, roles)
+        );
     }
 
     @Transactional(readOnly = true)
@@ -142,91 +141,95 @@ public class AuthService {
 
         Family family = new Family();
         family.setId(securityFamily.getId());
-        family.setEmail(securityFamily.getEmail().trim().toLowerCase());
+        family.setEmail(normalizeEmail(securityFamily.getEmail()));
         family.setPassword("");
 
         List<Role> roles = securityFamily.getRoles();
-
-        String newAccessToken = jwtService.generateToken(family, roles);
-        String newRefreshToken = jwtService.generateRefreshToken(family, roles);
-
-        LoginResponse response = new LoginResponse();
-        response.setAccessToken(newAccessToken);
-        response.setRefreshToken(newRefreshToken);
-
-        return response;
+        return buildLoginResponse(
+                jwtService.generateToken(family, roles),
+                jwtService.generateRefreshToken(family, roles)
+        );
     }
 
     public void initiateForgotPassword(ForgotPasswordRequest request) {
-        String email = request.getEmail().trim().toLowerCase();
+        String email = normalizeEmail(request.getEmail());
 
         Family family = familyRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.WRONG_EMAIL, email));
+                .orElseThrow(() -> AppException.of(AppErrorCode.WRONG_EMAIL, email));
 
-        String resetCode = generateCode();
+        String resetCode = generateVerificationCode();
         redisService.storeResetCode(family.getEmail(), resetCode);
         emailService.sendResetPasswordEmail(family.getEmail(), resetCode);
+        log.info("Password reset initiated: {}", email);
     }
 
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
-            throw FamilyException.of(FamilyErrorCode.PASSWORDS_DO_NOT_MATCH);
+            throw AppException.of(AppErrorCode.PASSWORDS_DO_NOT_MATCH);
         }
 
-        String email = request.getEmail().trim().toLowerCase();
-
+        String email = normalizeEmail(request.getEmail());
         Family family = familyRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.WRONG_EMAIL, email));
+                .orElseThrow(() -> AppException.of(AppErrorCode.WRONG_EMAIL, email));
 
         String storedCode = redisService.getResetCode(email);
         if (storedCode == null || !storedCode.equals(request.getVerificationCode())) {
-            throw FamilyException.of(FamilyErrorCode.INVALID_VERIFICATION_CODE);
+            throw AppException.of(AppErrorCode.INVALID_VERIFICATION_CODE);
         }
+
         family.setPassword(passwordEncoder.encode(request.getNewPassword()));
         familyRepository.save(family);
         redisService.deleteResetCode(email);
+        log.info("Password reset completed: {}", email);
     }
 
     @Transactional
-    public void loginAdminInitiate(AdminLoginInitiateRequest request) {
-        String email = request.getEmail().trim().toLowerCase();
+    public void initiateAdminLogin(AdminLoginInitiateRequest request) {
+        String email = normalizeEmail(request.getEmail());
 
         if (!adminUserRepository.existsByEmailIgnoreCase(email)) {
-            throw FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, email);
+            throw AppException.of(AppErrorCode.USER_NOT_FOUND, email);
         }
 
-        String verificationCode = generateCode();
-
+        String verificationCode = generateVerificationCode();
         redisService.storeLoginAdminData(email, verificationCode);
         emailService.sendVerificationAdminEmail(email, verificationCode);
+        log.info("Admin login initiated: {}", email);
     }
 
     @Transactional
-    public LoginResponse loginAdminConfirm(AdminLoginConfirmRequest request) {
-        String email = request.getEmail().trim().toLowerCase();
+    public LoginResponse confirmAdminLogin(AdminLoginConfirmRequest request) {
+        String email = normalizeEmail(request.getEmail());
 
         AdminUser admin = adminUserRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> FamilyException.of(FamilyErrorCode.USER_NOT_FOUND, email));
+                .orElseThrow(() -> AppException.of(AppErrorCode.USER_NOT_FOUND, email));
 
         String storedCode = redisService.getLoginAdminCode(email);
         if (storedCode == null || storedCode.isBlank() || !storedCode.equals(request.getVerificationCode())) {
-            throw FamilyException.of(FamilyErrorCode.INVALID_VERIFICATION_CODE);
+            throw AppException.of(AppErrorCode.INVALID_VERIFICATION_CODE);
         }
 
-        String accessToken = jwtService.generateAdminToken(admin);
-        String refreshToken = jwtService.generateAdminRefreshToken(admin);
-
         redisService.deleteLoginAdminData(email);
+        log.info("Admin login confirmed: id={}, email={}", admin.getId(), email);
+        return buildLoginResponse(
+                jwtService.generateAdminToken(admin),
+                jwtService.generateAdminRefreshToken(admin)
+        );
+    }
 
+    private LoginResponse buildLoginResponse(String accessToken, String refreshToken) {
         LoginResponse response = new LoginResponse();
         response.setAccessToken(accessToken);
         response.setRefreshToken(refreshToken);
         return response;
     }
 
-    private final SecureRandom random = new SecureRandom();
-    private String generateCode() {
-        return String.format("%0" + CODE_LENGTH + "d", random.nextInt(CODE_MAX_VALUE));
+    private String normalizeEmail(String email) {
+        return email.trim().toLowerCase();
+    }
+
+    private String generateVerificationCode() {
+        return String.format("%0" + CODE_LENGTH + "d", random.nextInt(CODE_BOUND));
     }
 }

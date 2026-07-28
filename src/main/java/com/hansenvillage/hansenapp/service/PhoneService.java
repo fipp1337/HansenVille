@@ -1,8 +1,8 @@
 package com.hansenvillage.hansenapp.service;
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
-import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
-import com.hansenvillage.hansenapp.exception.FamilyException;
+import com.hansenvillage.hansenapp.exception.AppErrorCode;
+import com.hansenvillage.hansenapp.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +16,12 @@ public class PhoneService {
             var number = phoneUtil.parse(phone, "UA");
 
             if (!phoneUtil.isValidNumber(number)) {
-                throw FamilyException.of(FamilyErrorCode.INVALID_PHONE_FORMAT);
+                throw AppException.of(AppErrorCode.INVALID_PHONE_FORMAT);
             }
             return phoneUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.E164);
 
         } catch (Exception e) {
-            throw FamilyException.of(FamilyErrorCode.INVALID_PHONE_FORMAT);
+            throw AppException.of(AppErrorCode.INVALID_PHONE_FORMAT);
         }
     }
 }

@@ -1,10 +1,17 @@
 package com.hansenvillage.hansenapp.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hansenvillage.hansenapp.dto.ResponseError;
+import com.hansenvillage.hansenapp.exception.AppException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -12,14 +19,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-
-    public JwtAuthenticationFilter(JwtService jwtService) {
-        this.jwtService = jwtService;
-    }
+    private final ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(
@@ -35,11 +41,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(family, null, family.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (RuntimeException ignored) {
+            } catch (AppException ex) {
+                // Invalid/expired token: continue as anonymous.
+                // Protected endpoints will correctly return 401 via AuthenticationEntryPoint.
                 SecurityContextHolder.clearContext();
+            } catch (Exception ex) {
+                // Unexpected error while parsing token must NOT look like "not authenticated".
+                log.error("Unexpected JWT filter error", ex);
+                SecurityContextHolder.clearContext();
+                writeInternalError(response, ex);
+                return;
             }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void writeInternalError(HttpServletResponse response, Exception ex) throws IOException {
+        String message = ex.getMessage() != null && !ex.getMessage().isBlank()
+                ? ex.getMessage()
+                : ex.getClass().getSimpleName();
+        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        objectMapper.writeValue(
+                response.getOutputStream(),
+                new ResponseError(HttpStatus.INTERNAL_SERVER_ERROR.value(), message)
+        );
     }
 }
