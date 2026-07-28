@@ -3,8 +3,8 @@ package com.hansenvillage.hansenapp.security;
 import com.hansenvillage.hansenapp.entity.AdminUser;
 import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.entity.Role;
-import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
-import com.hansenvillage.hansenapp.exception.FamilyException;
+import com.hansenvillage.hansenapp.exception.AppErrorCode;
+import com.hansenvillage.hansenapp.exception.AppException;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -58,19 +58,19 @@ public class JwtService {
         try {
             SignedJWT signedJwt = SignedJWT.parse(token);
             if (!signedJwt.verify(new MACVerifier(secret))) {
-                throw FamilyException.of(FamilyErrorCode.INVALID_TOKEN);
+                throw AppException.of(AppErrorCode.INVALID_TOKEN);
             }
 
             JWTClaimsSet claims = signedJwt.getJWTClaimsSet();
 
             String type = claims.getStringClaim("type");
             if (!"refresh".equals(type)) {
-                throw FamilyException.of(FamilyErrorCode.INVALID_TOKEN);
+                throw AppException.of(AppErrorCode.INVALID_TOKEN);
             }
 
             Date expiration = claims.getExpirationTime();
             if (expiration == null || expiration.before(new Date())) {
-                throw FamilyException.of(FamilyErrorCode.INVALID_TOKEN);
+                throw AppException.of(AppErrorCode.INVALID_TOKEN);
             }
 
             UUID id = UUID.fromString(claims.getSubject());
@@ -86,20 +86,20 @@ public class JwtService {
 
             return new SecurityFamily(family, roles);
         } catch (ParseException | JOSEException e) {
-            throw FamilyException.of(FamilyErrorCode.INVALID_TOKEN);
+            throw AppException.of(AppErrorCode.INVALID_TOKEN);
         }
     }
     public SecurityFamily parseToken(String token) {
         try {
             SignedJWT signedJwt = SignedJWT.parse(token);
             if (!signedJwt.verify(new MACVerifier(secret))) {
-                throw FamilyException.of(FamilyErrorCode.INVALID_TOKEN);
+                throw AppException.of(AppErrorCode.INVALID_TOKEN);
             }
 
             JWTClaimsSet claims = signedJwt.getJWTClaimsSet();
             Date expiration = claims.getExpirationTime();
             if (expiration == null || expiration.before(new Date())) {
-                throw FamilyException.of(FamilyErrorCode.INVALID_TOKEN);
+                throw AppException.of(AppErrorCode.INVALID_TOKEN);
             }
 
             UUID id = UUID.fromString(claims.getSubject());
@@ -114,7 +114,7 @@ public class JwtService {
             family.setPassword("");
             return new SecurityFamily(family, roles);
         } catch (ParseException | JOSEException e) {
-            throw FamilyException.of(FamilyErrorCode.INVALID_TOKEN);
+            throw AppException.of(AppErrorCode.INVALID_TOKEN);
         }
 
     }

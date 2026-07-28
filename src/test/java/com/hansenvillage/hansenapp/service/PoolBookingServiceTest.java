@@ -5,8 +5,8 @@
 //import com.hansenvillage.hansenapp.entity.PoolBooking;
 //import com.hansenvillage.hansenapp.entity.PoolSession;
 //import com.hansenvillage.hansenapp.entity.User;
-//import com.hansenvillage.hansenapp.exception.FamilyErrorCode;
-//import com.hansenvillage.hansenapp.exception.FamilyException;
+//import com.hansenvillage.hansenapp.exception.AppErrorCode;
+//import com.hansenvillage.hansenapp.exception.AppException;
 //import com.hansenvillage.hansenapp.mapper.PoolBookingMapper;
 //import com.hansenvillage.hansenapp.repository.PoolBookingRepository;
 //import com.hansenvillage.hansenapp.repository.PoolSessionRepository;
@@ -75,11 +75,11 @@
 //        try (MockedStatic<SecurityUtils> mockedSecurity = mockStatic(SecurityUtils.class)) {
 //            mockedSecurity.when(SecurityUtils::currentFamilyId).thenReturn(familyId);
 //
-//            FamilyException exception = assertThrows(FamilyException.class, () -> {
+//            AppException exception = assertThrows(AppException.class, () -> {
 //                poolBookingService.book(request);
 //            });
 //
-//            assertEquals(FamilyErrorCode.OUT_OF_TICKETS, exception.getErrorCode());
+//            assertEquals(AppErrorCode.OUT_OF_TICKETS, exception.getErrorCode());
 //            verify(poolSessionRepository, never()).save(any());
 //            verify(poolBookingRepository, never()).save(any());
 //        }
@@ -262,11 +262,11 @@
 //        UUID sessionId = UUID.randomUUID();
 //        when(poolSessionRepository.existsById(sessionId)).thenReturn(false);
 //
-//        FamilyException exception = assertThrows(FamilyException.class, () -> {
+//        AppException exception = assertThrows(AppException.class, () -> {
 //            poolBookingService.getBookingDetailsForSession(sessionId);
 //        });
 //
-//        assertEquals(FamilyErrorCode.POOL_SESSION_NOT_FOUND, exception.getErrorCode());
+//        assertEquals(AppErrorCode.POOL_SESSION_NOT_FOUND, exception.getErrorCode());
 //        verify(poolBookingRepository, never()).findBookingDetailsBySessionId(any());
 //    }
 //
@@ -337,11 +337,11 @@
 //        try (MockedStatic<SecurityUtils> mockedSecurity = mockStatic(SecurityUtils.class)) {
 //            mockedSecurity.when(SecurityUtils::isAdmin).thenReturn(true);
 //
-//            FamilyException exception = assertThrows(FamilyException.class, () -> {
+//            AppException exception = assertThrows(AppException.class, () -> {
 //                poolBookingService.deleteBooking(bookingId);
 //            });
 //
-//            assertEquals(FamilyErrorCode.TIME_OUT, exception.getErrorCode());
+//            assertEquals(AppErrorCode.TIME_OUT, exception.getErrorCode());
 //            assertEquals(5, session.getBookedCount());
 //            verify(poolSessionRepository, never()).save(any());
 //            verify(poolBookingRepository, never()).deleteById(any());

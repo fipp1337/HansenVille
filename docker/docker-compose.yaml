@@ -18,15 +18,22 @@ services:
       SPRING_DATA_REDIS_HOST: ${SPRING_DATA_REDIS_HOST}
       SPRING_DATA_REDIS_PORT: ${SPRING_DATA_REDIS_PORT}
 
+    volumes:
+      - uploads_hansen_data:/app/uploads
+
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 
   postgres:
     image: postgres:16-alpine
     container_name: postgres-hansen
     restart: unless-stopped
+    ports:
+      - "5432:5432"
 
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -36,12 +43,32 @@ services:
     volumes:
       - postgres_hansen_data:/var/lib/postgresql/data
 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 
   redis:
     image: redis:7-alpine
     container_name: redis-hansen
     restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_hansen_data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
 
 volumes:
   postgres_hansen_data:
+    name: postgres_hansen_data
+  redis_hansen_data:
+    name: redis_hansen_data
+  uploads_hansen_data:
+    name: uploads_hansen_data
