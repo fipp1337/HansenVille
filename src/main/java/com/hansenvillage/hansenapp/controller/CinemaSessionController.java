@@ -70,7 +70,7 @@ public class CinemaSessionController {
 
     @DeleteMapping("/{id}/poster")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-//          @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
+//     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void deletePoster(@PathVariable UUID id) {
         cinemaSessionService.deletePoster(id);
     }
