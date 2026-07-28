@@ -5,6 +5,7 @@ import com.hansenvillage.hansenapp.service.FacilityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +30,7 @@ public class FacilityController {
     }
 
     @PostMapping("/image/{id}")
+    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     public ResponseEntity<Void> uploadFacilityImage(
             @PathVariable UUID id,
             @RequestParam("file") MultipartFile file) {
@@ -37,6 +39,7 @@ public class FacilityController {
     }
 
     @PutMapping("/image/{id}")
+    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     public ResponseEntity<Void> updateFacilityImage(
             @PathVariable UUID id,
             @RequestParam("file") MultipartFile file) {
@@ -45,6 +48,7 @@ public class FacilityController {
     }
 
     @DeleteMapping("/image/{id}")
+    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     public ResponseEntity<Void> deleteFacilityImage(@PathVariable UUID id) {
         facilityService.deleteImage(id);
         return ResponseEntity.noContent().build();
