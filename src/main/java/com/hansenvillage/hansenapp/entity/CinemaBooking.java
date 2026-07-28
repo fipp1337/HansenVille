@@ -27,8 +27,6 @@ public class CinemaBooking {
 
     private UUID seatId;
 
-//    status     VARCHAR(20) NOT NULL DEFAULT 'CONFIRMED',
-
     @CreationTimestamp
     private LocalDateTime createdAt;
 }
