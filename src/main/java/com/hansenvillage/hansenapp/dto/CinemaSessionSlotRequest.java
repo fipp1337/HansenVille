@@ -27,6 +27,9 @@ public class CinemaSessionSlotRequest {
     private int duration;
 
     @NotNull
+    private String description;
+
+    @NotNull
     private UUID hallId;
 
     @Enumerated(EnumType.STRING)

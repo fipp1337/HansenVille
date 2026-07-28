@@ -7,10 +7,12 @@ import com.hansenvillage.hansenapp.exception.FamilyException;
 import com.hansenvillage.hansenapp.mapper.CinemaSeatMapper;
 import com.hansenvillage.hansenapp.mapper.CinemaSessionMapper;
 import com.hansenvillage.hansenapp.repository.CinemaBookingRepository;
+import com.hansenvillage.hansenapp.repository.CinemaHallRepository;
 import com.hansenvillage.hansenapp.repository.CinemaSeatRepository;
 import com.hansenvillage.hansenapp.repository.CinemaSessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.UrlResource;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -38,13 +40,19 @@ public class CinemaSessionService {
     private final CinemaSeatRepository cinemaSeatRepository;
     private final CinemaSeatMapper cinemaSeatMapper;
     private final CinemaBookingRepository cinemaBookingRepository;
+    private final CinemaHallRepository cinemaHallRepository;
 
     public List<CinemaSession> create(CinemaPublishWeekScheduleRequest request) {
-        CinemaSessionSlotRequest cinemaSessionSlotRequest = new CinemaSessionSlotRequest();
-        if (cinemaSessionSlotRequest.getHallId() == null) {
-            throw FamilyException.of(FamilyErrorCode.HALL_NOT_FOUND);
-        }
+
         List<CinemaSession> sessions = cinemaSessionMapper.toEntityList(request);
+
+        sessions.stream()
+                .map(CinemaSession::getHallId)
+                .forEach(hallId -> {
+                    if (!cinemaHallRepository.existsById(hallId)) {
+                        throw FamilyException.of(FamilyErrorCode.HALL_NOT_FOUND, hallId);
+                    }
+                });
         return cinemaSessionRepository.saveAll(sessions);
     }
 
