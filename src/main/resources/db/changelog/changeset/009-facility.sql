@@ -13,7 +13,7 @@ CREATE TABLE facilities (
 
 INSERT INTO facilities (id, code, name, description, target_route, active)
 VALUES
-    (gen_random_uuid(), 'POOL', 'Pool', 'Pool sessions', '/pool/booking', true),
-    (gen_random_uuid(), 'CINEMA', 'Cinema', 'Cinema sessions', '/cinema/booking', true),
-    (gen_random_uuid(), 'GYM', 'Gym', 'Gym sessions', '/gym/booking', true),
-    (gen_random_uuid(), 'ACTIVITIES', 'Activities', 'Hansen village activities/events', '/activities', true);
+    (gen_random_uuid(), 'POOL', 'Басейн', 'Відвідуй басейн з родиною 2 рази на тиждень!', '/pool/booking', true),
+    (gen_random_uuid(), 'GYM', 'Тренажерний зал', 'Займайся спортом самостійно чи з тренером!', '/gym/booking', true),
+    (gen_random_uuid(), 'CINEMA', 'Кінотеатр', 'Переглядай популярне з родиною або друзями!', '/cinema/booking', true),
+    (gen_random_uuid(), 'ACTIVITIES', 'Дозвілля', 'Не пропусти найближчі заходи та події в містечку!', '/activities', true);
