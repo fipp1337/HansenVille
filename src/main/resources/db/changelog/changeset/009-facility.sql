@@ -16,4 +16,4 @@ VALUES
     (gen_random_uuid(), 'POOL', 'Pool', 'Pool sessions', '/pool/booking', true),
     (gen_random_uuid(), 'CINEMA', 'Cinema', 'Cinema sessions', '/cinema/booking', true),
     (gen_random_uuid(), 'GYM', 'Gym', 'Gym sessions', '/gym/booking', true),
-    (gen_random_uuid(), 'ACTIVITIES', 'Activities', 'Hansen events', '/activities', true);
+    (gen_random_uuid(), 'ACTIVITIES', 'Activities', 'Hansen village activities/events', '/activities', true);
