@@ -5,7 +5,6 @@ import com.hansenvillage.hansenapp.dto.CinemaPublishWeekScheduleRequest;
 import com.hansenvillage.hansenapp.dto.CinemaSessionRequest;
 import com.hansenvillage.hansenapp.dto.CinemaSessionWithSeatsResponse;
 import com.hansenvillage.hansenapp.dto.CinemaSeatWithAvailableResponse;
-import com.hansenvillage.hansenapp.entity.CinemaBooking;
 import com.hansenvillage.hansenapp.entity.CinemaSeat;
 import com.hansenvillage.hansenapp.entity.CinemaSession;
 import com.hansenvillage.hansenapp.exception.AppErrorCode;

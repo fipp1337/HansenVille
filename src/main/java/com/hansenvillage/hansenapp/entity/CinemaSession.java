@@ -29,6 +29,8 @@ public class CinemaSession {
 
     private int duration;
 
+    private String description;
+
     private UUID hallId;
 
     @Enumerated(EnumType.STRING)

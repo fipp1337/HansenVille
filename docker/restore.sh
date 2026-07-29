@@ -74,7 +74,7 @@ gunzip -c "${BACKUP_DIR}/db.sql.gz" \
 echo "4/5 Restoring uploads..."
 docker run --rm \
   -v uploads_hansen_data:/data \
-  -v "${BACKUP_DIR}:/backup:ro" \
+  -v "$(realpath "$BACKUP_DIR"):/backup:ro" \
   alpine:3.20 \
   sh -c "find /data -mindepth 1 -maxdepth 1 -exec rm -rf {} +; tar xzf /backup/uploads.tar.gz -C /data"
 

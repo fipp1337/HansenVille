@@ -14,6 +14,7 @@ CREATE TABLE cinema_sessions
     poster_image VARCHAR(500),
     start_at TIMESTAMP NOT NULL,
     duration INT NOT NULL,
+    description VARCHAR(500) NOT NULL,
     hall_id      UUID       NOT NULL REFERENCES cinema_halls(id),
     status VARCHAR(50) NOT NULL,
     version INT NOT NULL DEFAULT 0
