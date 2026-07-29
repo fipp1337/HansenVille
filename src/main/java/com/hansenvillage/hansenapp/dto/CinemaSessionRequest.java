@@ -27,6 +27,9 @@ public class CinemaSessionRequest {
     @NotNull
     private int duration;
 
+    @NotNull
+    private String description;
+
     @Enumerated(EnumType.STRING)
     private SessionStatus status;
 

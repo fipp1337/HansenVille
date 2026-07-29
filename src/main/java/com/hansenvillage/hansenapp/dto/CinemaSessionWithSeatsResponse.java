@@ -17,7 +17,7 @@ public class CinemaSessionWithSeatsResponse {
     private String movieName;
     private LocalDateTime startAt;
     private Integer duration;
-
+    private String description;
     private String posterImage;
 
     private List<CinemaSeatWithAvailableResponse> seats;
