@@ -1,6 +1,8 @@
 package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.constant.AppConstant;
+import com.hansenvillage.hansenapp.exception.AppErrorCode;
+import com.hansenvillage.hansenapp.exception.AppException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,51 @@ public class RedisService {
 
     public RedisService(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
+    }
+
+    public boolean isResendAllowed(String email, String actionType) {
+        String key = AppConstant.Redis.COOLDOWN_PREFIX + actionType + ":" + email;
+        return !Boolean.TRUE.equals(redisTemplate.hasKey(key));
+    }
+
+    public void setResendCooldown(String email, String actionType) {
+        String key = AppConstant.Redis.COOLDOWN_PREFIX + actionType + ":" + email;
+        redisTemplate.opsForValue().set(
+                key,
+                "1",
+                AppConstant.Redis.RESEND_COOLDOWN_SECONDS,
+                TimeUnit.SECONDS
+        );
+    }
+
+    public long getRemainingCooldown(String email, String actionType) {
+        String key = AppConstant.Redis.COOLDOWN_PREFIX + actionType + ":" + email;
+        Long expire = redisTemplate.getExpire(key, TimeUnit.SECONDS);
+        return (expire != null && expire > 0) ? expire : 0;
+    }
+
+    public void updateRegistrationVerificationCode(String email, String newVerificationCode) {
+        Map<Object, Object> currentData = getRegistrationData(email);
+        if (currentData.isEmpty()) {
+            throw AppException.of(AppErrorCode.REGISTRATION_SESSION_EXPIRED);
+        }
+
+        String inviteCode = (String) currentData.get("inviteCode");
+        storeRegistrationData(email, inviteCode, newVerificationCode);
+    }
+
+    public void updateAdminLoginCode(String email, String newVerificationCode) {
+        if (getLoginAdminCode(email) == null) {
+            throw AppException.of(AppErrorCode.SESSION_EXPIRED);
+        }
+        storeLoginAdminData(email, newVerificationCode);
+    }
+
+    public void updateResetCode(String email, String newCode) {
+        if (getResetCode(email) == null) {
+            throw AppException.of(AppErrorCode.RESET_SESSION_EXPIRED);
+        }
+        storeResetCode(email, newCode);
     }
 
     public void storeLoginAdminData(String email, String verificationCode) {

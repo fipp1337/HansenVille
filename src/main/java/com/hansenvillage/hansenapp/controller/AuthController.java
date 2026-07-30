@@ -1,18 +1,6 @@
 package com.hansenvillage.hansenapp.controller;
 
-import com.hansenvillage.hansenapp.dto.AdminLoginConfirmRequest;
-import com.hansenvillage.hansenapp.dto.AdminLoginInitiateRequest;
-import com.hansenvillage.hansenapp.dto.AdminLoginInitiateResponse;
-import com.hansenvillage.hansenapp.dto.FamilyRegistrationRequest;
-import com.hansenvillage.hansenapp.dto.ForgotPasswordInitiateResponse;
-import com.hansenvillage.hansenapp.dto.ForgotPasswordRequest;
-import com.hansenvillage.hansenapp.dto.LoginRequest;
-import com.hansenvillage.hansenapp.dto.LoginResponse;
-import com.hansenvillage.hansenapp.dto.RefreshRequest;
-import com.hansenvillage.hansenapp.dto.RegistrationInitiateRequest;
-import com.hansenvillage.hansenapp.dto.RegistrationInitiateResponse;
-import com.hansenvillage.hansenapp.dto.ResetPasswordRequest;
-import com.hansenvillage.hansenapp.dto.ResetPasswordResponse;
+import com.hansenvillage.hansenapp.dto.*;
 import com.hansenvillage.hansenapp.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -88,5 +76,11 @@ public class AuthController {
     public ResponseEntity<LoginResponse> adminLoginConfirm(
             @Valid @RequestBody AdminLoginConfirmRequest request) {
         return ResponseEntity.ok(authService.confirmAdminLogin(request));
+    }
+
+    @PostMapping("/resend-code")
+    public ResponseEntity<String> resendCode(@Valid @RequestBody ResendCodeRequest request) {
+        authService.resendOtp(request.email(), request.type());
+        return ResponseEntity.ok("Verification code has been resent");
     }
 }

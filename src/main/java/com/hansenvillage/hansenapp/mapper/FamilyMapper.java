@@ -9,6 +9,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface FamilyMapper {
 
+    Family toEntity(FamilyAdminRegistrationRequest request);
     Family toEntity(FamilyRegistrationRequest request);
     FamilyInfoResponse toInfoResponse(Family family);
     FamilyRegistrationResponse toResponse(Family family);

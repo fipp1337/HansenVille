@@ -23,7 +23,10 @@ public enum AppErrorCode {
     NEW_PASSWORD_REQUIRED(HttpStatus.CONFLICT, "New password required"),
     NEW_PASSWORD_MATCH_WITH_OLD(HttpStatus.CONFLICT, "New password match with old"),
     INVALID_PHONE_FORMAT(HttpStatus.CONFLICT, "Invalid phone number format"),
-
+    REGISTRATION_SESSION_EXPIRED(HttpStatus.CONFLICT, "Registration session expired"),
+    SESSION_EXPIRED(HttpStatus.CONFLICT, "Session expired"),
+    RESET_SESSION_EXPIRED(HttpStatus.CONFLICT, "Reset session expired"),
+    OTP_TOO_MANY_REQUESTS(HttpStatus.CONFLICT, "Too many one-time password requests"),
     // Family / users / admin
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found: %s"),
     FAMILY_NOT_FOUND(HttpStatus.NOT_FOUND, "Family not found: %s"),

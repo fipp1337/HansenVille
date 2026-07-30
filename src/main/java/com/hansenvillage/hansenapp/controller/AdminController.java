@@ -1,11 +1,8 @@
 package com.hansenvillage.hansenapp.controller;
 
-import com.hansenvillage.hansenapp.dto.AdminRegistrationRequest;
-import com.hansenvillage.hansenapp.dto.AdminUpdateRequest;
-import com.hansenvillage.hansenapp.dto.AdminUpdateResponse;
-import com.hansenvillage.hansenapp.dto.FamilyInfoResponse;
-import com.hansenvillage.hansenapp.dto.GroupedAdminsResponse;
+import com.hansenvillage.hansenapp.dto.*;
 import com.hansenvillage.hansenapp.service.AdminService;
+import com.hansenvillage.hansenapp.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,6 +27,7 @@ import java.util.UUID;
 public class AdminController {
 
     private final AdminService adminService;
+    private final AuthService authService;
 
     @GetMapping("/families/search")
 //    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
@@ -69,5 +67,12 @@ public class AdminController {
 //     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<GroupedAdminsResponse> getAllAdmins() {
         return ResponseEntity.ok(adminService.getAllAdminsGrouped());
+    }
+
+    @PostMapping("/family-registration")
+    //  @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<String> registerFamilyByAdmin(@Valid @RequestBody FamilyAdminRegistrationRequest request) {
+        authService.registrationFamilyByAdmin(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Family registered successfully");
     }
 }
