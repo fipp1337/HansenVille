@@ -17,7 +17,7 @@ import java.util.UUID;
 public interface PoolBookingRepository extends JpaRepository<PoolBooking, UUID> {
 
     List<PoolBooking> findByUserIdIn(List<UUID> userIds);
-
+    List<PoolBooking> findByUserId(UUID userId);
     Optional<PoolBooking> findByUserIdAndPoolSessionId(UUID userId, UUID poolSessionId);
 
     List<PoolBooking> findByPoolSessionId(UUID poolSessionId);

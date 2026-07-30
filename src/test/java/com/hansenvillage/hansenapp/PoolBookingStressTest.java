@@ -78,7 +78,7 @@ class PoolBookingStressTest {
                     start.await();
 
                     PoolBookingRequest request = new PoolBookingRequest();
-                    request.setUserId(userId);
+                    request.setUserIds(userIds);
                     request.setPoolSessionId(sessionId);
 
                     poolBookingService.book(request);

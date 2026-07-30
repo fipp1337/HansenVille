@@ -11,6 +11,9 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface PoolBookingMapper {
 
+    @Mapping(target = "userId", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "status", ignore = true)
     PoolBooking toEntity(PoolBookingRequest request);
 
     @Mapping(target = "bookingId", source = "booking.id")

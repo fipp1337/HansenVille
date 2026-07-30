@@ -28,7 +28,7 @@ public class PoolBookingController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PoolBookingResponse createBooking(@Valid @RequestBody PoolBookingRequest request) {
+    public List<PoolBookingResponse> createBooking(@Valid @RequestBody PoolBookingRequest request) {
         return poolBookingService.book(request);
     }
 
