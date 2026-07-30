@@ -9,9 +9,11 @@ import org.springframework.beans.factory.annotation.Value;
 public class FamilyAdminRegistrationRequest {
     @NotBlank
     private String email;
+
     @NotBlank
     @Size(min = 6, max = 25, message = "Minimal password size - 6 symbols, maximum - 25")
     private String password;
+
     @NotBlank
     private String address;
 
