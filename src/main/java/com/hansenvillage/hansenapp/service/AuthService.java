@@ -232,4 +232,60 @@ public class AuthService {
     private String generateVerificationCode() {
         return String.format("%0" + CODE_LENGTH + "d", random.nextInt(CODE_BOUND));
     }
+
+    @Transactional
+    public void registrationFamilyByAdmin(FamilyAdminRegistrationRequest request) {
+        String email = normalizeEmail(request.getEmail());
+
+        if (familyRepository.existsByEmail(email)) {
+            throw AppException.of(AppErrorCode.EMAIL_ALREADY_EXISTS, email);
+        }
+        if (familyRepository.existsByAddress(request.getAddress())) {
+            throw AppException.of(AppErrorCode.ADDRESS_ALREADY_EXISTS, request.getAddress());
+        }
+
+        Family family = familyMapper.toEntity(request);
+        family.setEmail(email);
+        family.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
+            family.setPhoneNumber(phoneService.validateAndFormatPhone(request.getPhoneNumber()));
+        }
+
+        Family savedFamily = familyRepository.save(family);
+        FamilyRole familyRole = familyRoleMapper.createUserRole(savedFamily.getId());
+        familyRoleRepository.save(familyRole);
+
+        log.info("Family registered by admin: id={}, email={}", savedFamily.getId(), email);
+    }
+
+    public void resendOtp(String email, OtpType type) {
+        String normalizedEmail = normalizeEmail(email);
+        String actionType = type.name();
+
+        if (!redisService.isResendAllowed(normalizedEmail, actionType)) {
+            long remainingSeconds = redisService.getRemainingCooldown(normalizedEmail, actionType);
+            throw AppException.of(AppErrorCode.OTP_TOO_MANY_REQUESTS, remainingSeconds);
+        }
+
+        String newCode = generateVerificationCode();
+
+        switch (type) {
+            case REGISTRATION -> {
+                redisService.updateRegistrationVerificationCode(normalizedEmail, newCode);
+                emailService.sendVerificationEmail(normalizedEmail, newCode);
+            }
+            case ADMIN_LOGIN -> {
+                redisService.updateAdminLoginCode(normalizedEmail, newCode);
+                emailService.sendVerificationAdminEmail(normalizedEmail, newCode);
+            }
+            case RESET_PASSWORD -> {
+                redisService.updateResetCode(normalizedEmail, newCode);
+                emailService.sendResetPasswordEmail(normalizedEmail, newCode);
+            }
+        }
+        redisService.setResendCooldown(normalizedEmail, actionType);
+
+        log.info("OTP resent successfully for email: {}, type: {}", normalizedEmail, type);
+    }
 }
