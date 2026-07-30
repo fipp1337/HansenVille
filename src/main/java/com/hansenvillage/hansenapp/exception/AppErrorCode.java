@@ -56,6 +56,7 @@ public enum AppErrorCode {
     BOOKING_ALREADY_CANCELLED(HttpStatus.CONFLICT, "Book already has been canceled"),
     NOT_YOUR_BOOKING(HttpStatus.NOT_ACCEPTABLE, "Not your booking"),
     SESSION_ALREADY_STARTED(HttpStatus.CONFLICT, "Session was started"),
+    USERS_NOT_FROM_SAME_FAMILY(HttpStatus.CONFLICT, "User not from same family"),
 
     // Facilities / activities / files
     FACILITY_NOT_FOUND(HttpStatus.NOT_FOUND, "Facility not found: %s"),

@@ -62,7 +62,12 @@ public class PoolBookingService {
             maxAttempts = 3,
             backoff = @Backoff(delay = 100))
     @Transactional
-    public PoolBookingResponse book(PoolBookingRequest request) {
+    public List<PoolBookingResponse> book(PoolBookingRequest request) {
+        List<UUID> userIds = request.getUserIds();
+        if (userIds == null || userIds.isEmpty()) {
+            throw new IllegalArgumentException("User IDs list cannot be empty");
+        }
+
         PoolSession session = poolSessionRepository.findById(request.getPoolSessionId())
                 .orElseThrow(() -> AppException.of(AppErrorCode.POOL_SESSION_NOT_FOUND, request.getPoolSessionId()));
 
@@ -75,50 +80,63 @@ public class PoolBookingService {
             throw AppException.of(AppErrorCode.SESSION_ALREADY_STARTED, request.getPoolSessionId());
         }
 
-        if (session.getBookedCount() >= session.getMaxCapacity()) {
+        int requestedCount = userIds.size();
+        if (session.getBookedCount() + requestedCount > session.getMaxCapacity()) {
             throw AppException.of(AppErrorCode.POOL_SESSION_IS_FULL, request.getPoolSessionId());
         }
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> AppException.of(AppErrorCode.USER_NOT_FOUND, request.getUserId()));
+        List<User> users = userRepository.findAllById(userIds);
+        if (users.size() != userIds.size()) {
+            throw AppException.of(AppErrorCode.USER_NOT_FOUND);
+        }
 
-        Family family = familyRepository.findById(user.getFamilyId())
-                .orElseThrow(() -> AppException.of(AppErrorCode.FAMILY_NOT_FOUND, user.getFamilyId()));
+        UUID familyId = users.get(0).getFamilyId();
+        boolean allSameFamily = users.stream().allMatch(u -> Objects.equals(u.getFamilyId(), familyId));
+        if (!allSameFamily) {
+            throw AppException.of(AppErrorCode.USERS_NOT_FROM_SAME_FAMILY);
+        }
 
-        long memberCount = family.getMemberCount();
-        long maxAllowedTickets = memberCount * 2;
+        Family family = familyRepository.findById(familyId)
+                .orElseThrow(() -> AppException.of(AppErrorCode.FAMILY_NOT_FOUND, familyId));
 
+        long maxAllowedTickets = family.getMemberCount() * 2;
         LocalDate sessionDate = session.getSessionDate();
         LocalDate monday = sessionDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate sunday = sessionDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 
-        long usedTickets = countBookingsForFamilyInWeek(user.getFamilyId(), monday, sunday);
+        long usedTickets = countBookingsForFamilyInWeek(familyId, monday, sunday);
 
-        if (usedTickets >= maxAllowedTickets) {
+        if (usedTickets + requestedCount > maxAllowedTickets) {
             throw AppException.of(AppErrorCode.OUT_OF_TICKETS);
         }
 
-        Optional<PoolBooking> existingBookingOpt = poolBookingRepository.findByUserIdAndPoolSessionId(user.getId(), session.getId());
+        List<PoolBookingResponse> responses = new ArrayList<>();
+        for (User user : users) {
+            Optional<PoolBooking> existingBookingOpt = poolBookingRepository.findByUserIdAndPoolSessionId(user.getId(), session.getId());
 
-        PoolBooking booking;
-        if (existingBookingOpt.isPresent()) {
-            booking = existingBookingOpt.get();
-            if (booking.getStatus() == PoolBookingStatus.REGISTERED) {
-                throw AppException.of(AppErrorCode.POOL_HAS_BEEN_BOOKED, request.getPoolSessionId());
+            PoolBooking booking;
+            if (existingBookingOpt.isPresent()) {
+                booking = existingBookingOpt.get();
+                if (booking.getStatus() == PoolBookingStatus.REGISTERED) {
+                    throw AppException.of(AppErrorCode.POOL_HAS_BEEN_BOOKED, request.getPoolSessionId());
+                }
+                booking.setStatus(PoolBookingStatus.REGISTERED);
+            } else {
+                booking = new PoolBooking();
+                booking.setUserId(user.getId());
+                booking.setPoolSessionId(session.getId());
+                booking.setStatus(PoolBookingStatus.REGISTERED);
             }
-            booking.setStatus(PoolBookingStatus.REGISTERED);
-        } else {
-            booking = poolBookingMapper.toEntity(request);
-            booking.setStatus(PoolBookingStatus.REGISTERED);
+
+            PoolBooking savedBooking = poolBookingRepository.save(booking);
+            responses.add(poolBookingMapper.toResponse(savedBooking, user, session));
         }
 
-        session.setBookedCount(session.getBookedCount() + 1);
+        session.setBookedCount(session.getBookedCount() + requestedCount);
         poolSessionRepository.save(session);
 
-        PoolBooking savedBooking = poolBookingRepository.save(booking);
-        log.info("Pool booked: booking={}, session={}, user={}",
-                savedBooking.getId(), session.getId(), user.getId());
-        return poolBookingMapper.toResponse(savedBooking, user, session);
+        log.info("Pool booked for {} users in family {}: session={}", requestedCount, familyId, session.getId());
+        return responses;
     }
 
     @Transactional
