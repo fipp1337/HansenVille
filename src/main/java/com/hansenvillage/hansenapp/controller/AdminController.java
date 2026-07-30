@@ -50,6 +50,7 @@ public class AdminController {
     }
 
     @PutMapping("/{id}")
+    // @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<AdminUpdateResponse> updateAdmin(
             @PathVariable UUID id,
             @Valid @RequestBody AdminUpdateRequest request) {
