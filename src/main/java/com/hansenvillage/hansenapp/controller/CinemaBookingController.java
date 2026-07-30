@@ -55,4 +55,9 @@ public class CinemaBookingController {
     public void deleteBooking(@PathVariable UUID id) {
         cinemaBookingService.deleteBooking(id);
     }
+
+    @GetMapping ("/history/family/{id}")
+    public List<CinemaBookingResponse> getBookingHistory(@PathVariable UUID id) {
+        return cinemaBookingService.getCinemaBookingHistory(id);
+    }
 }
