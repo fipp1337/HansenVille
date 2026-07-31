@@ -86,6 +86,18 @@ public class CinemaSessionController {
         return cinemaSessionMapper.toResponse(cinemaSessionService.update(id, request));
     }
 
+    @PutMapping("/{id}/cancel")
+//    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
+    public void cancel(@PathVariable UUID id) {
+        cinemaSessionService.cancel(id);
+    }
+
+    @PutMapping("/{id}/uncancel")
+//    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
+    public void uncancel(@PathVariable UUID id) {
+        cinemaSessionService.uncancel(id);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
 //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
