@@ -35,9 +35,11 @@ public interface CinemaBookingRepository extends JpaRepository<CinemaBooking, UU
             """)
     List<CinemaBooking> findFutureByUserId(@Param("userId") UUID userId);
 
-    long countByCinemaSessionId(UUID cinemaSessionId);
-
     List<CinemaBooking> getBookingsByCinemaSessionId(UUID cinemaSessionId);
+
+    @Modifying
+    @Query("delete from CinemaBooking b where b.cinemaSessionId = :sessionId")
+    void deleteByCinemaSessionId(UUID sessionId);
 
     @Modifying
     @Query("DELETE FROM CinemaBooking b WHERE b.userId IN :userIds")
