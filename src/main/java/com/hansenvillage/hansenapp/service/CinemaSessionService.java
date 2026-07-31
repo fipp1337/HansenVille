@@ -145,7 +145,6 @@ public class CinemaSessionService {
             return;
         }
 
-        List<CinemaBooking> bookings = cinemaBookingRepository.findByCinemaSessionId(id);
         cinemaBookingRepository.deleteByCinemaSessionId(id);
 
         session.setStatus(SessionStatus.CANCELLED);
