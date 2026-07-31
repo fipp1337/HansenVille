@@ -16,5 +16,8 @@ public class Activity {
     @Column(nullable = false)
     private String title;
 
+    @Column(nullable = false, length = 150)
+    private String description;
+
     private String image;
 }

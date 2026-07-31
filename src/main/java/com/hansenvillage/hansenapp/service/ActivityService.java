@@ -46,6 +46,7 @@ public class ActivityService {
     public ActivityResponse updateActivity(UUID id, ActivityRequest request) {
         Activity activity = findActivity(id);
         activity.setTitle(request.getTitle());
+        activity.setDescription(request.getDescription());
         return activityMapper.toResponse(activityRepository.save(activity));
     }
 

@@ -7,5 +7,6 @@ import java.util.UUID;
 public class ActivityResponse {
     private UUID id;
     private String title;
+    private String description;
     private String imageUrl;
 }
