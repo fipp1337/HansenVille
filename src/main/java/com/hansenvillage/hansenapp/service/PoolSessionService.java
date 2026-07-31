@@ -66,12 +66,13 @@ public class PoolSessionService {
     public void delete(UUID id) {
         PoolSession session = findById(id);
         List<PoolBooking> bookings = poolBookingRepository.findByPoolSessionId(id);
-        for (PoolBooking booking : bookings) {
-            booking.setStatus(PoolBookingStatus.CANCELED_WITH_RETURN);
+        if (!bookings.isEmpty()) {
+            poolBookingRepository.deleteAll(bookings);
         }
-        poolBookingRepository.saveAll(bookings);
+
         poolSessionRepository.delete(session);
-        log.info("Pool session deleted: {}", id);
+
+        log.info("Pool session physically deleted: {}", id);
     }
 
     @Transactional
