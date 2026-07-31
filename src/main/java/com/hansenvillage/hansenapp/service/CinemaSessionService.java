@@ -5,8 +5,7 @@ import com.hansenvillage.hansenapp.dto.CinemaPublishWeekScheduleRequest;
 import com.hansenvillage.hansenapp.dto.CinemaSessionRequest;
 import com.hansenvillage.hansenapp.dto.CinemaSessionWithSeatsResponse;
 import com.hansenvillage.hansenapp.dto.CinemaSeatWithAvailableResponse;
-import com.hansenvillage.hansenapp.entity.CinemaSeat;
-import com.hansenvillage.hansenapp.entity.CinemaSession;
+import com.hansenvillage.hansenapp.entity.*;
 import com.hansenvillage.hansenapp.exception.AppErrorCode;
 import com.hansenvillage.hansenapp.exception.AppException;
 import com.hansenvillage.hansenapp.mapper.CinemaSeatMapper;
@@ -135,5 +134,33 @@ public class CinemaSessionService {
     private CinemaSession findSession(UUID id) {
         return cinemaSessionRepository.findById(id)
                 .orElseThrow(() -> AppException.of(AppErrorCode.CINEMA_SESSION_NOT_FOUND, id));
+    }
+
+    @Transactional
+    public void cancel(UUID id) {
+        CinemaSession session = cinemaSessionRepository.findById(id)
+                .orElseThrow(() -> AppException.of(AppErrorCode.CINEMA_SESSION_NOT_FOUND));
+
+        if (session.getStatus() == SessionStatus.CANCELLED) {
+            return;
+        }
+
+        List<CinemaBooking> bookings = cinemaBookingRepository.findByCinemaSessionId(id);
+        cinemaBookingRepository.deleteByCinemaSessionId(id);
+
+        session.setStatus(SessionStatus.CANCELLED);
+        log.info("Cinema session cancelled: {}", id);
+    }
+
+    @Transactional
+    public void uncancel(UUID id) {
+        CinemaSession session = cinemaSessionRepository.findById(id)
+                .orElseThrow(() -> AppException.of(AppErrorCode.CINEMA_SESSION_NOT_FOUND));
+
+        if (session.getStatus() == SessionStatus.CANCELLED) {
+            session.setStatus(SessionStatus.ACTIVE);
+            cinemaSessionRepository.save(session);
+            log.info("Cinema session restored: {}", id);
+        }
     }
 }
