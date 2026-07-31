@@ -1,6 +1,9 @@
 package com.hansenvillage.hansenapp.dto;
 
 import com.hansenvillage.hansenapp.entity.CinemaSeat;
+import com.hansenvillage.hansenapp.entity.SessionStatus;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,4 +24,6 @@ public class CinemaSessionResponse {
     private Integer duration;
     private String description;
     private String posterUrl;
+    @Enumerated(EnumType.STRING)
+    private SessionStatus status;
 }
