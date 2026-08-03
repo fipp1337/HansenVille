@@ -18,7 +18,7 @@ public class Facility {
 
     private String name;
 
-    @Column(length = 1000)
+    @Column(length = 100)
     private String description;
 
     private String image;
