@@ -15,6 +15,4 @@ public class CinemaHallRequest {
     @NotBlank
     private String name;
 
-//    @NotEmpty
-//    private List<CinemaSeatRequest> seats;
 }
