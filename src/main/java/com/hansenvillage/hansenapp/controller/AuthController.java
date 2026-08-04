@@ -5,7 +5,6 @@ import com.hansenvillage.hansenapp.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,67 +19,67 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register/initiate")
-    public ResponseEntity<RegistrationInitiateResponse> initiateRegistration(
+    public RegistrationInitiateResponse initiateRegistration(
             @Valid @RequestBody RegistrationInitiateRequest request) {
         authService.initiateRegistration(request);
         RegistrationInitiateResponse response = new RegistrationInitiateResponse();
         response.setMessage("Successful initiate registration");
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/password/forgot")
-    public ResponseEntity<ForgotPasswordInitiateResponse> forgotPassword(
-            @Valid @RequestBody ForgotPasswordRequest request) {
-        authService.initiateForgotPassword(request);
-        ForgotPasswordInitiateResponse response = new ForgotPasswordInitiateResponse();
-        response.setMessage("Successful initiate forgot password");
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/password/reset")
-    public ResponseEntity<ResetPasswordResponse> resetPassword(
-            @Valid @RequestBody ResetPasswordRequest request) {
-        authService.resetPassword(request);
-        ResetPasswordResponse response = new ResetPasswordResponse();
-        response.setMessage("Successful reset password");
-        return ResponseEntity.ok(response);
+        return response;
     }
 
     @PostMapping("/register/confirm")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<LoginResponse> confirmRegistration(
+    public LoginResponse confirmRegistration(
             @Valid @RequestBody FamilyRegistrationRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerFamily(request));
+        return authService.registerFamily(request);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
+        return authService.login(request);
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshRequest request) {
-        return ResponseEntity.ok(authService.refreshToken(request));
+    public LoginResponse refresh(@Valid @RequestBody RefreshRequest request) {
+        return authService.refreshToken(request);
+    }
+
+    @PostMapping("/password/forgot")
+    public ForgotPasswordInitiateResponse forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
+        authService.initiateForgotPassword(request);
+        ForgotPasswordInitiateResponse response = new ForgotPasswordInitiateResponse();
+        response.setMessage("Successful initiate forgot password");
+        return response;
+    }
+
+    @PostMapping("/password/reset")
+    public ResetPasswordResponse resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        ResetPasswordResponse response = new ResetPasswordResponse();
+        response.setMessage("Successful reset password");
+        return response;
     }
 
     @PostMapping("/admin/login/initiate")
-    public ResponseEntity<AdminLoginInitiateResponse> adminLoginInitiate(
+    public AdminLoginInitiateResponse adminLoginInitiate(
             @Valid @RequestBody AdminLoginInitiateRequest request) {
         authService.initiateAdminLogin(request);
         AdminLoginInitiateResponse response = new AdminLoginInitiateResponse();
         response.setMessage("Admin Login Initiate successful");
-        return ResponseEntity.ok(response);
+        return response;
     }
 
     @PostMapping("/admin/login/confirm")
-    public ResponseEntity<LoginResponse> adminLoginConfirm(
+    public LoginResponse adminLoginConfirm(
             @Valid @RequestBody AdminLoginConfirmRequest request) {
-        return ResponseEntity.ok(authService.confirmAdminLogin(request));
+        return authService.confirmAdminLogin(request);
     }
 
     @PostMapping("/resend-code")
-    public ResponseEntity<String> resendCode(@Valid @RequestBody ResendCodeRequest request) {
+    public String resendCode(@Valid @RequestBody ResendCodeRequest request) {
         authService.resendOtp(request.email(), request.type());
-        return ResponseEntity.ok("Verification code has been resent");
+        return "Verification code has been resent";
     }
 }
