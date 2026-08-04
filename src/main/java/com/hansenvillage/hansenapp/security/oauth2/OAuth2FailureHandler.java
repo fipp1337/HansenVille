@@ -5,6 +5,7 @@ import com.hansenvillage.hansenapp.dto.ResponseError;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
@@ -16,6 +17,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class OAuth2FailureHandler implements AuthenticationFailureHandler {
 
     private final ObjectMapper objectMapper;
@@ -33,6 +35,7 @@ public class OAuth2FailureHandler implements AuthenticationFailureHandler {
             message = oauthEx.getError().getDescription();
         }
 
+        log.warn("OAuth2 authentication failure from IP [{}]: {}", request.getRemoteAddr(), message);
         ResponseError error = new ResponseError(
                 HttpStatus.UNAUTHORIZED.value(),
                 message != null ? message : "Authentication failed"
