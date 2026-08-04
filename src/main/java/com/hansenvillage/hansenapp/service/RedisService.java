@@ -48,7 +48,8 @@ public class RedisService {
         }
 
         String inviteCode = (String) currentData.get("inviteCode");
-        storeRegistrationData(email, inviteCode, newVerificationCode);
+        String address = (String) currentData.get("address");
+        storeRegistrationData(email, inviteCode, newVerificationCode, address);
     }
 
     public void updateAdminLoginCode(String email, String newVerificationCode) {
@@ -82,11 +83,12 @@ public class RedisService {
         redisTemplate.delete(AppConstant.Redis.ADMIN_LOGIN_PREFIX + email);
     }
 
-    public void storeRegistrationData(String email, String inviteCode, String verificationCode) {
+    public void storeRegistrationData(String email, String inviteCode, String verificationCode, String address) {
         String key = AppConstant.Redis.REG_CODE_PREFIX + email;
         redisTemplate.opsForHash().putAll(key, Map.of(
                 "inviteCode", inviteCode != null ? inviteCode : "",
-                "verificationCode", verificationCode != null ? verificationCode : ""
+                "verificationCode", verificationCode != null ? verificationCode : "",
+                "address", address != null ? address : ""
         ));
         redisTemplate.expire(key, CODE_TTL);
     }

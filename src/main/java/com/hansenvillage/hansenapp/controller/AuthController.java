@@ -78,7 +78,8 @@ public class AuthController {
     }
 
     @PostMapping("/resend-code")
-    public String resendCode(@Valid @RequestBody ResendCodeRequest request) {
+    public String resendCode(
+            @Valid @RequestBody ResendCodeRequest request) {
         authService.resendOtp(request.email(), request.type());
         return "Verification code has been resent";
     }

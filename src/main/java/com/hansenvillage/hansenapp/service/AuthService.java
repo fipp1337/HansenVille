@@ -46,9 +46,14 @@ public class AuthService {
     @Transactional
     public void initiateRegistration(RegistrationInitiateRequest request) {
         String email = normalizeEmail(request.getEmail());
+        String address = request.getAddress();
 
         if (familyRepository.existsByEmail(email)) {
             throw AppException.of(AppErrorCode.EMAIL_ALREADY_EXISTS, email);
+        }
+
+        if (familyRepository.existsByAddress(address)) {
+            throw AppException.of(AppErrorCode.ADDRESS_ALREADY_EXISTS, address);
         }
 
         InviteCode inviteCode = inviteCodeRepository
@@ -56,7 +61,7 @@ public class AuthService {
                 .orElseThrow(() -> AppException.of(AppErrorCode.INVALID_INVITE_CODE));
 
         String verificationCode = generateVerificationCode();
-        redisService.storeRegistrationData(email, inviteCode.getCode(), verificationCode);
+        redisService.storeRegistrationData(email, inviteCode.getCode(), verificationCode, address);
         emailService.sendVerificationEmail(email, verificationCode);
         log.info("Registration initiated: {}", email);
     }
@@ -77,6 +82,8 @@ public class AuthService {
         }
 
         String storedInviteCode = (String) registrationData.get("inviteCode");
+        String storedAddress = (String) registrationData.get("address");
+
         InviteCode inviteCode = inviteCodeRepository
                 .findByCodeAndStatus(storedInviteCode, InviteCodeStatus.AVAILABLE)
                 .orElseThrow(() -> AppException.of(AppErrorCode.INVALID_INVITE_CODE));
@@ -84,16 +91,17 @@ public class AuthService {
         if (familyRepository.existsByEmail(email)) {
             throw AppException.of(AppErrorCode.EMAIL_ALREADY_EXISTS, email);
         }
-        if (familyRepository.existsByAddress(request.getAddress())) {
-            throw AppException.of(AppErrorCode.ADDRESS_ALREADY_EXISTS, request.getAddress());
+        if (familyRepository.existsByAddress(storedAddress)) {
+            throw AppException.of(AppErrorCode.ADDRESS_ALREADY_EXISTS, storedAddress);
         }
 
         inviteCode.setStatus(InviteCodeStatus.USED);
         inviteCode.setEmail(email);
         inviteCodeRepository.save(inviteCode);
 
-        Family family = familyMapper.toEntity(request);
+        Family family = new Family();
         family.setEmail(email);
+        family.setAddress(storedAddress);
         family.setPassword(passwordEncoder.encode(storedInviteCode));
 
         if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
@@ -101,12 +109,15 @@ public class AuthService {
         }
 
         Family savedFamily = familyRepository.save(family);
+
         FamilyRole familyRole = familyRoleMapper.createUserRole(savedFamily.getId());
         familyRoleRepository.save(familyRole);
+
         redisService.deleteRegistrationData(email);
 
         List<Role> roles = List.of(Role.valueOf(familyRole.getRole()));
         log.info("Family registered: id={}, email={}", savedFamily.getId(), email);
+
         return buildLoginResponse(
                 jwtService.generateToken(savedFamily, roles),
                 jwtService.generateRefreshToken(savedFamily, roles)
