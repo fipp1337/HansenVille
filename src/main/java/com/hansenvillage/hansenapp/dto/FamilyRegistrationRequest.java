@@ -16,12 +16,8 @@ public class FamilyRegistrationRequest {
     @Email
     private String email;
 
-    @NotBlank
-    private String address;
-
     private String phoneNumber;
 
-    private List<Role> roles;
-
+    @NotBlank
     private String verificationCode;
 }
