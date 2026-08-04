@@ -1,18 +1,13 @@
 package com.hansenvillage.hansenapp.security.oauth2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.entity.Role;
-import com.hansenvillage.hansenapp.exception.AppErrorCode;
-import com.hansenvillage.hansenapp.exception.AppException;
-import com.hansenvillage.hansenapp.repository.FamilyRepository;
 import com.hansenvillage.hansenapp.security.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -25,23 +20,24 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class OAuth2SecurityHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final JwtService jwtService;
-    private final FamilyRepository familyRepository;
     private final ObjectMapper objectMapper;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException {
-        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        String email = oAuth2User.getAttribute("email");
+        CustomOAuth2User customUser = (CustomOAuth2User) authentication.getPrincipal();
 
-        Family family = familyRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> AppException.of(AppErrorCode.FAMILY_NOT_FOUND));
+        String accessToken;
+        String refreshToken;
 
-        List<Role> roles = List.of(Role.USER);
-
-        String accessToken = jwtService.generateToken(family, roles);
-        String refreshToken = jwtService.generateRefreshToken(family, roles);
+        if (customUser.isAdmin()) {
+            accessToken = jwtService.generateAdminToken(customUser.getAdminUser());
+            refreshToken = jwtService.generateAdminRefreshToken(customUser.getAdminUser());
+        } else {
+            accessToken = jwtService.generateToken(customUser.getFamily(), List.of(Role.USER));
+            refreshToken = jwtService.generateRefreshToken(customUser.getFamily(), List.of(Role.USER));
+        }
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());

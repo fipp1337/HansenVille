@@ -37,12 +37,12 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
             return new CustomOAuth2User(oAuth2User, adminUser.get(), null);
         }
 
-        Family family = familyRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> {
-                    OAuth2Error error = new OAuth2Error("user_not_found", "User with email " + email + " not found", null);
-                    return new OAuth2AuthenticationException(error, error.getDescription());
-                });
+        Optional<Family> family = familyRepository.findByEmailIgnoreCase(normalizedEmail);
+        if (family.isPresent()) {
+            return new CustomOAuth2User(oAuth2User, null, family.get());
+        }
 
-        return oAuth2User;
+        OAuth2Error error = new OAuth2Error("user_not_found", "User with email " + normalizedEmail + " not found", null);
+        throw new OAuth2AuthenticationException(error, error.getDescription());
     }
 }
