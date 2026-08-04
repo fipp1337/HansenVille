@@ -5,6 +5,7 @@ import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.repository.AdminUserRepository;
 import com.hansenvillage.hansenapp.repository.FamilyRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -16,12 +17,16 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OAuth2UserService extends DefaultOAuth2UserService {
     private final FamilyRepository familyRepository;
     private final AdminUserRepository adminUserRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest request) throws OAuth2AuthenticationException {
+        String provider = request.getClientRegistration().getRegistrationId();
+        log.info("Processing OAuth2 login request from provider: [{}]", provider);
+
         OAuth2User oAuth2User = super.loadUser(request);
 
         String email = oAuth2User.getAttribute("email");
@@ -34,11 +39,13 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
         Optional<AdminUser> adminUser = adminUserRepository.findByEmailIgnoreCase(normalizedEmail);
         if (adminUser.isPresent()) {
+            log.info("OAuth2 user matched AdminUser with email: [{}]", normalizedEmail);
             return new CustomOAuth2User(oAuth2User, adminUser.get(), null);
         }
 
         Optional<Family> family = familyRepository.findByEmailIgnoreCase(normalizedEmail);
         if (family.isPresent()) {
+            log.info("OAuth2 user matched Family with email: [{}]", normalizedEmail);
             return new CustomOAuth2User(oAuth2User, null, family.get());
         }
 

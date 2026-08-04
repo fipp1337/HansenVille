@@ -6,6 +6,7 @@ import com.hansenvillage.hansenapp.security.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -18,6 +19,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class OAuth2SecurityHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final JwtService jwtService;
     private final ObjectMapper objectMapper;
@@ -32,9 +34,13 @@ public class OAuth2SecurityHandler extends SimpleUrlAuthenticationSuccessHandler
         String refreshToken;
 
         if (customUser.isAdmin()) {
+            log.info("Generating JWT tokens for AdminUser [ID: {}, Email: {}]",
+                    customUser.getAdminUser().getId(), customUser.getAdminUser().getEmail());
             accessToken = jwtService.generateAdminToken(customUser.getAdminUser());
             refreshToken = jwtService.generateAdminRefreshToken(customUser.getAdminUser());
         } else {
+            log.info("Generating JWT tokens for Family [ID: {}, Email: {}]",
+                    customUser.getFamily().getId(), customUser.getFamily().getEmail());
             accessToken = jwtService.generateToken(customUser.getFamily(), List.of(Role.USER));
             refreshToken = jwtService.generateRefreshToken(customUser.getFamily(), List.of(Role.USER));
         }
@@ -62,5 +68,6 @@ public class OAuth2SecurityHandler extends SimpleUrlAuthenticationSuccessHandler
         );
 
         objectMapper.writeValue(response.getWriter(), tokens);
+        log.debug("Successfully returned OAuth2 JWT tokens response for client IP: [{}]", request.getRemoteAddr());
     }
 }
