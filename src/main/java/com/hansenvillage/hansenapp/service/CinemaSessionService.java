@@ -57,7 +57,7 @@ public class CinemaSessionService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<Resource> getPoster(UUID sessionId) {
+    public Resource getPoster(UUID sessionId) {
         CinemaSession session = findSession(sessionId);
         return fileStorageService.loadAsResource(
                 AppConstant.Upload.POSTERS_DIR,

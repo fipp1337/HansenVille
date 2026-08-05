@@ -35,7 +35,7 @@ public class FileStorageService {
         }
     }
 
-    public ResponseEntity<Resource> loadAsResource(String directory, String fileName, AppErrorCode notFoundCode) {
+    public Resource loadAsResource(String directory, String fileName, AppErrorCode notFoundCode) {
         if (fileName == null) {
             throw AppException.of(notFoundCode);
         }
@@ -43,13 +43,11 @@ public class FileStorageService {
         Path path = Paths.get(directory).resolve(fileName);
         try {
             Resource resource = new UrlResource(path.toUri());
-            String contentType = Files.probeContentType(path);
-            if (contentType == null) {
-                contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+
+            if (!resource.exists() || !resource.isReadable()) {
+                throw AppException.of(notFoundCode);
             }
-            return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(contentType))
-                    .body(resource);
+            return resource;
         } catch (IOException e) {
             throw AppException.of(notFoundCode);
         }

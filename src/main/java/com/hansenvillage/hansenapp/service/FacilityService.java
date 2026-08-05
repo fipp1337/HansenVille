@@ -43,7 +43,7 @@ public class FacilityService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<Resource> getImage(UUID facilityId) {
+    public Resource getImage(UUID facilityId) {
         Facility facility = findFacility(facilityId);
         return fileStorageService.loadAsResource(
                 AppConstant.Upload.FACILITIES_DIR,

@@ -8,15 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,49 +23,50 @@ public class AdminController {
 
     @GetMapping("/families/search")
 //    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
-    public ResponseEntity<List<FamilyInfoResponse>> findFamiliesByAddress(@RequestParam String address) {
-        return ResponseEntity.ok(adminService.findFamiliesByAddress(address));
+    public List<FamilyInfoResponse> findFamiliesByAddress(@RequestParam String address) {
+        return adminService.findFamiliesByAddress(address);
     }
 
     @DeleteMapping("/families")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
 //    @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<Void> deleteFamilyByAddress(@RequestParam String address) {
+    public void deleteFamilyByAddress(@RequestParam String address) {
         adminService.deleteFamilyByAddress(address);
-        return ResponseEntity.noContent().build();
     }
 
     @PostMapping
     // @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<String> createAdmin(@Valid @RequestBody AdminRegistrationRequest request) {
+    public String createAdmin(@Valid @RequestBody AdminRegistrationRequest request) {
         adminService.addAdmin(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Admin registered successfully");
+        return "Admin registered successfully";
     }
 
     @PutMapping("/{id}")
     // @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<AdminUpdateResponse> updateAdmin(
+    public AdminUpdateResponse updateAdmin(
             @PathVariable UUID id,
             @Valid @RequestBody AdminUpdateRequest request) {
-        return ResponseEntity.ok(adminService.updateAdmin(id, request));
+        return adminService.updateAdmin(id, request);
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     // @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<Void> deleteAdmin(@PathVariable UUID id) {
+    public void deleteAdmin(@PathVariable UUID id) {
         adminService.deleteAdmin(id);
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
 //     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<GroupedAdminsResponse> getAllAdmins() {
-        return ResponseEntity.ok(adminService.getAllAdminsGrouped());
+    public GroupedAdminsResponse getAllAdmins() {
+        return adminService.getAllAdminsGrouped();
     }
 
     @PostMapping("/family-registration")
+    @ResponseStatus(HttpStatus.CREATED)
     //  @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<String> registerFamilyByAdmin(@Valid @RequestBody FamilyAdminRegistrationRequest request) {
+    public String registerFamilyByAdmin(@Valid @RequestBody FamilyAdminRegistrationRequest request) {
         authService.registrationFamilyByAdmin(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Family registered successfully");
+        return "Family registered successfully";
     }
 }

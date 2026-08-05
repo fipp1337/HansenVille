@@ -38,6 +38,7 @@ public class PoolTemplateController {
     }
 
     @PostMapping("/generate")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
 //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
     public void generateSchedule(@Valid @RequestBody PoolGenerateScheduleRequest request) {
         poolTemplateService.generate(request.getStartDate(), request.getEndDate());
