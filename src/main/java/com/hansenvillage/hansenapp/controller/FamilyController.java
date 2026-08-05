@@ -26,45 +26,44 @@ public class FamilyController {
     private final UserMapper userMapper;
 
     @PutMapping("/{id}")
-    public ResponseEntity<FamilyUpdateResponse> familyUpdate(
+    public FamilyUpdateResponse familyUpdate(
             @PathVariable UUID id,
             @Valid @RequestBody FamilyUpdateRequest request) {
 
         Family updated = familyService.updateFamilyInfo(id, request);
-        return ResponseEntity.ok(familyMapper.toUpdateResponse(updated));
+        return familyMapper.toUpdateResponse(updated);
     }
 
     @PutMapping("/members/{id}")
-    public ResponseEntity<UserUpdateResponse> userUpdate(
+    public UserUpdateResponse userUpdate(
             @PathVariable UUID id,
             @Valid @RequestBody UserUpdateRequest request) {
 
         User updated = userService.updateUser(id, request);
-        return ResponseEntity.ok(userMapper.toUpdateResponse(updated));
+        return userMapper.toUpdateResponse(updated);
     }
 
     @PostMapping("/members")
-    public ResponseEntity<UserUpdateResponse> userAdd(@Valid @RequestBody AddMemberRequest request) {
+    public UserUpdateResponse userAdd(@Valid @RequestBody AddMemberRequest request) {
         User created = userService.addNewMember(request);
-        return ResponseEntity.ok(userMapper.toUpdateResponse(created));
+        return userMapper.toUpdateResponse(created);
     }
 
     @DeleteMapping("/members/{id}")
-    public ResponseEntity<Void> userRemove(@PathVariable UUID id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void userRemove(@PathVariable UUID id) {
         userService.removeMember(id);
-        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteFamily(@PathVariable UUID id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteFamily(@PathVariable UUID id) {
         familyService.deleteFamily(id);
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FamilyInfoResponse> getFamilyInfo(@PathVariable UUID id) {
-        FamilyInfoResponse familyInfo = familyService.getFamilyInfoById(id);
-        return ResponseEntity.ok(familyInfo);
+    public FamilyInfoResponse getFamilyInfo(@PathVariable UUID id) {
+        return familyService.getFamilyInfoById(id);
     }
 
     @GetMapping("/tickets/pool")

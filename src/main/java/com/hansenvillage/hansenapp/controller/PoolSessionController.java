@@ -56,32 +56,32 @@ public class PoolSessionController {
     }
 
     @PutMapping("/{id}/cancel")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
 //    @PreAuthorize("hasRole('SUPER_ADMIN', 'POOL_MANAGER')")
-    public ResponseEntity<Void> cancelSession(@PathVariable UUID id) {
+    public void cancelSession(@PathVariable UUID id) {
         poolSessionService.cancel(id);
-        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/cancel-by-day")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
 //    @PreAuthorize("hasRole('SUPER_ADMIN', 'POOL_MANAGER')")
-    public ResponseEntity<Void> cancelSessionsForDay(
+    public void cancelSessionsForDay(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         poolSessionService.cancelSessionsForDay(date);
-        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}/uncancel")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
 //    @PreAuthorize("hasRole('SUPER_ADMIN', 'POOL_MANAGER')")
-    public ResponseEntity<Void> uncancelSession(@PathVariable UUID id) {
+    public void uncancelSession(@PathVariable UUID id) {
         poolSessionService.uncancelSession(id);
-        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/uncancel-by-day")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
 //    @PreAuthorize("hasRole('SUPER_ADMIN', 'POOL_MANAGER')")
-    public ResponseEntity<Void> uncancelSessionsForDay(
+    public void uncancelSessionsForDay(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         poolSessionService.uncancelSessionsForDay(date);
-        return ResponseEntity.ok().build();
     }
 }

@@ -58,11 +58,12 @@ public class CinemaSessionController {
     }
 
     @GetMapping("/{id}/poster")
-    public ResponseEntity<Resource> getPoster(@PathVariable UUID id) {
+    public Resource getPoster(@PathVariable UUID id) {
         return cinemaSessionService.getPoster(id);
     }
 
     @PutMapping("/{id}/poster")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
 //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void updatePoster(@PathVariable UUID id, @RequestParam MultipartFile newFile) {
         cinemaSessionService.updatePoster(id, newFile);
@@ -87,12 +88,14 @@ public class CinemaSessionController {
     }
 
     @PutMapping("/{id}/cancel")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
 //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void cancel(@PathVariable UUID id) {
         cinemaSessionService.cancel(id);
     }
 
     @PutMapping("/{id}/uncancel")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
 //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void uncancel(@PathVariable UUID id) {
         cinemaSessionService.uncancel(id);

@@ -68,7 +68,7 @@ public class ActivityService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<Resource> getImage(UUID id) {
+    public Resource getImage(UUID id) {
         Activity activity = findActivity(id);
         return fileStorageService.loadAsResource(
                 AppConstant.Upload.ACTIVITIES_DIR,
