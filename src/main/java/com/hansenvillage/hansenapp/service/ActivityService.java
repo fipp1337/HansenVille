@@ -4,10 +4,12 @@ import com.hansenvillage.hansenapp.constant.AppConstant;
 import com.hansenvillage.hansenapp.dto.ActivityRequest;
 import com.hansenvillage.hansenapp.dto.ActivityResponse;
 import com.hansenvillage.hansenapp.entity.Activity;
+import com.hansenvillage.hansenapp.entity.ActivityType;
 import com.hansenvillage.hansenapp.exception.AppErrorCode;
 import com.hansenvillage.hansenapp.exception.AppException;
 import com.hansenvillage.hansenapp.mapper.ActivityMapper;
 import com.hansenvillage.hansenapp.repository.ActivityRepository;
+import com.hansenvillage.hansenapp.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -29,16 +31,36 @@ public class ActivityService {
     private final ImageValidationService imageValidationService;
 
     @Transactional(readOnly = true)
-    public List<ActivityResponse> getAllActivities() {
-        return activityRepository.findAll().stream()
+    public List<ActivityResponse> getActivities(ActivityType type) {
+        List<Activity> activities;
+        if (type != null) {
+            activities = activityRepository.findByType(type);
+        } else {
+            activities = activityRepository.findAll();
+        }
+
+        return activities.stream()
+                .map(activityMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ActivityResponse> getMyActivities() {
+        UUID currentFamilyId = SecurityUtils.currentFamilyId();
+
+        return activityRepository.findByFamilyId(currentFamilyId).stream()
                 .map(activityMapper::toResponse)
                 .toList();
     }
 
     @Transactional
     public ActivityResponse createActivity(ActivityRequest request) {
-        Activity saved = activityRepository.save(activityMapper.toEntity(request));
-        log.info("Activity created: id={}, title={}", saved.getId(), saved.getTitle());
+        UUID currentFamilyId = SecurityUtils.currentFamilyId();
+        Activity activity = activityMapper.toEntity(request);
+        activity.setFamilyId(currentFamilyId);
+        Activity saved = activityRepository.save(activity);
+
+        log.info("Activity created: id={}, title={}, familyId={}", saved.getId(), saved.getTitle(), currentFamilyId);
         return activityMapper.toResponse(saved);
     }
 

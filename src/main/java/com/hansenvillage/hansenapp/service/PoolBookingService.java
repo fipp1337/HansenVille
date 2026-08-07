@@ -148,15 +148,10 @@ public class PoolBookingService {
             throw AppException.of(AppErrorCode.BOOKING_ALREADY_CANCELLED, id);
         }
 
-        if (!SecurityUtils.isSuperAdmin()) {
-            User bookingUser = userRepository.findById(booking.getUserId())
-                    .orElseThrow(() -> AppException.of(AppErrorCode.USER_NOT_FOUND, booking.getUserId()));
+        User bookingUser = userRepository.findById(booking.getUserId())
+                .orElseThrow(() -> AppException.of(AppErrorCode.USER_NOT_FOUND, booking.getUserId()));
 
-            UUID currentFamilyId = SecurityUtils.currentFamilyId();
-            if (!Objects.equals(bookingUser.getFamilyId(), currentFamilyId)) {
-                throw AppException.of(AppErrorCode.NOT_YOUR_BOOKING, bookingUser.getFamilyId());
-            }
-        }
+        SecurityUtils.assertOwnerOrSuperAdmin(bookingUser.getFamilyId());
 
         PoolSession session = poolSessionRepository.findById(booking.getPoolSessionId())
                 .orElseThrow(() -> AppException.of(AppErrorCode.POOL_SESSION_NOT_FOUND, booking.getPoolSessionId()));
@@ -170,7 +165,6 @@ public class PoolBookingService {
 
         if (session.getBookedCount() > 0) {
             session.setBookedCount(session.getBookedCount() - 1);
-            poolSessionRepository.save(session);
         }
 
         long hoursToSession = ChronoUnit.HOURS.between(now, sessionStart);
@@ -179,7 +173,7 @@ public class PoolBookingService {
                 : PoolBookingStatus.CANCELED_WITHOUT_RETURN;
 
         booking.setStatus(finalStatus);
-        poolBookingRepository.save(booking);
+
         log.info("Pool booking cancelled: booking={}, status={}", id, finalStatus);
     }
 
@@ -261,6 +255,53 @@ public class PoolBookingService {
                 .map(b -> poolBookingMapper.toResponse(b, usersMap.get(b.getUserId()), sessionsMap.get(b.getPoolSessionId())))
                 .sorted(Comparator.comparing(PoolBookingResponse::getSessionDate, Comparator.nullsLast(Comparator.reverseOrder())))
                 .toList();
+    }
+
+    @Transactional
+    public void cancelFamilyBookingsForSession(UUID sessionId) {
+        UUID currentFamilyId = SecurityUtils.currentFamilyId();
+
+        List<User> familyUsers = userRepository.findByFamilyId(currentFamilyId);
+        List<UUID> familyUserIds = familyUsers.stream().map(User::getId).toList();
+
+        List<PoolBooking> familyBookings = poolBookingRepository
+                .findByPoolSessionIdAndUserIdIn(sessionId, familyUserIds)
+                .stream()
+                .filter(b -> b.getStatus() == PoolBookingStatus.REGISTERED)
+                .toList();
+
+        if (familyBookings.isEmpty()) {
+            throw AppException.of(AppErrorCode.BOOKING_NOT_FOUND, sessionId);
+        }
+
+        PoolSession session = poolSessionRepository.findById(sessionId)
+                .orElseThrow(() -> AppException.of(AppErrorCode.POOL_SESSION_NOT_FOUND, sessionId));
+
+        LocalDateTime sessionStart = LocalDateTime.of(session.getSessionDate(), session.getStartTime());
+        LocalDateTime now = LocalDateTime.now();
+
+        if (now.isAfter(sessionStart)) {
+            throw AppException.of(AppErrorCode.SESSION_ALREADY_STARTED, sessionId);
+        }
+
+        long hoursToSession = ChronoUnit.HOURS.between(now, sessionStart);
+        PoolBookingStatus finalStatus = (hoursToSession >= 6)
+                ? PoolBookingStatus.CANCELED_WITH_RETURN
+                : PoolBookingStatus.CANCELED_WITHOUT_RETURN;
+
+        for (PoolBooking booking : familyBookings) {
+            booking.setStatus(finalStatus);
+        }
+
+        int cancelledCount = familyBookings.size();
+        if (session.getBookedCount() >= cancelledCount) {
+            session.setBookedCount(session.getBookedCount() - cancelledCount);
+        } else {
+            session.setBookedCount(0);
+        }
+
+        log.info("Family {} cancelled {} bookings for session {}, status={}",
+                currentFamilyId, cancelledCount, sessionId, finalStatus);
     }
 
     private List<PoolBookingResponse> filterAndMapFutureBookings(List<PoolBooking> bookings, Map<UUID, User> usersMap) {
