@@ -81,3 +81,8 @@ logging:
     org.springframework.orm.jpa: WARN
     org.springframework.security: WARN
     org.liquibase: INFO
+
+  servlet:
+    multipart:
+      max-file-size: 3MB
+      max-request-size: 3MB

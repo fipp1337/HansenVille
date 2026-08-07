@@ -72,6 +72,12 @@ public class CinemaSessionController {
         return new MessageResponse("Cinema session restored successfully");
     }
 
+    @PutMapping(value = "/{id}/posters", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void uploadPoster(@PathVariable UUID id, @RequestParam MultipartFile file) {
+        cinemaSessionService.uploadPoster(id, file);
+    }
+
     @GetMapping("/{id}/posters")
     public ResponseEntity<Resource> getPoster(@PathVariable UUID id) {
         Resource resource = cinemaSessionService.getPoster(id);

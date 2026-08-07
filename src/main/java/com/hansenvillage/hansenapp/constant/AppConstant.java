@@ -34,6 +34,7 @@ public class AppConstant {
         public final String FACILITIES_DIR = "uploads/facilities";
         public final String ACTIVITIES_DIR = "uploads/activities";
         public final String POSTERS_DIR = "uploads/posters";
+        public final String FAMILIES_DIR = "uploads/families";
 
         public final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 

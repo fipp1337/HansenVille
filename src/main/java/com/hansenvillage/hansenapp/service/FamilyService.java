@@ -1,5 +1,6 @@
 package com.hansenvillage.hansenapp.service;
 
+import com.hansenvillage.hansenapp.constant.AppConstant;
 import com.hansenvillage.hansenapp.dto.FamilyBookingHistoryResponse;
 import com.hansenvillage.hansenapp.dto.FamilyInfoResponse;
 import com.hansenvillage.hansenapp.dto.FamilyUpdateRequest;
@@ -18,9 +19,11 @@ import com.hansenvillage.hansenapp.repository.UserRepository;
 import com.hansenvillage.hansenapp.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -45,6 +48,8 @@ public class FamilyService {
     private final UserMapper userMapper;
     private final PoolBookingService poolBookingService;
     private final CinemaBookingService cinemaBookingService;
+    private final FileStorageService fileStorageService;
+    private final ImageValidationService imageValidationService;
 
     public int getFamilySize(UUID familyId) {
         return userRepository.countByFamilyId(familyId);
@@ -169,5 +174,43 @@ public class FamilyService {
         }
 
         family.setPassword(passwordEncoder.encode(request.getNewPassword()));
+    }
+
+    @Transactional
+    public void uploadProfilePicture(MultipartFile file) {
+        imageValidationService.validate(file);
+        UUID familyId = SecurityUtils.currentFamilyId();
+        Family family = findById(familyId);
+        family.setProfilePicture(fileStorageService.store(file, AppConstant.Upload.FAMILIES_DIR));
+        familyRepository.save(family);
+        log.info("Profile picture uploaded: family={}", familyId);
+    }
+
+    @Transactional(readOnly = true)
+    public Resource getProfilePicture(UUID familyId) {
+        Family family = findById(familyId);
+        return fileStorageService.loadAsResource(
+                AppConstant.Upload.FAMILIES_DIR,
+                family.getProfilePicture(),
+                AppErrorCode.PROFILE_PICTURE_NOT_FOUND);
+    }
+
+    @Transactional
+    public void updateProfilePicture(MultipartFile newFile) {
+        deleteProfilePicture();
+        uploadProfilePicture(newFile);
+    }
+
+    @Transactional
+    public void deleteProfilePicture() {
+        UUID familyId = SecurityUtils.currentFamilyId();
+        Family family = findById(familyId);
+        if (family.getProfilePicture() == null) {
+            throw AppException.of(AppErrorCode.PROFILE_PICTURE_NOT_FOUND, familyId);
+        }
+
+        fileStorageService.delete(AppConstant.Upload.FAMILIES_DIR, family.getProfilePicture());
+        family.setProfilePicture(null);
+        familyRepository.save(family);
     }
 }
