@@ -19,12 +19,10 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register/initiate")
-    public RegistrationInitiateResponse initiateRegistration(
+    public MessageResponse initiateRegistration(
             @Valid @RequestBody RegistrationInitiateRequest request) {
         authService.initiateRegistration(request);
-        RegistrationInitiateResponse response = new RegistrationInitiateResponse();
-        response.setMessage("Successful initiate registration");
-        return response;
+        return new MessageResponse("Successful initiate registration");
     }
 
     @PostMapping("/register/confirm")
@@ -45,42 +43,36 @@ public class AuthController {
     }
 
     @PostMapping("/password/forgot")
-    public ForgotPasswordInitiateResponse forgotPassword(
+    public MessageResponse forgotPassword(
             @Valid @RequestBody ForgotPasswordRequest request) {
         authService.initiateForgotPassword(request);
-        ForgotPasswordInitiateResponse response = new ForgotPasswordInitiateResponse();
-        response.setMessage("Successful initiate forgot password");
-        return response;
+        return new MessageResponse("Successful initiate forgot password");
     }
 
     @PostMapping("/password/reset")
-    public ResetPasswordResponse resetPassword(
+    public MessageResponse resetPassword(
             @Valid @RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request);
-        ResetPasswordResponse response = new ResetPasswordResponse();
-        response.setMessage("Successful reset password");
-        return response;
+        return new MessageResponse("Successful reset password");
     }
 
-    @PostMapping("/admin/login/initiate")
-    public AdminLoginInitiateResponse adminLoginInitiate(
+    @PostMapping("/admins/login/initiate")
+    public MessageResponse adminLoginInitiate(
             @Valid @RequestBody AdminLoginInitiateRequest request) {
         authService.initiateAdminLogin(request);
-        AdminLoginInitiateResponse response = new AdminLoginInitiateResponse();
-        response.setMessage("Admin Login Initiate successful");
-        return response;
+        return new MessageResponse("Admin Login Initiate successful");
     }
 
-    @PostMapping("/admin/login/confirm")
+    @PostMapping("/admins/login/confirm")
     public LoginResponse adminLoginConfirm(
             @Valid @RequestBody AdminLoginConfirmRequest request) {
         return authService.confirmAdminLogin(request);
     }
 
     @PostMapping("/resend-code")
-    public String resendCode(
+    public MessageResponse resendCode(
             @Valid @RequestBody ResendCodeRequest request) {
         authService.resendOtp(request.email(), request.type());
-        return "Verification code has been resent";
+        return new MessageResponse("Verification code has been resent");
     }
 }

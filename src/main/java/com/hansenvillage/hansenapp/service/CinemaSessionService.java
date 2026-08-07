@@ -39,6 +39,7 @@ public class CinemaSessionService {
     private final CinemaSeatMapper cinemaSeatMapper;
     private final CinemaBookingRepository cinemaBookingRepository;
     private final FileStorageService fileStorageService;
+    private final ImageValidationService imageValidationService;
 
     @Transactional
     public List<CinemaSession> create(CinemaPublishWeekScheduleRequest request) {
@@ -50,8 +51,11 @@ public class CinemaSessionService {
 
     @Transactional
     public void uploadPoster(UUID sessionId, MultipartFile file) {
+        imageValidationService.validate(file);
         CinemaSession session = findSession(sessionId);
-        session.setPosterImage(fileStorageService.store(file, AppConstant.Upload.POSTERS_DIR));
+        String fileName = fileStorageService.store(file, AppConstant.Upload.POSTERS_DIR);
+        fileStorageService.deleteQuietly(AppConstant.Upload.POSTERS_DIR, session.getPosterImage());
+        session.setPosterImage(fileName);
         cinemaSessionRepository.save(session);
         log.info("Cinema poster uploaded: session={}", sessionId);
     }
@@ -68,7 +72,6 @@ public class CinemaSessionService {
 
     @Transactional
     public void updatePoster(UUID sessionId, MultipartFile newFile) {
-        deletePoster(sessionId);
         uploadPoster(sessionId, newFile);
     }
 
@@ -79,7 +82,7 @@ public class CinemaSessionService {
             throw AppException.of(AppErrorCode.POSTER_NOT_FOUND, sessionId);
         }
 
-        fileStorageService.delete(AppConstant.Upload.POSTERS_DIR, session.getPosterImage());
+        fileStorageService.deleteQuietly(AppConstant.Upload.POSTERS_DIR, session.getPosterImage());
         session.setPosterImage(null);
         cinemaSessionRepository.save(session);
     }
@@ -137,7 +140,7 @@ public class CinemaSessionService {
     }
 
     @Transactional
-    public void cancel(UUID id) {
+    public void cancelSession(UUID id) {
         CinemaSession session = cinemaSessionRepository.findById(id)
                 .orElseThrow(() -> AppException.of(AppErrorCode.CINEMA_SESSION_NOT_FOUND));
 
@@ -152,7 +155,7 @@ public class CinemaSessionService {
     }
 
     @Transactional
-    public void uncancel(UUID id) {
+    public void uncancelSession(UUID id) {
         CinemaSession session = cinemaSessionRepository.findById(id)
                 .orElseThrow(() -> AppException.of(AppErrorCode.CINEMA_SESSION_NOT_FOUND));
 

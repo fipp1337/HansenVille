@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/family")
+@RequestMapping("/api/families")
 @RequiredArgsConstructor
 public class FamilyController {
     private final FamilyMapper familyMapper;
@@ -73,8 +73,10 @@ public class FamilyController {
     }
 
     @PutMapping("/me")
-    public Family updateMyFamily(@RequestBody @Valid FamilyUpdateRequest request) {
-        return familyService.updateFamilyInfoByJwt(request);
+    public FamilyUpdateResponse updateMyFamily(
+            @Valid @RequestBody FamilyUpdateRequest request) {
+        Family updated = familyService.updateFamilyInfoByJwt(request);
+        return familyMapper.toUpdateResponse(updated);
     }
 
     @DeleteMapping("/me")

@@ -14,35 +14,34 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/admins")
 @RequiredArgsConstructor
+//@PreAuthorize("hasAnyRole('SUPER_ADMIN')")
 public class AdminController {
 
     private final AdminService adminService;
     private final AuthService authService;
 
     @GetMapping("/families/search")
-//    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     public List<FamilyInfoResponse> findFamiliesByAddress(@RequestParam String address) {
         return adminService.findFamiliesByAddress(address);
     }
 
     @DeleteMapping("/families")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-//    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public void deleteFamilyByAddress(@RequestParam String address) {
         adminService.deleteFamilyByAddress(address);
     }
 
     @PostMapping
-    // @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public String createAdmin(@Valid @RequestBody AdminRegistrationRequest request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public MessageResponse createAdmin(
+            @Valid @RequestBody AdminRegistrationRequest request) {
         adminService.addAdmin(request);
-        return "Admin registered successfully";
+        return new MessageResponse("Admin registered successfully");
     }
 
     @PutMapping("/{id}")
-    // @PreAuthorize("hasRole('SUPER_ADMIN')")
     public AdminUpdateResponse updateAdmin(
             @PathVariable UUID id,
             @Valid @RequestBody AdminUpdateRequest request) {
@@ -51,22 +50,20 @@ public class AdminController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    // @PreAuthorize("hasRole('SUPER_ADMIN')")
     public void deleteAdmin(@PathVariable UUID id) {
         adminService.deleteAdmin(id);
     }
 
     @GetMapping
-//     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public GroupedAdminsResponse getAllAdmins() {
         return adminService.getAllAdminsGrouped();
     }
 
     @PostMapping("/family-registration")
     @ResponseStatus(HttpStatus.CREATED)
-    //  @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public String registerFamilyByAdmin(@Valid @RequestBody FamilyAdminRegistrationRequest request) {
+    public MessageResponse registerFamilyByAdmin(
+            @Valid @RequestBody FamilyAdminRegistrationRequest request) {
         authService.registrationFamilyByAdmin(request);
-        return "Family registered successfully";
+        return new MessageResponse("Family registered successfully");
     }
 }
