@@ -9,9 +9,12 @@ import com.hansenvillage.hansenapp.service.FamilyService;
 import com.hansenvillage.hansenapp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -94,4 +97,26 @@ public class FamilyController {
     public FamilyBookingHistoryResponse getMyBookingHistory() {
         return familyService.getFamilyBookingHistoryByJwt();
     }
+
+    @PostMapping(value = "/me/picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public void uploadProfilePicture(@RequestParam("file") MultipartFile file) {
+        familyService.uploadProfilePicture(file);
+    }
+
+    @GetMapping(value = "/{id}/picture", produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
+    public Resource getProfilePicture(@PathVariable UUID id) {
+        return familyService.getProfilePicture(id);
+    }
+
+    @PostMapping("/me/picture")
+    public void updateProfilePicture(@RequestParam MultipartFile file) {
+        familyService.updateProfilePicture(file);
+    }
+
+    @DeleteMapping("/me/picture")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteProfilePicture() {
+        familyService.deleteProfilePicture();
+    }
+
 }

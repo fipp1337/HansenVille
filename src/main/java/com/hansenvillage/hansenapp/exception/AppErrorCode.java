@@ -50,6 +50,7 @@ public enum AppErrorCode {
     SEAT_ALREADY_BOOKED(HttpStatus.BAD_REQUEST, "Seat has been booked: %s"),
     TOO_MANY_SEATS(HttpStatus.CONFLICT, "You can't book more seats, than there are members in your family"),
     POSTER_NOT_FOUND(HttpStatus.NOT_FOUND, "Poster not found for session: %s"),
+    PROFILE_PICTURE_NOT_FOUND(HttpStatus.NOT_FOUND, "Profile picture not found"),
 
     // Shared booking
     BOOKING_NOT_FOUND(HttpStatus.NOT_FOUND, "Booking not found"),

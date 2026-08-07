@@ -31,5 +31,7 @@ public class Family {
 
     private String address;
 
+    private String profilePicture;
+
     private int memberCount;
 }
