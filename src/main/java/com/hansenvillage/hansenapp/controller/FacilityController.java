@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,32 +26,35 @@ public class FacilityController {
         return facilityService.getAllActiveFacilities();
     }
 
-    @GetMapping(value = "/image/{id}", produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
-    public Resource getFacilityImage(@PathVariable UUID id) {
-        return facilityService.getImage(id);
-    }
-
-    @PostMapping("/image/{id}")
+    @PostMapping(value = "/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
-    public void uploadFacilityImage(
+    public void uploadImage(
             @PathVariable UUID id,
             @RequestParam("file") MultipartFile file) {
         facilityService.uploadImage(id, file);
     }
 
-    @PutMapping("/image/{id}")
+    @GetMapping("/images/{id}")
+    public ResponseEntity<Resource> getFacilityImage(@PathVariable UUID id) {
+        Resource resource = facilityService.getImage(id);
+        MediaType mediaType = MediaTypeFactory.getMediaType(resource)
+                .orElse(MediaType.APPLICATION_OCTET_STREAM);
+
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .body(resource);
+    }
+
+    @PutMapping(value = "/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     public void updateFacilityImage(
             @PathVariable UUID id,
             @RequestParam("file") MultipartFile file) {
         facilityService.updateImage(id, file);
     }
 
-    @DeleteMapping("/image/{id}")
+    @DeleteMapping("/images/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     public void deleteFacilityImage(@PathVariable UUID id) {
         facilityService.deleteImage(id);
     }

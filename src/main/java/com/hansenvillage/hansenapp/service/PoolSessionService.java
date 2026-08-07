@@ -76,7 +76,7 @@ public class PoolSessionService {
     }
 
     @Transactional
-    public void cancel(UUID id) {
+    public void cancelSession(UUID id) {
         PoolSession session = findById(id);
         if (session.getStatus() == SessionStatus.CANCELLED) {
             return;
@@ -97,7 +97,7 @@ public class PoolSessionService {
 
     @Transactional
     public void cancelSessionsForDay(LocalDate date) {
-        poolSessionRepository.findIdsByDate(date).forEach(this::cancel);
+        poolSessionRepository.findIdsByDate(date).forEach(this::cancelSession);
         log.info("Pool sessions cancelled for day: {}", date);
     }
 

@@ -26,6 +26,7 @@ public class FacilityService {
     private final FacilityRepository facilityRepository;
     private final FacilityMapper facilityMapper;
     private final FileStorageService fileStorageService;
+    private final ImageValidationService imageValidationService;
 
     @Transactional(readOnly = true)
     public List<FacilityResponse> getAllActiveFacilities() {
@@ -36,8 +37,11 @@ public class FacilityService {
 
     @Transactional
     public void uploadImage(UUID facilityId, MultipartFile file) {
+        imageValidationService.validate(file);
         Facility facility = findFacility(facilityId);
-        facility.setImage(fileStorageService.store(file, AppConstant.Upload.FACILITIES_DIR));
+        String fileName = fileStorageService.store(file, AppConstant.Upload.FACILITIES_DIR);
+        fileStorageService.deleteQuietly(AppConstant.Upload.FACILITIES_DIR, facility.getImage());
+        facility.setImage(fileName);
         facilityRepository.save(facility);
         log.info("Facility image uploaded: {}", facilityId);
     }
@@ -54,7 +58,6 @@ public class FacilityService {
 
     @Transactional
     public void updateImage(UUID facilityId, MultipartFile newFile) {
-        deleteImage(facilityId);
         uploadImage(facilityId, newFile);
     }
 
@@ -65,7 +68,7 @@ public class FacilityService {
             throw AppException.of(AppErrorCode.FACILITY_IMAGE_NOT_FOUND);
         }
 
-        fileStorageService.delete(AppConstant.Upload.FACILITIES_DIR, facility.getImage());
+        fileStorageService.deleteQuietly(AppConstant.Upload.FACILITIES_DIR, facility.getImage());
         facility.setImage(null);
         facilityRepository.save(facility);
         log.info("Facility image deleted: {}", facilityId);
