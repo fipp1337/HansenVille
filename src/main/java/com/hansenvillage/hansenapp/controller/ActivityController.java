@@ -2,6 +2,7 @@ package com.hansenvillage.hansenapp.controller;
 
 import com.hansenvillage.hansenapp.dto.ActivityRequest;
 import com.hansenvillage.hansenapp.dto.ActivityResponse;
+import com.hansenvillage.hansenapp.entity.ActivityType;
 import com.hansenvillage.hansenapp.service.ActivityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +25,13 @@ public class ActivityController {
     private final ActivityService activityService;
 
     @GetMapping
-    public List<ActivityResponse> getAllActivities() {
-        return activityService.getAllActivities();
+    public List<ActivityResponse> getActivities(@RequestParam(required = false) ActivityType type) {
+        return activityService.getActivities(type);
+    }
+
+    @GetMapping("/me")
+    public List<ActivityResponse> getMyActivities() {
+        return activityService.getMyActivities();
     }
 
     @PostMapping

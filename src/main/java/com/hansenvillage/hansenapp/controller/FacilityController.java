@@ -28,6 +28,7 @@ public class FacilityController {
 
     @PostMapping(value = "/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void uploadImage(
             @PathVariable UUID id,
             @RequestParam("file") MultipartFile file) {
@@ -47,6 +48,7 @@ public class FacilityController {
 
     @PutMapping(value = "/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void updateFacilityImage(
             @PathVariable UUID id,
             @RequestParam("file") MultipartFile file) {
@@ -55,6 +57,7 @@ public class FacilityController {
 
     @DeleteMapping("/images/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void deleteFacilityImage(@PathVariable UUID id) {
         facilityService.deleteImage(id);
     }
