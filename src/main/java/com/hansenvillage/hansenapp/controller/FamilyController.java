@@ -98,22 +98,22 @@ public class FamilyController {
         return familyService.getFamilyBookingHistoryByJwt();
     }
 
-    @PostMapping(value = "/me/picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/me/pictures", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void uploadProfilePicture(@RequestParam("file") MultipartFile file) {
         familyService.uploadProfilePicture(file);
     }
 
-    @GetMapping(value = "/{id}/picture", produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
+    @GetMapping(value = "/{id}/pictures", produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
     public Resource getProfilePicture(@PathVariable UUID id) {
         return familyService.getProfilePicture(id);
     }
 
-    @PostMapping("/me/picture")
+    @PostMapping("/me/pictures")
     public void updateProfilePicture(@RequestParam MultipartFile file) {
         familyService.updateProfilePicture(file);
     }
 
-    @DeleteMapping("/me/picture")
+    @DeleteMapping("/me/pictures")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProfilePicture() {
         familyService.deleteProfilePicture();
