@@ -64,7 +64,10 @@ public enum AppErrorCode {
     ACTIVITY_NOT_FOUND(HttpStatus.NOT_FOUND, "Activity not found: %s"),
     ACTIVITY_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "Activity image not found"),
     FILE_UPLOAD_FAILED(HttpStatus.CONFLICT, "File upload failed"),
-    FILE_DELETE_FAILED(HttpStatus.CONFLICT, "File delete failed");
+    FILE_DELETE_FAILED(HttpStatus.CONFLICT, "File delete failed"),
+    FILE_TOO_LARGE(HttpStatus.PAYLOAD_TOO_LARGE, "File too large"),
+    INVALID_FILE_FORMAT(HttpStatus.CONFLICT, "Invalid file format"),
+    FILE_PROCESSING_FAILED(HttpStatus.CONFLICT, "File processing failed");
 
     private final HttpStatus status;
     private final String message;

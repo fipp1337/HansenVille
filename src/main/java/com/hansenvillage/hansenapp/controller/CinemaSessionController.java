@@ -4,6 +4,7 @@ import com.hansenvillage.hansenapp.dto.CinemaPublishWeekScheduleRequest;
 import com.hansenvillage.hansenapp.dto.CinemaSessionRequest;
 import com.hansenvillage.hansenapp.dto.CinemaSessionResponse;
 import com.hansenvillage.hansenapp.dto.CinemaSessionWithSeatsResponse;
+import com.hansenvillage.hansenapp.dto.MessageResponse;
 import com.hansenvillage.hansenapp.mapper.CinemaSessionMapper;
 import com.hansenvillage.hansenapp.service.CinemaSessionService;
 import jakarta.validation.Valid;
@@ -12,18 +13,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -31,18 +23,12 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/cinema/session")
+@RequestMapping("/api/cinema/sessions")
 @RequiredArgsConstructor
 public class CinemaSessionController {
 
     private final CinemaSessionService cinemaSessionService;
     private final CinemaSessionMapper cinemaSessionMapper;
-
-    @GetMapping("/week")
-    public List<CinemaSessionResponse> getWeekSchedule(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStart) {
-        return cinemaSessionMapper.toResponseList(cinemaSessionService.getWeekSchedule(weekStart));
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -51,34 +37,15 @@ public class CinemaSessionController {
         return cinemaSessionMapper.toResponseList(cinemaSessionService.create(request));
     }
 
-    @PostMapping(value = "/{id}/poster", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
-    public void uploadPoster(@PathVariable UUID id, @RequestParam MultipartFile file) {
-        cinemaSessionService.uploadPoster(id, file);
-    }
-
-    @GetMapping("/{id}/poster")
-    public Resource getPoster(@PathVariable UUID id) {
-        return cinemaSessionService.getPoster(id);
-    }
-
-    @PutMapping("/{id}/poster")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-//    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
-    public void updatePoster(@PathVariable UUID id, @RequestParam MultipartFile newFile) {
-        cinemaSessionService.updatePoster(id, newFile);
-    }
-
-    @DeleteMapping("/{id}/poster")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-//     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
-    public void deletePoster(@PathVariable UUID id) {
-        cinemaSessionService.deletePoster(id);
-    }
-
     @GetMapping("/{id}")
     public CinemaSessionWithSeatsResponse getById(@PathVariable UUID id) {
         return cinemaSessionService.findById(id);
+    }
+
+    @GetMapping
+    public List<CinemaSessionResponse> getWeekSchedule(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStart) {
+        return cinemaSessionMapper.toResponseList(cinemaSessionService.getWeekSchedule(weekStart));
     }
 
     @PutMapping("/{id}")
@@ -87,24 +54,44 @@ public class CinemaSessionController {
         return cinemaSessionMapper.toResponse(cinemaSessionService.update(id, request));
     }
 
-    @PutMapping("/{id}/cancel")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-//    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
-    public void cancel(@PathVariable UUID id) {
-        cinemaSessionService.cancel(id);
-    }
-
-    @PutMapping("/{id}/uncancel")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-//    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
-    public void uncancel(@PathVariable UUID id) {
-        cinemaSessionService.uncancel(id);
-    }
-
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-//    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void delete(@PathVariable UUID id) {
         cinemaSessionService.delete(id);
+    }
+
+    @PostMapping("/{id}/cancel")
+    public MessageResponse cancelSession(@PathVariable UUID id) {
+        cinemaSessionService.cancelSession(id);
+        return new MessageResponse("Cinema session cancelled successfully");
+    }
+
+    @PostMapping("/{id}/uncancel")
+    public MessageResponse uncancelSession(@PathVariable UUID id) {
+        cinemaSessionService.uncancelSession(id);
+        return new MessageResponse("Cinema session restored successfully");
+    }
+
+    @GetMapping("/{id}/posters")
+    public ResponseEntity<Resource> getPoster(@PathVariable UUID id) {
+        Resource resource = cinemaSessionService.getPoster(id);
+        MediaType mediaType = MediaTypeFactory.getMediaType(resource)
+                .orElse(MediaType.APPLICATION_OCTET_STREAM);
+
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .body(resource);
+    }
+
+    @PutMapping(value = "/{id}/posters", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updatePoster(@PathVariable UUID id, @RequestParam MultipartFile file) {
+        cinemaSessionService.updatePoster(id, file);
+    }
+
+    @DeleteMapping("/{id}/posters")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePoster(@PathVariable UUID id) {
+        cinemaSessionService.deletePoster(id);
     }
 }

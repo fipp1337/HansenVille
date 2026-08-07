@@ -6,7 +6,6 @@ import com.hansenvillage.hansenapp.service.PoolBookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/pool/booking")
+@RequestMapping("/api/pool/bookings")
 @RequiredArgsConstructor
 public class PoolBookingController {
 
@@ -43,12 +42,12 @@ public class PoolBookingController {
         return poolBookingService.getBookingDetailsBySessionId(id);
     }
 
-    @GetMapping("/family/{familyId}")
+    @GetMapping("/families/{familyId}")
     public List<PoolBookingResponse> getBookingsByFamily(@PathVariable UUID familyId) {
         return poolBookingService.getBookingsByFamilyId(familyId);
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/users/{userId}")
     public List<PoolBookingResponse> getBookingsByUser(@PathVariable UUID userId) {
         return poolBookingService.getBookingsByUserId(userId);
     }

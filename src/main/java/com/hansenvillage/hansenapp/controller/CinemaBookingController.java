@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/cinema/booking")
+@RequestMapping("/api/cinema/bookings")
 @RequiredArgsConstructor
 public class CinemaBookingController {
 
@@ -39,12 +39,12 @@ public class CinemaBookingController {
         return cinemaBookingMapper.toResponse(cinemaBookingService.getBookingById(id));
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/users/{userId}")
     public List<CinemaBookingResponse> getBookingsByUser(@PathVariable UUID userId) {
         return cinemaBookingMapper.toResponseList(cinemaBookingService.getAllUpcomingBookingsForUser(userId));
     }
 
-    @GetMapping("/session/{sessionId}")
+    @GetMapping("/sessions/{sessionId}")
     //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public List<CinemaBookingResponse> getBookingsBySessionId(@PathVariable UUID sessionId) {
         return cinemaBookingMapper.toResponseList(cinemaBookingService.getBookingsBySessionId(sessionId));
@@ -56,7 +56,7 @@ public class CinemaBookingController {
         cinemaBookingService.deleteBooking(id);
     }
 
-    @GetMapping ("/history/family/{id}")
+    @GetMapping ("/history/families/{id}")
     public List<CinemaBookingResponse> getBookingHistory(@PathVariable UUID id) {
         return cinemaBookingService.getCinemaBookingHistory(id);
     }
