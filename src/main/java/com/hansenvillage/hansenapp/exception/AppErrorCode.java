@@ -27,6 +27,8 @@ public enum AppErrorCode {
     SESSION_EXPIRED(HttpStatus.CONFLICT, "Session expired"),
     RESET_SESSION_EXPIRED(HttpStatus.CONFLICT, "Reset session expired"),
     OTP_TOO_MANY_REQUESTS(HttpStatus.CONFLICT, "Too many one-time password requests"),
+    CONFIRM_PASSWORD_REQUIRED(HttpStatus.CONFLICT, "Confirm password required"),
+
     // Family / users / admin
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found: %s"),
     FAMILY_NOT_FOUND(HttpStatus.NOT_FOUND, "Family not found: %s"),
