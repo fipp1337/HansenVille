@@ -32,6 +32,8 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.UUID;
 
+import static org.springframework.util.StringUtils.hasText;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -50,6 +52,7 @@ public class FamilyService {
     private final CinemaBookingService cinemaBookingService;
     private final FileStorageService fileStorageService;
     private final ImageValidationService imageValidationService;
+    private final FamilyPasswordService familyPasswordService;
 
     public int getFamilySize(UUID familyId) {
         return userRepository.countByFamilyId(familyId);
@@ -148,32 +151,22 @@ public class FamilyService {
     }
 
     private void applyPasswordUpdateIfRequested(Family family, FamilyUpdateRequest request) {
-        boolean passwordUpdateAttempted =
-                (request.getOldPassword() != null && !request.getOldPassword().isBlank())
-                        || (request.getNewPassword() != null && !request.getNewPassword().isBlank())
-                        || (request.getConfirmNewPassword() != null && !request.getConfirmNewPassword().isBlank());
-
-        if (!passwordUpdateAttempted) {
+        if (!hasPasswordUpdate(request)) {
             return;
         }
 
-        if (request.getOldPassword() == null || request.getOldPassword().isBlank()) {
-            throw AppException.of(AppErrorCode.OLD_PASSWORD_REQUIRED);
-        }
-        if (request.getNewPassword() == null || request.getNewPassword().isBlank()) {
-            throw AppException.of(AppErrorCode.NEW_PASSWORD_REQUIRED);
-        }
-        if (request.getNewPassword().equals(request.getOldPassword())) {
-            throw AppException.of(AppErrorCode.NEW_PASSWORD_MATCH_WITH_OLD);
-        }
-        if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
-            throw AppException.of(AppErrorCode.PASSWORDS_DO_NOT_MATCH);
-        }
-        if (!passwordEncoder.matches(request.getOldPassword(), family.getPassword())) {
-            throw AppException.of(AppErrorCode.INVALID_OLD_PASSWORD);
-        }
+        familyPasswordService.updatePassword(
+                family,
+                request.getOldPassword(),
+                request.getNewPassword(),
+                request.getConfirmNewPassword()
+        );
+    }
 
-        family.setPassword(passwordEncoder.encode(request.getNewPassword()));
+    private boolean hasPasswordUpdate(FamilyUpdateRequest request) {
+        return hasText(request.getOldPassword())
+                || hasText(request.getNewPassword())
+                || hasText(request.getConfirmNewPassword());
     }
 
     @Transactional
