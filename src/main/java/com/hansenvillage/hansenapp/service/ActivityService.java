@@ -11,7 +11,6 @@ import com.hansenvillage.hansenapp.repository.ActivityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +26,7 @@ public class ActivityService {
     private final ActivityRepository activityRepository;
     private final ActivityMapper activityMapper;
     private final FileStorageService fileStorageService;
+    private final ImageValidationService imageValidationService;
 
     @Transactional(readOnly = true)
     public List<ActivityResponse> getAllActivities() {
@@ -60,11 +60,13 @@ public class ActivityService {
 
     @Transactional
     public void uploadImage(UUID id, MultipartFile file) {
+        imageValidationService.validate(file);
         Activity activity = findActivity(id);
         String fileName = fileStorageService.store(file, AppConstant.Upload.ACTIVITIES_DIR);
         fileStorageService.deleteQuietly(AppConstant.Upload.ACTIVITIES_DIR, activity.getImage());
         activity.setImage(fileName);
         activityRepository.save(activity);
+        log.info("Activity image uploaded: id={}", id);
     }
 
     @Transactional(readOnly = true)
