@@ -70,7 +70,10 @@ public enum AppErrorCode {
     FILE_DELETE_FAILED(HttpStatus.CONFLICT, "File delete failed"),
     FILE_TOO_LARGE(HttpStatus.PAYLOAD_TOO_LARGE, "File too large"),
     INVALID_FILE_FORMAT(HttpStatus.CONFLICT, "Invalid file format"),
-    FILE_PROCESSING_FAILED(HttpStatus.CONFLICT, "File processing failed");
+    FILE_PROCESSING_FAILED(HttpStatus.CONFLICT, "File processing failed"),
+    INVALID_REQUEST(HttpStatus.BAD_REQUEST, "Invalid request"),
+    MISSING_ACTIVITY_DATE(HttpStatus.NOT_FOUND, "Missing activity date"),
+    MISSING_ACTIVITY_DAYS(HttpStatus.NOT_FOUND, "Missing activity days");
 
     private final HttpStatus status;
     private final String message;

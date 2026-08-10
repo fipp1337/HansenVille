@@ -29,14 +29,15 @@ public class ActivityService {
     private final ActivityMapper activityMapper;
     private final FileStorageService fileStorageService;
     private final ImageValidationService imageValidationService;
+    private final PhoneService phoneService;
 
     @Transactional(readOnly = true)
-    public List<ActivityResponse> getActivities(ActivityType type) {
+    public List<ActivityResponse> getAllActivities(ActivityType type) {
         List<Activity> activities;
         if (type != null) {
-            activities = activityRepository.findByType(type);
+            activities = activityRepository.findAllByTypeOrderByDateTimeAsc(type);
         } else {
-            activities = activityRepository.findAll();
+            activities = activityRepository.findAllByOrderByDateTimeAsc();
         }
 
         return activities.stream()
@@ -58,6 +59,9 @@ public class ActivityService {
         UUID currentFamilyId = SecurityUtils.currentFamilyId();
         Activity activity = activityMapper.toEntity(request);
         activity.setFamilyId(currentFamilyId);
+
+        validateAndSanitizeActivity(activity);
+        phoneService.validateAndFormatPhone(request.getPhoneNumber());
         Activity saved = activityRepository.save(activity);
 
         log.info("Activity created: id={}, title={}, familyId={}", saved.getId(), saved.getTitle(), currentFamilyId);
@@ -66,9 +70,12 @@ public class ActivityService {
 
     @Transactional
     public ActivityResponse updateActivity(UUID id, ActivityRequest request) {
+        UUID currentFamilyId = SecurityUtils.currentFamilyId();
+        SecurityUtils.assertOwnerOrSuperAdmin(currentFamilyId);
         Activity activity = findActivity(id);
-        activity.setTitle(request.getTitle());
-        activity.setDescription(request.getDescription());
+        activityMapper.updateEntity(request, activity);
+        validateAndSanitizeActivity(activity);
+        phoneService.validateAndFormatPhone(request.getPhoneNumber());
         return activityMapper.toResponse(activityRepository.save(activity));
     }
 
@@ -121,5 +128,24 @@ public class ActivityService {
     private Activity findActivity(UUID id) {
         return activityRepository.findById(id)
                 .orElseThrow(() -> AppException.of(AppErrorCode.ACTIVITY_NOT_FOUND, id));
+    }
+
+    private void validateAndSanitizeActivity(Activity activity) {
+        if (activity.getType() == null) {
+            throw AppException.of(AppErrorCode.INVALID_REQUEST);
+        }
+
+        if (activity.getType() == ActivityType.SINGLE) {
+            if (activity.getDateTime() == null) {
+                throw AppException.of(AppErrorCode.MISSING_ACTIVITY_DATE);
+            }
+            activity.setDayOfWeek(null);
+
+        } else if (activity.getType() == ActivityType.REGULAR) {
+            if (activity.getDayOfWeek() == null || activity.getDayOfWeek().isEmpty()) {
+                throw AppException.of(AppErrorCode.MISSING_ACTIVITY_DAYS);
+            }
+            activity.setDateTime(null);
+        }
     }
 }
