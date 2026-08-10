@@ -1,5 +1,6 @@
 package com.hansenvillage.hansenapp.dto;
 
+import com.hansenvillage.hansenapp.entity.ActivityType;
 import lombok.Data;
 import java.util.UUID;
 
@@ -9,4 +10,5 @@ public class ActivityResponse {
     private String title;
     private String description;
     private String imageUrl;
+    private ActivityType type;
 }

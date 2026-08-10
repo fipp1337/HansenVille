@@ -36,10 +36,10 @@ public class PoolBookingController {
         return poolBookingService.getBookingById(id);
     }
 
-    @GetMapping("/sessions/{id}")
+    @GetMapping("/sessions/{sessionId}")
 //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'POOL_MANAGER')")
-    public List<PoolBookingResponse> getBookingsBySession(@PathVariable UUID id) {
-        return poolBookingService.getBookingDetailsBySessionId(id);
+    public List<PoolBookingResponse> getBookingsBySession(@PathVariable UUID sessionId) {
+        return poolBookingService.getBookingDetailsBySessionId(sessionId);
     }
 
     @GetMapping("/families/{familyId}")
@@ -61,5 +61,11 @@ public class PoolBookingController {
     @GetMapping("/me/active")
     public List<PoolBookingResponse> getFamilyActivePoolBookings() {
         return poolBookingService.getActiveBookingsByJwt();
+    }
+
+    @DeleteMapping("/sessions/{sessionId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancelFamilyBookingsForSession(@PathVariable UUID sessionId) {
+        poolBookingService.cancelFamilyBookingsForSession(sessionId);
     }
 }

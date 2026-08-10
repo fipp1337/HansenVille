@@ -26,6 +26,8 @@ public interface PoolBookingRepository extends JpaRepository<PoolBooking, UUID> 
 
     List<PoolBooking> findByUserIdAndStatus(UUID userId, PoolBookingStatus status);
 
+    List<PoolBooking> findByPoolSessionIdAndUserIdIn(UUID poolSessionId, List<UUID> userIds);
+
     @Modifying
     @Query("DELETE FROM PoolBooking b WHERE b.poolSessionId = :poolSessionId")
     void deleteByPoolSessionId(@Param("poolSessionId") UUID poolSessionId);
