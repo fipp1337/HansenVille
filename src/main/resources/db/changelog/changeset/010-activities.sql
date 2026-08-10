@@ -7,5 +7,9 @@ CREATE TABLE activities (
     description VARCHAR(150) NOT NULL,
     image VARCHAR(255),
     type VARCHAR(20),
-    family_id UUID NOT NULL REFERENCES families (id)
+    family_id UUID NOT NULL REFERENCES families (id),
+    phone_number VARCHAR(25) NOT NULL,
+    day_of_week smallint[],
+    date_time TIMESTAMP,
+    location VARCHAR(100)
 );

@@ -26,8 +26,9 @@ public class ActivityController {
 
     @GetMapping
     public List<ActivityResponse> getActivities(@RequestParam(required = false) ActivityType type) {
-        return activityService.getActivities(type);
+        return activityService.getAllActivities(type);
     }
+
 
     @GetMapping("/me")
     public List<ActivityResponse> getMyActivities() {
