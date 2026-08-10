@@ -44,4 +44,6 @@ public interface CinemaBookingRepository extends JpaRepository<CinemaBooking, UU
     @Modifying
     @Query("DELETE FROM CinemaBooking b WHERE b.userId IN :userIds")
     void deleteByUserIdIn(@Param("userIds") List<UUID> userIds);
+
+    List<CinemaBooking> findByCinemaSessionIdAndUserIdIn(UUID sessionId, List<UUID> userIds);
 }
