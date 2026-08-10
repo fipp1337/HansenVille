@@ -56,17 +56,20 @@ public class CinemaSessionController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void delete(@PathVariable UUID id) {
         cinemaSessionService.delete(id);
     }
 
     @PostMapping("/{id}/cancel")
+    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public MessageResponse cancelSession(@PathVariable UUID id) {
         cinemaSessionService.cancelSession(id);
         return new MessageResponse("Cinema session cancelled successfully");
     }
 
     @PostMapping("/{id}/uncancel")
+    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public MessageResponse uncancelSession(@PathVariable UUID id) {
         cinemaSessionService.uncancelSession(id);
         return new MessageResponse("Cinema session restored successfully");
@@ -74,6 +77,7 @@ public class CinemaSessionController {
 
     @PostMapping(value = "/{id}/posters", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void uploadPoster(@PathVariable UUID id, @RequestParam MultipartFile file) {
         cinemaSessionService.uploadPoster(id, file);
     }
@@ -91,12 +95,14 @@ public class CinemaSessionController {
 
     @PutMapping(value = "/{id}/posters", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void updatePoster(@PathVariable UUID id, @RequestParam MultipartFile file) {
         cinemaSessionService.updatePoster(id, file);
     }
 
     @DeleteMapping("/{id}/posters")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void deletePoster(@PathVariable UUID id) {
         cinemaSessionService.deletePoster(id);
     }

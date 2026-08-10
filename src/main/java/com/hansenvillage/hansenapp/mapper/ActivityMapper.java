@@ -13,9 +13,7 @@ public interface ActivityMapper {
     @Mapping(target = "image", ignore = true)
     Activity toEntity(ActivityRequest request);
 
-    @Mapping(
-            target = "imageUrl",
-            expression = "java(activity.getImage() != null ? \"/api/activities/image/\" + activity.getId() : null)"
-    )
+    @Mapping(target = "imageUrl", expression = "java(activity.getImage() != null ? \"/api/activities/image/\" + activity.getId() : null)")
+    @Mapping(target = "type", source = "type")
     ActivityResponse toResponse(Activity activity);
 }

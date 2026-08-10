@@ -11,11 +11,7 @@ import com.hansenvillage.hansenapp.exception.AppErrorCode;
 import com.hansenvillage.hansenapp.exception.AppException;
 import com.hansenvillage.hansenapp.mapper.FamilyMapper;
 import com.hansenvillage.hansenapp.mapper.UserMapper;
-import com.hansenvillage.hansenapp.repository.CinemaBookingRepository;
-import com.hansenvillage.hansenapp.repository.FamilyRepository;
-import com.hansenvillage.hansenapp.repository.FamilyRoleRepository;
-import com.hansenvillage.hansenapp.repository.PoolBookingRepository;
-import com.hansenvillage.hansenapp.repository.UserRepository;
+import com.hansenvillage.hansenapp.repository.*;
 import com.hansenvillage.hansenapp.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +37,6 @@ public class FamilyService {
 
     private final FamilyRepository familyRepository;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final PhoneService phoneService;
     private final PoolBookingRepository poolBookingRepository;
     private final CinemaBookingRepository cinemaBookingRepository;

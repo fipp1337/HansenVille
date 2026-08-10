@@ -55,7 +55,7 @@ public enum AppErrorCode {
     PROFILE_PICTURE_NOT_FOUND(HttpStatus.NOT_FOUND, "Profile picture not found"),
 
     // Shared booking
-    BOOKING_NOT_FOUND(HttpStatus.NOT_FOUND, "Booking not found"),
+    BOOKING_NOT_FOUND(HttpStatus.NOT_FOUND, "Booking not found %s"),
     BOOKING_ALREADY_CANCELLED(HttpStatus.CONFLICT, "Book already has been canceled"),
     NOT_YOUR_BOOKING(HttpStatus.NOT_ACCEPTABLE, "Not your booking"),
     SESSION_ALREADY_STARTED(HttpStatus.CONFLICT, "Session was started"),

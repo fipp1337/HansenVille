@@ -13,6 +13,8 @@ public class Activity {
     @GeneratedValue
     private UUID id;
 
+    private UUID familyId;
+
     @Column(nullable = false)
     private String title;
 
@@ -20,4 +22,7 @@ public class Activity {
     private String description;
 
     private String image;
+
+    @Enumerated(EnumType.STRING)
+    private ActivityType type;
 }

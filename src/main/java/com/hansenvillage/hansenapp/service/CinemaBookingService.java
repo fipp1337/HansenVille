@@ -113,10 +113,10 @@ public class CinemaBookingService {
         CinemaBooking booking = cinemaBookingRepository.findById(id)
                 .orElseThrow(() -> AppException.of(AppErrorCode.BOOKING_NOT_FOUND, id));
 
-        cinemaSessionRepository.findById(booking.getCinemaSessionId())
-                .orElseThrow(() -> AppException.of(AppErrorCode.CINEMA_SESSION_NOT_FOUND, booking.getCinemaSessionId()));
+        SecurityUtils.assertOwnerOrSuperAdmin(booking.getUserId());
 
-        cinemaBookingRepository.deleteById(id);
+        cinemaBookingRepository.delete(booking);
+
         log.info("Cinema booking deleted: booking={}", id);
     }
 
