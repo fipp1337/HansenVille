@@ -60,4 +60,10 @@ public class CinemaBookingController {
     public List<CinemaBookingResponse> getBookingHistory(@PathVariable UUID id) {
         return cinemaBookingService.getCinemaBookingHistory(id);
     }
+
+    @DeleteMapping("/sessions/{sessionId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancelFamilyBookingsForSession(@PathVariable UUID sessionId) {
+        cinemaBookingService.cancelFamilyBookingsForSession(sessionId);
+    }
 }

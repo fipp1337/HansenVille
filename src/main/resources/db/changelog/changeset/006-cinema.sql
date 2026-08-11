@@ -35,6 +35,7 @@ CREATE TABLE cinema_bookings (
    seat_id    UUID      NOT NULL REFERENCES cinema_seats(id),
    user_id    UUID      NOT NULL REFERENCES users(id),
    created_at TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   status VARCHAR(50) NOT NULL,
    UNIQUE (cinema_session_id, seat_id)
 );
 
