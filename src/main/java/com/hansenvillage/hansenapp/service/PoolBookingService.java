@@ -89,8 +89,8 @@ public class PoolBookingService {
         if (users.size() != userIds.size()) {
             throw AppException.of(AppErrorCode.USER_NOT_FOUND);
         }
-
         UUID familyId = users.get(0).getFamilyId();
+        SecurityUtils.assertOwnerOrSuperAdmin(familyId);
         boolean allSameFamily = users.stream().allMatch(u -> Objects.equals(u.getFamilyId(), familyId));
         if (!allSameFamily) {
             throw AppException.of(AppErrorCode.USERS_NOT_FROM_SAME_FAMILY);
@@ -199,6 +199,7 @@ public class PoolBookingService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> AppException.of(AppErrorCode.USER_NOT_FOUND, userId));
 
+        SecurityUtils.assertOwnerOrSuperAdmin(user.getFamilyId());
         List<PoolBooking> bookings = poolBookingRepository.findByUserIdAndStatus(userId, PoolBookingStatus.REGISTERED);
         if (bookings.isEmpty()) return List.of();
 
@@ -207,6 +208,7 @@ public class PoolBookingService {
 
     @Transactional(readOnly = true)
     public List<PoolBookingResponse> getBookingsByFamilyId(UUID familyId) {
+        SecurityUtils.assertOwnerOrSuperAdmin(familyId);
         List<User> members = userRepository.findByFamilyId(familyId);
         if (members.isEmpty()) return List.of();
 
@@ -243,6 +245,7 @@ public class PoolBookingService {
 
     @Transactional(readOnly = true)
     public List<PoolBookingResponse> getPoolBookingHistory(UUID familyId) {
+        SecurityUtils.assertOwnerOrSuperAdmin(familyId);
         List<User> members = userRepository.findByFamilyId(familyId);
         if (members.isEmpty()) return List.of();
 
