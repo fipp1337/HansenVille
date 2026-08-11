@@ -1,12 +1,15 @@
 package com.hansenvillage.hansenapp.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.util.UUID;
 
 @Entity
 @Table(name = "invite_codes")
+@NoArgsConstructor
 @Getter
 @Setter
 public class InviteCode {

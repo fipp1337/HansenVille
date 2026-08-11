@@ -99,7 +99,7 @@ public class PoolBookingService {
         Family family = familyRepository.findById(familyId)
                 .orElseThrow(() -> AppException.of(AppErrorCode.FAMILY_NOT_FOUND, familyId));
 
-        long maxAllowedTickets = family.getMemberCount() * 2;
+        long maxAllowedTickets = family.getMemberCount() * 2L;
         LocalDate sessionDate = session.getSessionDate();
         LocalDate monday = sessionDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate sunday = sessionDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
@@ -110,7 +110,9 @@ public class PoolBookingService {
             throw AppException.of(AppErrorCode.OUT_OF_TICKETS);
         }
 
-        List<PoolBookingResponse> responses = new ArrayList<>();
+        List<PoolBooking> bookingsToSave = new ArrayList<>();
+        Map<UUID, User> userMap = users.stream().collect(Collectors.toMap(User::getId, u -> u));
+
         for (User user : users) {
             Optional<PoolBooking> existingBookingOpt = poolBookingRepository.findByUserIdAndPoolSessionId(user.getId(), session.getId());
 
@@ -122,21 +124,24 @@ public class PoolBookingService {
                 }
                 booking.setStatus(PoolBookingStatus.REGISTERED);
             } else {
-                booking = new PoolBooking();
-                booking.setUserId(user.getId());
-                booking.setPoolSessionId(session.getId());
-                booking.setStatus(PoolBookingStatus.REGISTERED);
+                booking = PoolBooking.builder()
+                        .userId(user.getId())
+                        .poolSessionId(session.getId())
+                        .status(PoolBookingStatus.REGISTERED)
+                        .build();
             }
-
-            PoolBooking savedBooking = poolBookingRepository.save(booking);
-            responses.add(poolBookingMapper.toResponse(savedBooking, user, session));
+            bookingsToSave.add(booking);
         }
+        List<PoolBooking> savedBookings = poolBookingRepository.saveAll(bookingsToSave);
 
         session.setBookedCount(session.getBookedCount() + requestedCount);
         poolSessionRepository.save(session);
 
         log.info("Pool booked for {} users in family {}: session={}", requestedCount, familyId, session.getId());
-        return responses;
+
+        return savedBookings.stream()
+                .map(b -> poolBookingMapper.toResponse(b, userMap.get(b.getUserId()), session))
+                .toList();
     }
 
     @Transactional

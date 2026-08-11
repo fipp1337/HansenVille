@@ -99,15 +99,16 @@ public class AuthService {
         inviteCode.setEmail(email);
         inviteCodeRepository.save(inviteCode);
 
-        Family family = new Family();
-        family.setEmail(email);
-        family.setAddress(storedAddress);
-        family.setPassword(passwordEncoder.encode(storedInviteCode));
+        Family.FamilyBuilder familyBuilder = Family.builder()
+                .email(email)
+                .address(storedAddress)
+                .password(passwordEncoder.encode(storedInviteCode));
 
         if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
-            family.setPhoneNumber(phoneService.validateAndFormatPhone(request.getPhoneNumber()));
+            familyBuilder.phoneNumber(phoneService.validateAndFormatPhone(request.getPhoneNumber()));
         }
 
+        Family family = familyBuilder.build();
         Family savedFamily = familyRepository.save(family);
 
         FamilyRole familyRole = familyRoleMapper.createUserRole(savedFamily.getId());
@@ -150,15 +151,9 @@ public class AuthService {
     public LoginResponse refreshToken(RefreshRequest request) {
         SecurityFamily securityFamily = jwtService.parseRefreshToken(request.getRefreshToken());
 
-        Family family = new Family();
-        family.setId(securityFamily.getId());
-        family.setEmail(normalizeEmail(securityFamily.getEmail()));
-        family.setPassword("");
-
-        List<Role> roles = securityFamily.getRoles();
         return buildLoginResponse(
-                jwtService.generateToken(family, roles),
-                jwtService.generateRefreshToken(family, roles)
+                jwtService.generateToken(securityFamily),
+                jwtService.generateRefreshToken(securityFamily)
         );
     }
 

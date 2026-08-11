@@ -37,6 +37,14 @@ public class JwtService {
         this.refreshExpirationMs = refreshExpirationMs;
     }
 
+    public String generateToken(SecurityFamily securityFamily) {
+        return buildToken(String.valueOf(securityFamily.getId()), securityFamily.getEmail(), securityFamily.getRoles(), expirationMs, "access");
+    }
+
+    public String generateRefreshToken(SecurityFamily securityFamily) {
+        return buildToken(String.valueOf(securityFamily.getId()), securityFamily.getEmail(), securityFamily.getRoles(), refreshExpirationMs, "refresh");
+    }
+
 
     public String generateToken(Family family, List<Role> roles) {
         return buildToken(String.valueOf(family.getId()), family.getEmail(), roles, expirationMs, "access");
@@ -79,12 +87,7 @@ public class JwtService {
                     .map(Role::valueOf)
                     .toList();
 
-            Family family = new Family();
-            family.setId(id);
-            family.setEmail(email);
-            family.setPassword("");
-
-            return new SecurityFamily(family, roles);
+            return new SecurityFamily(id, email, roles);
         } catch (ParseException | JOSEException e) {
             throw AppException.of(AppErrorCode.INVALID_TOKEN);
         }
@@ -108,11 +111,7 @@ public class JwtService {
                     .map(Role::valueOf)
                     .toList();
 
-            Family family = new Family();
-            family.setId(id);
-            family.setEmail(email);
-            family.setPassword("");
-            return new SecurityFamily(family, roles);
+            return new SecurityFamily(id, email, roles);
         } catch (ParseException | JOSEException e) {
             throw AppException.of(AppErrorCode.INVALID_TOKEN);
         }
