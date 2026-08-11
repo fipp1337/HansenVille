@@ -1,12 +1,15 @@
 package com.hansenvillage.hansenapp.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+
 import java.util.UUID;
 
 @Entity
+@NoArgsConstructor
 @Table(name = "facilities")
-@Data
+@Getter
+@Setter
 public class Facility {
 
     @Id

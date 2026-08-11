@@ -26,6 +26,13 @@ public class SecurityFamily implements UserDetails {
         this.roles = List.copyOf(roles);
     }
 
+    public SecurityFamily(UUID id, String email, List<Role> roles) {
+        this.id = id;
+        this.email = email;
+        this.password = "";
+        this.roles = List.copyOf(roles);
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()

@@ -9,6 +9,7 @@ public class ResetPasswordRequest {
     private String email;
     @NotBlank
     private String verificationCode;
+
     @NotBlank
     @Size(min = 6, max = 25)
     private String newPassword;

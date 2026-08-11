@@ -1,16 +1,18 @@
 package com.hansenvillage.hansenapp.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.*;
 
 @Entity
 @Table(name = "admin_users")
-@Data
+@NoArgsConstructor
+@Getter
+@Setter
 public class AdminUser {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     private String email;
     private String name;
