@@ -1,5 +1,6 @@
 package com.hansenvillage.hansenapp.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hansenvillage.hansenapp.entity.ActivityType;
 import lombok.Data;
 
@@ -18,6 +19,8 @@ public class ActivityResponse {
     private ActivityType type;
     private String phoneNumber;
     private List<DayOfWeek> dayOfWeek;
+
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
     private LocalDateTime dateTime;
     private String location;
 }
