@@ -42,7 +42,7 @@ public class CinemaSessionController {
         return cinemaSessionService.findById(id);
     }
 
-    @GetMapping
+    @GetMapping("/week")
     public List<CinemaSessionResponse> getWeekSchedule(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStart) {
         return cinemaSessionMapper.toResponseList(cinemaSessionService.getWeekSchedule(weekStart));
