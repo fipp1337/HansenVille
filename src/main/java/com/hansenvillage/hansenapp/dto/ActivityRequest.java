@@ -18,6 +18,6 @@ public class ActivityRequest {
     private List<DayOfWeek> dayOfWeek;
     private String location;
 
-    @JsonFormat(pattern = "dd.MM.yyyy HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime dateTime;
 }
