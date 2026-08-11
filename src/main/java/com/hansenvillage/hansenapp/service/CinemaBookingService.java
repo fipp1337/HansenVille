@@ -2,10 +2,7 @@ package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.dto.CinemaBookingRequest;
 import com.hansenvillage.hansenapp.dto.CinemaBookingResponse;
-import com.hansenvillage.hansenapp.entity.CinemaBooking;
-import com.hansenvillage.hansenapp.entity.CinemaSession;
-import com.hansenvillage.hansenapp.entity.Family;
-import com.hansenvillage.hansenapp.entity.User;
+import com.hansenvillage.hansenapp.entity.*;
 import com.hansenvillage.hansenapp.exception.AppErrorCode;
 import com.hansenvillage.hansenapp.exception.AppException;
 import com.hansenvillage.hansenapp.repository.CinemaBookingRepository;
@@ -23,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -75,6 +73,7 @@ public class CinemaBookingService {
                     booking.setCinemaSessionId(session.getId());
                     booking.setSeatId(seatId);
                     booking.setUserId(request.getUserId());
+                    booking.setStatus(CinemaBookingStatus.ACTIVE);
                     return booking;
                 })
                 .toList();
@@ -115,6 +114,9 @@ public class CinemaBookingService {
 
         SecurityUtils.assertOwnerOrSuperAdmin(booking.getUserId());
 
+//        booking.setStatus(CinemaBookingStatus.CANCELLED);
+//        cinemaBookingRepository.save(booking);
+
         cinemaBookingRepository.delete(booking);
 
         log.info("Cinema booking deleted: booking={}", id);
@@ -152,5 +154,40 @@ public class CinemaBookingService {
                         booking.getSeatId()
                 ))
                 .toList();
+    }
+
+    @Transactional
+    public void cancelFamilyBookingsForSession(UUID sessionId) {
+        UUID currentFamilyId = SecurityUtils.currentFamilyId();
+
+        List<User> familyUsers = userRepository.findByFamilyId(currentFamilyId);
+        List<UUID> familyUserIds = familyUsers.stream().map(User::getId).toList();
+
+        List<CinemaBooking> familyBookings = cinemaBookingRepository
+                .findByCinemaSessionIdAndUserIdIn(sessionId, familyUserIds)
+                .stream()
+                .filter(b -> b.getStatus() == CinemaBookingStatus.ACTIVE)
+                .toList();
+
+        if (familyBookings.isEmpty()) {
+            throw AppException.of(AppErrorCode.BOOKING_NOT_FOUND, sessionId);
+        }
+
+        CinemaSession session = cinemaSessionRepository.findById(sessionId)
+                .orElseThrow(() -> AppException.of(AppErrorCode.CINEMA_SESSION_NOT_FOUND, sessionId));
+
+        LocalDateTime sessionStart = session.getStartAt();
+        LocalDateTime now = LocalDateTime.now();
+
+        if (now.isAfter(sessionStart)) {
+            throw AppException.of(AppErrorCode.SESSION_ALREADY_STARTED, sessionId);
+        }
+
+        for (CinemaBooking booking : familyBookings) {
+            booking.setStatus(CinemaBookingStatus.CANCELLED);
+        }
+
+        log.info("Family {} cancelled all cinema bookings for session {}, status={}",
+                currentFamilyId, sessionId, CinemaBookingStatus.CANCELLED);
     }
 }
