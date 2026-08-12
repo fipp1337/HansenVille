@@ -56,7 +56,8 @@ public enum AppErrorCode {
 
     // Shared booking
     BOOKING_NOT_FOUND(HttpStatus.NOT_FOUND, "Booking not found %s"),
-    BOOKING_ALREADY_CANCELLED(HttpStatus.CONFLICT, "Book already has been canceled"),
+    BOOKING_ALREADY_CANCELLED(HttpStatus.CONFLICT, "Booking already has been canceled"),
+    BOOKING_NOT_CANCELLED(HttpStatus.CONFLICT, "Booking has not been canceled: %s"),
     NOT_YOUR_BOOKING(HttpStatus.NOT_ACCEPTABLE, "Not your booking"),
     SESSION_ALREADY_STARTED(HttpStatus.CONFLICT, "Session was started"),
     USERS_NOT_FROM_SAME_FAMILY(HttpStatus.CONFLICT, "User not from same family"),

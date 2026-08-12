@@ -54,17 +54,18 @@ public class CinemaBookingService {
         Family family = familyRepository.findById(user.getFamilyId())
                 .orElseThrow(() -> AppException.of(AppErrorCode.FAMILY_NOT_FOUND, user.getFamilyId()));
 
-        for (UUID seatId : request.getSeatIds()) {
-            cinemaSeatRepository.findById(seatId)
-                    .orElseThrow(() -> AppException.of(AppErrorCode.SEAT_NOT_FOUND, seatId));
-
-            if (cinemaBookingRepository.existsByCinemaSessionIdAndSeatId(session.getId(), seatId)) {
-                throw AppException.of(AppErrorCode.SEAT_ALREADY_BOOKED, seatId);
-            }
-        }
-
         if (request.getSeatIds().size() > family.getMemberCount()) {
             throw AppException.of(AppErrorCode.TOO_MANY_SEATS);
+        }
+
+        for (UUID seatId : request.getSeatIds()) {
+            CinemaSeat seat = cinemaSeatRepository.findById(seatId)
+                    .orElseThrow(() -> AppException.of(AppErrorCode.SEAT_NOT_FOUND, seatId));
+
+            if (seat.getStatus() == CinemaSeatStatus.BOOKED) {
+                throw AppException.of(AppErrorCode.SEAT_ALREADY_BOOKED, seatId);
+            }
+            seat.setStatus(CinemaSeatStatus.BOOKED);
         }
 
         List<CinemaBooking> bookings = request.getSeatIds().stream()
@@ -72,6 +73,7 @@ public class CinemaBookingService {
                     CinemaBooking booking = new CinemaBooking();
                     booking.setCinemaSessionId(session.getId());
                     booking.setSeatId(seatId);
+
                     booking.setUserId(request.getUserId());
                     booking.setStatus(CinemaBookingStatus.ACTIVE);
                     return booking;
@@ -117,6 +119,14 @@ public class CinemaBookingService {
 //        booking.setStatus(CinemaBookingStatus.CANCELLED);
 //        cinemaBookingRepository.save(booking);
 
+        List<UUID> seatIds = cinemaBookingRepository.findSeatIdsByCinemaBookingId(id);
+        List<CinemaSeat> seats = cinemaSeatRepository.findAllById(seatIds);
+
+        if (seats.size() != seatIds.size()) {
+            throw AppException.of(AppErrorCode.SEAT_NOT_FOUND);
+        }
+
+        seats.forEach(seat -> seat.setStatus(CinemaSeatStatus.AVAILABLE));
         cinemaBookingRepository.delete(booking);
 
         log.info("Cinema booking deleted: booking={}", id);
@@ -156,38 +166,152 @@ public class CinemaBookingService {
                 .toList();
     }
 
+//    @Transactional
+//    public void cancelFamilyBookingsForSession(UUID sessionId) {
+//        UUID currentFamilyId = SecurityUtils.currentFamilyId();
+//
+//        List<User> familyUsers = userRepository.findByFamilyId(currentFamilyId);
+//        List<UUID> familyUserIds = familyUsers.stream().map(User::getId).toList();
+//
+//        List<CinemaBooking> familyBookings = cinemaBookingRepository
+//                .findByCinemaSessionIdAndUserIdIn(sessionId, familyUserIds)
+//                .stream()
+//                .filter(b -> b.getStatus() == CinemaBookingStatus.ACTIVE)
+//                .toList();
+//
+//        if (familyBookings.isEmpty()) {
+//            throw AppException.of(AppErrorCode.BOOKING_NOT_FOUND, sessionId);
+//        }
+//
+//        CinemaSession session = cinemaSessionRepository.findById(sessionId)
+//                .orElseThrow(() -> AppException.of(AppErrorCode.CINEMA_SESSION_NOT_FOUND, sessionId));
+//
+//        LocalDateTime sessionStart = session.getStartAt();
+//        LocalDateTime now = LocalDateTime.now();
+//
+//        if (now.isAfter(sessionStart)) {
+//            throw AppException.of(AppErrorCode.SESSION_ALREADY_STARTED, sessionId);
+//        }
+//
+//        for (CinemaBooking booking : familyBookings) {
+//            booking.setStatus(CinemaBookingStatus.CANCELLED);
+//        }
+//
+//        List<UUID> seatIds = cinemaBookingRepository.findSeatIdsByCinemaSessionId(sessionId);
+//        List<CinemaSeat> seats = cinemaSeatRepository.findAllById(seatIds);
+//
+//        if (seats.size() != seatIds.size()) {
+//            throw AppException.of(AppErrorCode.SEAT_NOT_FOUND);
+//        }
+//
+//        seats.forEach(seat -> seat.setStatus(CinemaSeatStatus.AVAILABLE));
+//
+//        log.info("Family {} cancelled all cinema bookings for session {}, status={}",
+//                currentFamilyId, sessionId, CinemaBookingStatus.CANCELLED);
+//    }
+
     @Transactional
-    public void cancelFamilyBookingsForSession(UUID sessionId) {
+    public void cancel(UUID bookingId) {
         UUID currentFamilyId = SecurityUtils.currentFamilyId();
 
-        List<User> familyUsers = userRepository.findByFamilyId(currentFamilyId);
-        List<UUID> familyUserIds = familyUsers.stream().map(User::getId).toList();
+        CinemaBooking booking = cinemaBookingRepository.findById(bookingId)
+                .orElseThrow(() -> AppException.of(
+                        AppErrorCode.BOOKING_NOT_FOUND, bookingId));
 
-        List<CinemaBooking> familyBookings = cinemaBookingRepository
-                .findByCinemaSessionIdAndUserIdIn(sessionId, familyUserIds)
-                .stream()
-                .filter(b -> b.getStatus() == CinemaBookingStatus.ACTIVE)
-                .toList();
+        User bookingUser = userRepository.findById(booking.getUserId())
+                .orElseThrow(() -> AppException.of(
+                        AppErrorCode.USER_NOT_FOUND, booking.getUserId()));
 
-        if (familyBookings.isEmpty()) {
-            throw AppException.of(AppErrorCode.BOOKING_NOT_FOUND, sessionId);
+        if (!currentFamilyId.equals(bookingUser.getFamilyId())) {
+            throw AppException.of(AppErrorCode.ACCESS_DENIED);
         }
 
-        CinemaSession session = cinemaSessionRepository.findById(sessionId)
-                .orElseThrow(() -> AppException.of(AppErrorCode.CINEMA_SESSION_NOT_FOUND, sessionId));
-
-        LocalDateTime sessionStart = session.getStartAt();
-        LocalDateTime now = LocalDateTime.now();
-
-        if (now.isAfter(sessionStart)) {
-            throw AppException.of(AppErrorCode.SESSION_ALREADY_STARTED, sessionId);
+        if (booking.getStatus() != CinemaBookingStatus.ACTIVE) {
+            throw AppException.of(AppErrorCode.BOOKING_ALREADY_CANCELLED, bookingId);
         }
 
-        for (CinemaBooking booking : familyBookings) {
-            booking.setStatus(CinemaBookingStatus.CANCELLED);
+        CinemaSession session = cinemaSessionRepository.findById(booking.getCinemaSessionId())
+                .orElseThrow(() -> AppException.of(
+                        AppErrorCode.CINEMA_SESSION_NOT_FOUND,
+                        booking.getCinemaSessionId()));
+
+        if (LocalDateTime.now().isAfter(session.getStartAt())) {
+            throw AppException.of(
+                    AppErrorCode.SESSION_ALREADY_STARTED,
+                    session.getId());
         }
 
-        log.info("Family {} cancelled all cinema bookings for session {}, status={}",
-                currentFamilyId, sessionId, CinemaBookingStatus.CANCELLED);
+        CinemaSeat seat = cinemaSeatRepository.findById(booking.getSeatId())
+                .orElseThrow(() -> AppException.of(
+                        AppErrorCode.SEAT_NOT_FOUND,
+                        booking.getSeatId()));
+
+        booking.setStatus(CinemaBookingStatus.CANCELLED);
+        seat.setStatus(CinemaSeatStatus.AVAILABLE);
+
+        log.info(
+                "Family {} cancelled cinema booking {}, seat={}, session={}",
+                currentFamilyId,
+                bookingId,
+                booking.getSeatId(),
+                booking.getCinemaSessionId()
+        );
+    }
+
+    @Transactional
+    public void uncancel(UUID bookingId) {
+        UUID currentFamilyId = SecurityUtils.currentFamilyId();
+
+        CinemaBooking booking = cinemaBookingRepository.findById(bookingId)
+                .orElseThrow(() -> AppException.of(
+                        AppErrorCode.BOOKING_NOT_FOUND,
+                        bookingId));
+
+        User bookingUser = userRepository.findById(booking.getUserId())
+                .orElseThrow(() -> AppException.of(
+                        AppErrorCode.USER_NOT_FOUND,
+                        booking.getUserId()));
+
+        if (!currentFamilyId.equals(bookingUser.getFamilyId())) {
+            throw AppException.of(AppErrorCode.ACCESS_DENIED);
+        }
+
+        if (booking.getStatus() != CinemaBookingStatus.CANCELLED) {
+            throw AppException.of(
+                    AppErrorCode.BOOKING_NOT_CANCELLED, bookingId);
+        }
+
+        CinemaSession session = cinemaSessionRepository.findById(booking.getCinemaSessionId())
+                .orElseThrow(() -> AppException.of(
+                        AppErrorCode.CINEMA_SESSION_NOT_FOUND,
+                        booking.getCinemaSessionId()));
+
+        if (LocalDateTime.now().isAfter(session.getStartAt())) {
+            throw AppException.of(
+                    AppErrorCode.SESSION_ALREADY_STARTED,
+                    session.getId());
+        }
+
+        CinemaSeat seat = cinemaSeatRepository.findById(booking.getSeatId())
+                .orElseThrow(() -> AppException.of(
+                        AppErrorCode.SEAT_NOT_FOUND,
+                        booking.getSeatId()));
+
+        if (seat.getStatus() == CinemaSeatStatus.BOOKED) {
+            throw AppException.of(
+                    AppErrorCode.SEAT_ALREADY_BOOKED,
+                    booking.getSeatId());
+        }
+
+        booking.setStatus(CinemaBookingStatus.ACTIVE);
+        seat.setStatus(CinemaSeatStatus.BOOKED);
+
+        log.info(
+                "Family {} restored cinema booking {}, seat={}, session={}",
+                currentFamilyId,
+                bookingId,
+                booking.getSeatId(),
+                booking.getCinemaSessionId()
+        );
     }
 }
