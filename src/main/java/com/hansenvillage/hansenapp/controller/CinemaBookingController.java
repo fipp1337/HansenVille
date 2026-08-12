@@ -61,9 +61,13 @@ public class CinemaBookingController {
         return cinemaBookingService.getCinemaBookingHistory(id);
     }
 
-    @DeleteMapping("/sessions/{sessionId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void cancelFamilyBookingsForSession(@PathVariable UUID sessionId) {
-        cinemaBookingService.cancelFamilyBookingsForSession(sessionId);
+    @PostMapping("/{id}/cancel")
+    public void cancel(@PathVariable UUID id) {
+        cinemaBookingService.cancel(id);
+    }
+
+    @PostMapping("/{id}/uncancel")
+    public void uncancel(@PathVariable UUID id) {
+        cinemaBookingService.uncancel(id);
     }
 }

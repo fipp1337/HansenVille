@@ -22,4 +22,7 @@ public class CinemaSeat {
     private UUID hallId;
 
     private String seatNumber;
+
+    @Enumerated(EnumType.STRING)
+    private CinemaSeatStatus status;
 }

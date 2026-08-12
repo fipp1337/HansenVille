@@ -24,7 +24,12 @@ public interface CinemaBookingRepository extends JpaRepository<CinemaBooking, UU
             """)
     List<UUID> findSeatIdsByCinemaSessionId(@Param("sessionId") UUID sessionId);
 
-    boolean existsByCinemaSessionIdAndSeatId(UUID cinemaSessionId, UUID seatId);
+    @Query("""
+            SELECT b.seatId
+            FROM CinemaBooking b
+            WHERE b.id = :bookingId
+            """)
+    List<UUID> findSeatIdsByCinemaBookingId(@Param("bookingId") UUID bookingId);
 
     @Query("""
             FROM CinemaBooking b

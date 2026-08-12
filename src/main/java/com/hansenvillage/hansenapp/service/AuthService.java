@@ -48,9 +48,9 @@ public class AuthService {
         String email = normalizeEmail(request.getEmail());
         String address = request.getAddress();
 
-        if (familyRepository.existsByEmail(email)) {
-            throw AppException.of(AppErrorCode.EMAIL_ALREADY_EXISTS, email);
-        }
+//        if (familyRepository.existsByEmail(email)) {
+//            throw AppException.of(AppErrorCode.EMAIL_ALREADY_EXISTS, email);
+//        }
 
         if (familyRepository.existsByAddress(address)) {
             throw AppException.of(AppErrorCode.ADDRESS_ALREADY_EXISTS, address);
@@ -88,14 +88,14 @@ public class AuthService {
                 .findByCodeAndStatus(storedInviteCode, InviteCodeStatus.AVAILABLE)
                 .orElseThrow(() -> AppException.of(AppErrorCode.INVALID_INVITE_CODE));
 
-        if (familyRepository.existsByEmail(email)) {
-            throw AppException.of(AppErrorCode.EMAIL_ALREADY_EXISTS, email);
-        }
-        if (familyRepository.existsByAddress(storedAddress)) {
-            throw AppException.of(AppErrorCode.ADDRESS_ALREADY_EXISTS, storedAddress);
-        }
+//        if (familyRepository.existsByEmail(email)) {
+//            throw AppException.of(AppErrorCode.EMAIL_ALREADY_EXISTS, email);
+//        }
+//        if (familyRepository.existsByAddress(storedAddress)) {
+//            throw AppException.of(AppErrorCode.ADDRESS_ALREADY_EXISTS, storedAddress);
+//        }
 
-        inviteCode.setStatus(InviteCodeStatus.USED);
+//        inviteCode.setStatus(InviteCodeStatus.USED);
         inviteCode.setEmail(email);
         inviteCodeRepository.save(inviteCode);
 
