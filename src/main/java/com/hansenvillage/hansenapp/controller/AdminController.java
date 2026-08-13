@@ -66,4 +66,18 @@ public class AdminController {
         authService.registrationFamilyByAdmin(request);
         return new MessageResponse("Family registered successfully");
     }
+
+//    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PostMapping("/families/{familyId}/roles/activity")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void setActivityRole(@PathVariable UUID familyId) {
+        adminService.setActivityRole(familyId);
+    }
+
+//    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @DeleteMapping("/families/{familyId}/roles/activity")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeActivityRole(@PathVariable UUID familyId) {
+        adminService.removeActivityRole(familyId);
+    }
 }
