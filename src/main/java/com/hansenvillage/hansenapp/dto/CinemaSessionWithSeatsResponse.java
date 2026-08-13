@@ -20,5 +20,5 @@ public class CinemaSessionWithSeatsResponse {
     private String description;
     private String posterImage;
 
-    private List<CinemaSeatWithAvailableResponse> seats;
+    private List<CinemaSeatResponse> seats;
 }

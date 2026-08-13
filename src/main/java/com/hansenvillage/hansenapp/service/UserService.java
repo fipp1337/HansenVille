@@ -53,6 +53,22 @@ public class UserService {
     }
 
     @Transactional
+    public User addNewMemberById(UUID familyId, AddMemberRequest request) {
+
+        User member = userMapper.toEntity(request);
+        member.setFamilyId(familyId);
+        User savedUser = userRepository.save(member);
+
+        Family family = familyRepository.findById(familyId)
+                .orElseThrow(() -> AppException.of(AppErrorCode.FAMILY_NOT_FOUND, familyId));
+        family.setMemberCount(family.getMemberCount() + 1);
+        familyRepository.save(family);
+
+        log.info("Member added: user={}, family={}", savedUser.getId(), familyId);
+        return savedUser;
+    }
+
+    @Transactional
     public User updateUser(UUID id, UserUpdateRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> AppException.of(AppErrorCode.USER_NOT_FOUND, id));

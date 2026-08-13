@@ -26,7 +26,7 @@ public class FacilityController {
         return facilityService.getAllActiveFacilities();
     }
 
-    @PostMapping(value = "/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void uploadImage(
@@ -35,7 +35,7 @@ public class FacilityController {
         facilityService.uploadImage(id, file);
     }
 
-    @GetMapping("/images/{id}")
+    @GetMapping("/{id}/images")
     public ResponseEntity<Resource> getFacilityImage(@PathVariable UUID id) {
         Resource resource = facilityService.getImage(id);
         MediaType mediaType = MediaTypeFactory.getMediaType(resource)
@@ -46,7 +46,7 @@ public class FacilityController {
                 .body(resource);
     }
 
-    @PutMapping(value = "/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void updateFacilityImage(
@@ -55,7 +55,7 @@ public class FacilityController {
         facilityService.updateImage(id, file);
     }
 
-    @DeleteMapping("/images/{id}")
+    @DeleteMapping("/{id}/images")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CINEMA_MANAGER')")
     public void deleteFacilityImage(@PathVariable UUID id) {

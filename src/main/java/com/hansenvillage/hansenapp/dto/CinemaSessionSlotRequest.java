@@ -31,7 +31,4 @@ public class CinemaSessionSlotRequest {
 
     @NotNull
     private UUID hallId;
-
-    @Enumerated(EnumType.STRING)
-    private SessionStatus status;
 }

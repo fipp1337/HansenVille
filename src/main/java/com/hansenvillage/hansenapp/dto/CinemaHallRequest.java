@@ -14,5 +14,4 @@ public class CinemaHallRequest {
 
     @NotBlank
     private String name;
-
 }

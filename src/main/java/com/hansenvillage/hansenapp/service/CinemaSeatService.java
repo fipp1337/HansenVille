@@ -1,6 +1,7 @@
 package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.entity.CinemaSeat;
+import com.hansenvillage.hansenapp.entity.CinemaSeatStatus;
 import com.hansenvillage.hansenapp.repository.CinemaSeatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class CinemaSeatService {
                 CinemaSeat seat = new CinemaSeat();
                 seat.setHallId(hallId);
                 seat.setSeatNumber(row + number);
+                seat.setStatus(CinemaSeatStatus.AVAILABLE);
                 seats.add(seat);
             }
         }
