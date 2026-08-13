@@ -40,7 +40,6 @@ public class FamilyService {
     private final PhoneService phoneService;
     private final PoolBookingRepository poolBookingRepository;
     private final CinemaBookingRepository cinemaBookingRepository;
-    private final FamilyRoleRepository familyRoleRepository;
     private final FamilyMapper familyMapper;
     private final UserMapper userMapper;
     private final PoolBookingService poolBookingService;
@@ -85,12 +84,13 @@ public class FamilyService {
     public void deleteFamilyData(UUID id) {
         List<User> familyMembers = userRepository.findByFamilyId(id);
         List<UUID> userIds = familyMembers.stream().map(User::getId).toList();
+
         if (!userIds.isEmpty()) {
             poolBookingRepository.deleteByUserIdIn(userIds);
             cinemaBookingRepository.deleteByUserIdIn(userIds);
         }
+
         userRepository.deleteByFamilyId(id);
-        familyRoleRepository.deleteByFamilyId(id);
         familyRepository.deleteById(id);
         log.info("Family deleted: {}", id);
     }
