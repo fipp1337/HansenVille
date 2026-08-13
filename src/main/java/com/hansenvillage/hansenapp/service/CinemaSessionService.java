@@ -1,13 +1,11 @@
 package com.hansenvillage.hansenapp.service;
 
 import com.hansenvillage.hansenapp.constant.AppConstant;
-import com.hansenvillage.hansenapp.dto.CinemaPublishWeekScheduleRequest;
-import com.hansenvillage.hansenapp.dto.CinemaSessionRequest;
-import com.hansenvillage.hansenapp.dto.CinemaSessionWithSeatsResponse;
-import com.hansenvillage.hansenapp.dto.CinemaSeatWithAvailableResponse;
+import com.hansenvillage.hansenapp.dto.*;
 import com.hansenvillage.hansenapp.entity.*;
 import com.hansenvillage.hansenapp.exception.AppErrorCode;
 import com.hansenvillage.hansenapp.exception.AppException;
+import com.hansenvillage.hansenapp.mapper.CinemaHallMapper;
 import com.hansenvillage.hansenapp.mapper.CinemaSeatMapper;
 import com.hansenvillage.hansenapp.mapper.CinemaSessionMapper;
 import com.hansenvillage.hansenapp.repository.CinemaBookingRepository;
@@ -24,9 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -35,6 +31,7 @@ public class CinemaSessionService {
 
     private final CinemaSessionRepository cinemaSessionRepository;
     private final CinemaSessionMapper cinemaSessionMapper;
+    private final CinemaHallMapper cinemaHallMapper;
     private final CinemaSeatRepository cinemaSeatRepository;
     private final CinemaSeatMapper cinemaSeatMapper;
     private final CinemaBookingRepository cinemaBookingRepository;
@@ -87,23 +84,55 @@ public class CinemaSessionService {
         cinemaSessionRepository.save(session);
     }
 
+//    @Transactional(readOnly = true)
+//    public CinemaSessionWithSeatsResponse findById(UUID id) {
+//        CinemaSession session = findSession(id);
+//        CinemaSessionWithSeatsResponse response = cinemaSessionMapper.toResponseWithSeats(session);
+//
+//        List<CinemaSeat> seats = cinemaSeatRepository.findByHallId(session.getHallId());
+//        List<UUID> bookedSeatIds = cinemaBookingRepository.findSeatIdsByCinemaSessionId(session.getId());
+//
+//        List<CinemaSeatWithAvailableResponse> seatResponses = seats.stream()
+//                .map(seat -> {
+//                    CinemaSeatWithAvailableResponse seatResponse = cinemaSeatMapper.toResponseWithAvailable(seat);
+//                    seatResponse.setAvailable(!bookedSeatIds.contains(seat.getId()));
+//                    return seatResponse;
+//                })
+//                .toList();
+//
+//        response.setSeats(seatResponses);
+//        return response;
+//    }
+
     @Transactional(readOnly = true)
     public CinemaSessionWithSeatsResponse findById(UUID id) {
         CinemaSession session = findSession(id);
+
         CinemaSessionWithSeatsResponse response = cinemaSessionMapper.toResponseWithSeats(session);
 
         List<CinemaSeat> seats = cinemaSeatRepository.findByHallId(session.getHallId());
-        List<UUID> bookedSeatIds = cinemaBookingRepository.findSeatIdsByCinemaSessionId(session.getId());
 
-        List<CinemaSeatWithAvailableResponse> seatResponses = seats.stream()
+        Set<UUID> bookedSeatIds = new HashSet<>(
+                cinemaBookingRepository.findSeatIdsByCinemaSessionId(session.getId())
+        );
+
+        List<CinemaSeatResponse> seatResponses = seats.stream()
                 .map(seat -> {
-                    CinemaSeatWithAvailableResponse seatResponse = cinemaSeatMapper.toResponseWithAvailable(seat);
-                    seatResponse.setAvailable(!bookedSeatIds.contains(seat.getId()));
+                    CinemaSeatResponse seatResponse =
+                            cinemaSeatMapper.toResponse(seat);
+
+                    seatResponse.setStatus(
+                            bookedSeatIds.contains(seat.getId())
+                                    ? CinemaSeatStatus.BOOKED
+                                    : CinemaSeatStatus.AVAILABLE
+                    );
+
                     return seatResponse;
                 })
                 .toList();
 
         response.setSeats(seatResponses);
+
         return response;
     }
 

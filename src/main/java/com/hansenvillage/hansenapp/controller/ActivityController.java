@@ -2,6 +2,7 @@ package com.hansenvillage.hansenapp.controller;
 
 import com.hansenvillage.hansenapp.dto.ActivityRequest;
 import com.hansenvillage.hansenapp.dto.ActivityResponse;
+import com.hansenvillage.hansenapp.entity.Activity;
 import com.hansenvillage.hansenapp.entity.ActivityType;
 import com.hansenvillage.hansenapp.service.ActivityService;
 import jakarta.validation.Valid;
@@ -29,7 +30,6 @@ public class ActivityController {
         return activityService.getAllActivities(type);
     }
 
-
     @GetMapping("/me")
     public List<ActivityResponse> getMyActivities() {
         return activityService.getMyActivities();
@@ -41,12 +41,9 @@ public class ActivityController {
         return activityService.createActivity(request);
     }
 
-    @PostMapping(value = "/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void uploadActivityImage(
-            @PathVariable UUID id,
-            @RequestParam("file") MultipartFile file) {
-        activityService.uploadImage(id, file);
+    @GetMapping("/{id}")
+    public ActivityResponse getActivityInfo(@PathVariable UUID id) {
+        return activityService.getActivityInfo(id);
     }
 
     @PutMapping("/{id}")
@@ -62,7 +59,15 @@ public class ActivityController {
         activityService.deleteActivity(id);
     }
 
-    @GetMapping("/images/{id}")
+    @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void uploadActivityImage(
+            @PathVariable UUID id,
+            @RequestParam("file") MultipartFile file) {
+        activityService.uploadImage(id, file);
+    }
+
+    @GetMapping("/{id}/images")
     public ResponseEntity<Resource> getActivityImage(@PathVariable UUID id) {
         Resource resource = activityService.getImage(id);
         MediaType mediaType = MediaTypeFactory.getMediaType(resource)
@@ -73,7 +78,7 @@ public class ActivityController {
                 .body(resource);
     }
 
-    @PutMapping(value = "/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateActivityImage(
             @PathVariable UUID id,
@@ -81,7 +86,7 @@ public class ActivityController {
         activityService.updateImage(id, file);
     }
 
-    @DeleteMapping("/images/{id}")
+    @DeleteMapping("/{id}/images")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteActivityImage(@PathVariable UUID id) {
         activityService.deleteImage(id);

@@ -22,7 +22,7 @@ public class AuthController {
     public MessageResponse initiateRegistration(
             @Valid @RequestBody RegistrationInitiateRequest request) {
         authService.initiateRegistration(request);
-        return new MessageResponse("Successful initiate registration");
+        return new MessageResponse("Registration initiated successfully");
     }
 
     @PostMapping("/register/confirm")
@@ -46,21 +46,21 @@ public class AuthController {
     public MessageResponse forgotPassword(
             @Valid @RequestBody ForgotPasswordRequest request) {
         authService.initiateForgotPassword(request);
-        return new MessageResponse("Successful initiate forgot password");
+        return new MessageResponse("Forgot password initiated successfully");
     }
 
     @PostMapping("/password/reset")
     public MessageResponse resetPassword(
             @Valid @RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request);
-        return new MessageResponse("Successful reset password");
+        return new MessageResponse("Password was reset successfully");
     }
 
     @PostMapping("/admins/login/initiate")
     public MessageResponse adminLoginInitiate(
             @Valid @RequestBody AdminLoginInitiateRequest request) {
         authService.initiateAdminLogin(request);
-        return new MessageResponse("Admin Login Initiate successful");
+        return new MessageResponse("Admin login initiated successful");
     }
 
     @PostMapping("/admins/login/confirm")

@@ -1,5 +1,6 @@
 package com.hansenvillage.hansenapp.dto;
 
+import com.hansenvillage.hansenapp.entity.CinemaSeatStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,5 +14,5 @@ public class CinemaSeatResponse {
 
     private UUID id;
     private String seatNumber;
-//    private boolean available;
+    private CinemaSeatStatus status;
 }

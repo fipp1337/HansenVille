@@ -76,6 +76,23 @@ public class FamilyService {
     }
 
     @Transactional
+    public Family updateFamilyInfoById(UUID id, FamilyUpdateRequest request) {
+        SecurityUtils.assertOwnerOrSuperAdmin(id);
+        Family family = findById(id);
+
+        familyMapper.updateFamilyFromRequest(request, family);
+        applyPasswordUpdateIfRequested(family, request);
+
+        if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
+            family.setPhoneNumber(phoneService.validateAndFormatPhone(request.getPhoneNumber()));
+        }
+
+        Family saved = familyRepository.save(family);
+        log.info("Family updated: {}", id);
+        return saved;
+    }
+
+    @Transactional
     public void deleteFamily(UUID id) {
         SecurityUtils.assertOwnerOrSuperAdmin(id);
         deleteFamilyData(id);
@@ -175,7 +192,17 @@ public class FamilyService {
     }
 
     @Transactional(readOnly = true)
-    public Resource getProfilePicture(UUID familyId) {
+    public Resource getProfilePictureById(UUID familyId) {
+        Family family = findById(familyId);
+        return fileStorageService.loadAsResource(
+                AppConstant.Upload.FAMILIES_DIR,
+                family.getProfilePicture(),
+                AppErrorCode.PROFILE_PICTURE_NOT_FOUND);
+    }
+
+    @Transactional(readOnly = true)
+    public Resource getProfilePicture() {
+        UUID familyId = SecurityUtils.currentFamilyId();
         Family family = findById(familyId);
         return fileStorageService.loadAsResource(
                 AppConstant.Upload.FAMILIES_DIR,

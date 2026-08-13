@@ -1,8 +1,14 @@
 package com.hansenvillage.hansenapp.controller;
 
 import com.hansenvillage.hansenapp.dto.*;
+import com.hansenvillage.hansenapp.entity.Family;
+import com.hansenvillage.hansenapp.entity.User;
+import com.hansenvillage.hansenapp.mapper.FamilyMapper;
+import com.hansenvillage.hansenapp.mapper.UserMapper;
 import com.hansenvillage.hansenapp.service.AdminService;
 import com.hansenvillage.hansenapp.service.AuthService;
+import com.hansenvillage.hansenapp.service.FamilyService;
+import com.hansenvillage.hansenapp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,16 +27,12 @@ public class AdminController {
 
     private final AdminService adminService;
     private final AuthService authService;
+    private final UserService userService;
+    private final UserMapper userMapper;
 
-    @GetMapping("/families/search")
-    public List<FamilyInfoResponse> findFamiliesByAddress(@RequestParam String address) {
-        return adminService.findFamiliesByAddress(address);
-    }
-
-    @DeleteMapping("/families")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteFamilyByAddress(@RequestParam String address) {
-        adminService.deleteFamilyByAddress(address);
+    @GetMapping
+    public GroupedAdminsResponse getAllAdmins() {
+        return adminService.getAllAdminsGrouped();
     }
 
     @PostMapping
@@ -54,16 +56,28 @@ public class AdminController {
         adminService.deleteAdmin(id);
     }
 
-    @GetMapping
-    public GroupedAdminsResponse getAllAdmins() {
-        return adminService.getAllAdminsGrouped();
+    @GetMapping("/families")
+    public List<FamilyInfoResponse> findFamiliesByAddress(@RequestParam String address) {
+        return adminService.findFamiliesByAddress(address);
     }
 
-    @PostMapping("/family-registration")
+    @PostMapping("/families")
     @ResponseStatus(HttpStatus.CREATED)
     public MessageResponse registerFamilyByAdmin(
             @Valid @RequestBody FamilyAdminRegistrationRequest request) {
         authService.registrationFamilyByAdmin(request);
         return new MessageResponse("Family registered successfully");
+    }
+
+    @DeleteMapping("/families")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteFamilyByAddress(@RequestParam String address) {
+        adminService.deleteFamilyByAddress(address);
+    }
+
+    @PostMapping("/families/{id}/members")
+    public UserUpdateResponse userAddById(@PathVariable UUID id, @Valid @RequestBody AddMemberRequest request) {
+        User created = userService.addNewMemberById(id, request);
+        return userMapper.toUpdateResponse(created);
     }
 }

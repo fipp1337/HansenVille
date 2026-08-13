@@ -68,6 +68,13 @@ public class ActivityService {
         return activityMapper.toResponse(saved);
     }
 
+    @Transactional(readOnly = true)
+    public ActivityResponse getActivityInfo(UUID id) {
+        Activity activity = activityRepository.findById(id)
+                .orElseThrow(() -> AppException.of(AppErrorCode.ACTIVITY_NOT_FOUND));
+        return activityMapper.toResponse(activity);
+    }
+
     @Transactional
     public ActivityResponse updateActivity(UUID id, ActivityRequest request) {
         UUID currentFamilyId = SecurityUtils.currentFamilyId();

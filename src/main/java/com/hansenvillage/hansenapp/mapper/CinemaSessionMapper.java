@@ -2,6 +2,7 @@ package com.hansenvillage.hansenapp.mapper;
 
 import com.hansenvillage.hansenapp.dto.*;
 import com.hansenvillage.hansenapp.entity.CinemaSession;
+import com.hansenvillage.hansenapp.entity.SessionStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -28,7 +29,14 @@ public interface CinemaSessionMapper {
         return request.getDays().stream()
                 .filter(day -> day.getSessions() != null)
                 .flatMap(day -> day.getSessions().stream()
-                        .map(slot -> toEntity(slot, day.getSessionDate())))
+                        .map(slot -> {
+                            CinemaSession session =
+                                    toEntity(slot, day.getSessionDate());
+
+                            session.setStatus(SessionStatus.ACTIVE);
+
+                            return session;
+                        }))
                 .toList();
     }
 
