@@ -143,4 +143,24 @@ public class AdminService {
         response.setRoles(user.getRoles());
         return response;
     }
+
+    public void setActivityRole(UUID familyId) {
+        Family family = familyRepository.findById(familyId)
+                .orElseThrow(() -> AppException.of(AppErrorCode.FAMILY_NOT_FOUND));
+
+       family.getRoles().add(Role.ACTIVITY);
+       familyRepository.save(family);
+
+        log.info("Set ACTIVITY role to family with ID = {}", familyId);
+    }
+
+    public void removeActivityRole(UUID familyId) {
+        Family family = familyRepository.findById(familyId)
+                .orElseThrow(() -> AppException.of(AppErrorCode.FAMILY_NOT_FOUND));
+
+        family.getRoles().remove(Role.ACTIVITY);
+        familyRepository.save(family);
+
+        log.info("Delete ACTIVITY role from family with ID = {}", familyId);
+    }
 }

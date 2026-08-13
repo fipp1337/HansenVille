@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,6 +38,7 @@ public class ActivityController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+//    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ACTIVITY')")
     public ActivityResponse createActivity(@RequestBody @Valid ActivityRequest request) {
         return activityService.createActivity(request);
     }
