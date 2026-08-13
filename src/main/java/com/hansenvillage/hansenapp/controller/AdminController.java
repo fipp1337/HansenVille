@@ -1,19 +1,14 @@
 package com.hansenvillage.hansenapp.controller;
 
 import com.hansenvillage.hansenapp.dto.*;
-import com.hansenvillage.hansenapp.entity.Family;
 import com.hansenvillage.hansenapp.entity.User;
-import com.hansenvillage.hansenapp.mapper.FamilyMapper;
 import com.hansenvillage.hansenapp.mapper.UserMapper;
 import com.hansenvillage.hansenapp.service.AdminService;
 import com.hansenvillage.hansenapp.service.AuthService;
-import com.hansenvillage.hansenapp.service.FamilyService;
 import com.hansenvillage.hansenapp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -67,6 +62,20 @@ public class AdminController {
             @Valid @RequestBody FamilyAdminRegistrationRequest request) {
         authService.registrationFamilyByAdmin(request);
         return new MessageResponse("Family registered successfully");
+    }
+
+//    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PostMapping("/families/{familyId}/roles/activity")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void setActivityRole(@PathVariable UUID familyId) {
+        adminService.setActivityRole(familyId);
+    }
+
+//    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @DeleteMapping("/families/{familyId}/roles/activity")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeActivityRole(@PathVariable UUID familyId) {
+        adminService.removeActivityRole(familyId);
     }
 
     @DeleteMapping("/families")

@@ -45,4 +45,13 @@ public final class SecurityUtils {
             throw AppException.of(AppErrorCode.ACCESS_DENIED);
         }
     }
+    public static void assertOwnerOrSuperAdmin(UUID currentFamilyId, UUID resourceOwnerId) {
+        if (isSuperAdmin()) {
+            return;
+        }
+
+        if (!currentFamilyId.equals(resourceOwnerId)) {
+            throw AppException.of(AppErrorCode.ACCESS_DENIED);
+        }
+    }
 }

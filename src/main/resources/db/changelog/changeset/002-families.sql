@@ -31,7 +31,9 @@ CREATE INDEX idx_users_family_id
 ON users(family_id);
 
 CREATE TABLE families_roles (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     family_id UUID NOT NULL,
-    role VARCHAR(20) NOT NULL
+    role VARCHAR(20) NOT NULL,
+    CONSTRAINT fk_families_roles_family FOREIGN KEY (family_id)
+    REFERENCES families (id) ON DELETE CASCADE,
+    PRIMARY KEY (family_id, role)
 );

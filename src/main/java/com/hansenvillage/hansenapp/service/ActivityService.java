@@ -61,7 +61,11 @@ public class ActivityService {
         activity.setFamilyId(currentFamilyId);
 
         validateAndSanitizeActivity(activity);
-        phoneService.validateAndFormatPhone(request.getPhoneNumber());
+
+        if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
+            activity.setPhoneNumber(phoneService.validateAndFormatPhone(request.getPhoneNumber()));
+        }
+
         Activity saved = activityRepository.save(activity);
 
         log.info("Activity created: id={}, title={}, familyId={}", saved.getId(), saved.getTitle(), currentFamilyId);
@@ -77,18 +81,18 @@ public class ActivityService {
 
     @Transactional
     public ActivityResponse updateActivity(UUID id, ActivityRequest request) {
-        UUID currentFamilyId = SecurityUtils.currentFamilyId();
-        SecurityUtils.assertOwnerOrSuperAdmin(currentFamilyId);
-        Activity activity = findActivity(id);
+        Activity activity = findActivityAndCheckAccess(id);
         activityMapper.updateEntity(request, activity);
         validateAndSanitizeActivity(activity);
-        phoneService.validateAndFormatPhone(request.getPhoneNumber());
+        if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
+            activity.setPhoneNumber(phoneService.validateAndFormatPhone(request.getPhoneNumber()));
+        }
         return activityMapper.toResponse(activityRepository.save(activity));
     }
 
     @Transactional
     public void deleteActivity(UUID id) {
-        Activity activity = findActivity(id);
+        Activity activity = findActivityAndCheckAccess(id);
         fileStorageService.deleteQuietly(AppConstant.Upload.ACTIVITIES_DIR, activity.getImage());
         activityRepository.delete(activity);
         log.info("Activity deleted: {}", id);
@@ -97,7 +101,7 @@ public class ActivityService {
     @Transactional
     public void uploadImage(UUID id, MultipartFile file) {
         imageValidationService.validate(file);
-        Activity activity = findActivity(id);
+        Activity activity = findActivityAndCheckAccess(id);
         String fileName = fileStorageService.store(file, AppConstant.Upload.ACTIVITIES_DIR);
         fileStorageService.deleteQuietly(AppConstant.Upload.ACTIVITIES_DIR, activity.getImage());
         activity.setImage(fileName);
@@ -122,7 +126,8 @@ public class ActivityService {
 
     @Transactional
     public void deleteImage(UUID id) {
-        Activity activity = findActivity(id);
+        Activity activity = findActivityAndCheckAccess(id);
+
         if (activity.getImage() == null) {
             throw AppException.of(AppErrorCode.ACTIVITY_IMAGE_NOT_FOUND);
         }
@@ -135,6 +140,15 @@ public class ActivityService {
     private Activity findActivity(UUID id) {
         return activityRepository.findById(id)
                 .orElseThrow(() -> AppException.of(AppErrorCode.ACTIVITY_NOT_FOUND, id));
+    }
+
+    private Activity findActivityAndCheckAccess(UUID activityId) {
+        Activity activity = findActivity(activityId);
+        UUID currentFamilyId = SecurityUtils.currentFamilyId();
+
+        SecurityUtils.assertOwnerOrSuperAdmin(currentFamilyId, activity.getFamilyId());
+
+        return activity;
     }
 
     private void validateAndSanitizeActivity(Activity activity) {

@@ -5,10 +5,8 @@ import com.hansenvillage.hansenapp.entity.*;
 import com.hansenvillage.hansenapp.exception.AppErrorCode;
 import com.hansenvillage.hansenapp.exception.AppException;
 import com.hansenvillage.hansenapp.mapper.FamilyMapper;
-import com.hansenvillage.hansenapp.mapper.FamilyRoleMapper;
 import com.hansenvillage.hansenapp.repository.AdminUserRepository;
 import com.hansenvillage.hansenapp.repository.FamilyRepository;
-import com.hansenvillage.hansenapp.repository.FamilyRoleRepository;
 import com.hansenvillage.hansenapp.repository.InviteCodeRepository;
 import com.hansenvillage.hansenapp.security.JwtService;
 import com.hansenvillage.hansenapp.security.SecurityFamily;
@@ -19,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,11 +30,9 @@ public class AuthService {
     private static final int CODE_BOUND = 1_000_000;
 
     private final FamilyRepository familyRepository;
-    private final FamilyRoleRepository familyRoleRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final FamilyMapper familyMapper;
-    private final FamilyRoleMapper familyRoleMapper;
     private final PhoneService phoneService;
     private final RedisService redisService;
     private final InviteCodeRepository inviteCodeRepository;
@@ -109,14 +106,12 @@ public class AuthService {
         }
 
         Family family = familyBuilder.build();
+        family.getRoles().add(Role.USER);
         Family savedFamily = familyRepository.save(family);
-
-        FamilyRole familyRole = familyRoleMapper.createUserRole(savedFamily.getId());
-        familyRoleRepository.save(familyRole);
 
         redisService.deleteRegistrationData(email);
 
-        List<Role> roles = List.of(Role.valueOf(familyRole.getRole()));
+        List<Role> roles = new ArrayList<>(savedFamily.getRoles());
         log.info("Family registered: id={}, email={}", savedFamily.getId(), email);
 
         return buildLoginResponse(
@@ -136,9 +131,7 @@ public class AuthService {
             throw AppException.of(AppErrorCode.WRONG_PASSWORD, request.getPassword());
         }
 
-        List<Role> roles = familyRoleRepository.findByFamilyId(family.getId()).stream()
-                .map(familyRole -> Role.valueOf(familyRole.getRole()))
-                .toList();
+        List<Role> roles = new ArrayList<>(family.getRoles());
 
         log.info("Family login: id={}, email={}", family.getId(), email);
         return buildLoginResponse(
@@ -258,9 +251,8 @@ public class AuthService {
             family.setPhoneNumber(phoneService.validateAndFormatPhone(request.getPhoneNumber()));
         }
 
+        family.getRoles().add(Role.USER);
         Family savedFamily = familyRepository.save(family);
-        FamilyRole familyRole = familyRoleMapper.createUserRole(savedFamily.getId());
-        familyRoleRepository.save(familyRole);
 
         log.info("Family registered by admin: id={}, email={}", savedFamily.getId(), email);
     }
