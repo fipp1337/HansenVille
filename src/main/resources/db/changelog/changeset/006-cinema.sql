@@ -16,15 +16,16 @@ CREATE TABLE cinema_sessions
     movie_name VARCHAR(255) NOT NULL,
     poster_image VARCHAR(500),
     start_at TIMESTAMP NOT NULL,
+    age_rating VARCHAR(10) NOT NULL,
+    year INT NOT NULL,
     duration INT NOT NULL,
+    genre VARCHAR(255) NOT NULL,
     description VARCHAR(500) NOT NULL,
+    type VARCHAR(255) NOT NULL,
     hall_id      UUID       NOT NULL REFERENCES cinema_halls(id),
     status VARCHAR(50) NOT NULL,
     version INT NOT NULL DEFAULT 0
 );
-
--- CREATE INDEX idx_session_movie
--- ON cinema_sessions(movie_name)
 
 CREATE TABLE cinema_seats (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
