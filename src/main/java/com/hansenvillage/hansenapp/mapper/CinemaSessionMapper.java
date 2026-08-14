@@ -13,6 +13,10 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface CinemaSessionMapper {
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "posterImage", ignore = true)
+    @Mapping(target = "hallId", ignore = true)
+    @Mapping(target = "version", ignore = true)
     CinemaSession updateEntity(CinemaSessionRequest request, @MappingTarget CinemaSession session);
 
     CinemaSessionResponse toResponse(CinemaSession entity);
@@ -46,5 +50,6 @@ public interface CinemaSessionMapper {
     @Mapping(target = "duration", source = "slot.duration")
     @Mapping(target = "description", source = "slot.description")
     @Mapping(target = "hallId", source = "slot.hallId")
+    @Mapping(target = "year", source = "slot.year")
     CinemaSession toEntity(CinemaSessionSlotRequest slot, LocalDate date);
 }
