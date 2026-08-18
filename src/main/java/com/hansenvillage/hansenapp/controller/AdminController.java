@@ -39,7 +39,7 @@ public class AdminController {
     }
 
     @PutMapping("/{id}")
-    public AdminUpdateResponse updateAdmin(
+    public AdminResponse updateAdmin(
             @PathVariable UUID id,
             @Valid @RequestBody AdminUpdateRequest request) {
         return adminService.updateAdmin(id, request);

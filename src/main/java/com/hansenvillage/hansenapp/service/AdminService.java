@@ -3,7 +3,6 @@ package com.hansenvillage.hansenapp.service;
 import com.hansenvillage.hansenapp.dto.AdminRegistrationRequest;
 import com.hansenvillage.hansenapp.dto.AdminResponse;
 import com.hansenvillage.hansenapp.dto.AdminUpdateRequest;
-import com.hansenvillage.hansenapp.dto.AdminUpdateResponse;
 import com.hansenvillage.hansenapp.dto.FamilyInfoResponse;
 import com.hansenvillage.hansenapp.dto.GroupedAdminsResponse;
 import com.hansenvillage.hansenapp.entity.AdminUser;
@@ -60,33 +59,25 @@ public class AdminService {
     }
 
     @Transactional
-    public AdminUpdateResponse updateAdmin(UUID adminId, AdminUpdateRequest request) {
+    public AdminResponse updateAdmin(UUID adminId, AdminUpdateRequest request) {
         AdminUser admin = adminUserRepository.findById(adminId)
                 .orElseThrow(() -> AppException.of(AppErrorCode.USER_NOT_FOUND, adminId));
 
         if (request.getEmail() != null && !request.getEmail().isBlank()) {
             String newEmail = request.getEmail().trim().toLowerCase();
-            if (!newEmail.equals(admin.getEmail())) {
-                if (adminUserRepository.existsByEmail(newEmail)) {
-                    throw AppException.of(AppErrorCode.EMAIL_ALREADY_EXISTS, newEmail);
-                }
-                admin.setEmail(newEmail);
+
+            if (!newEmail.equals(admin.getEmail())
+                    && adminUserRepository.existsByEmail(newEmail)) {
+                throw AppException.of(AppErrorCode.EMAIL_ALREADY_EXISTS, newEmail);
             }
+
+            admin.setEmail(newEmail);
         }
 
-        if (request.getName() != null && !request.getName().isBlank()) {
-            admin.setName(request.getName());
-        }
-        if (request.getRoles() != null && !request.getRoles().isEmpty()) {
-            admin.setRoles(request.getRoles());
-        }
+        adminMapper.update(request, admin);
 
         AdminUser savedAdmin = adminUserRepository.save(admin);
-        AdminUpdateResponse response = new AdminUpdateResponse();
-        response.setName(savedAdmin.getName());
-        response.setEmail(savedAdmin.getEmail());
-        response.setRoles(savedAdmin.getRoles());
-        return response;
+        return adminMapper.toResponse(savedAdmin);
     }
 
     @Transactional
@@ -124,7 +115,7 @@ public class AdminService {
         List<AdminResponse> managers = new ArrayList<>();
 
         for (AdminUser user : adminUserRepository.findAll()) {
-            AdminResponse response = toAdminResponse(user);
+            AdminResponse response = adminMapper.toResponse(user);
             if (user.getRoles() != null && user.getRoles().contains(Role.SUPER_ADMIN)) {
                 admins.add(response);
             } else {
@@ -133,15 +124,6 @@ public class AdminService {
         }
 
         return new GroupedAdminsResponse(admins, managers);
-    }
-
-    private AdminResponse toAdminResponse(AdminUser user) {
-        AdminResponse response = new AdminResponse();
-        response.setId(user.getId());
-        response.setName(user.getName());
-        response.setEmail(user.getEmail());
-        response.setRoles(user.getRoles());
-        return response;
     }
 
     public void setActivityRole(UUID familyId) {
